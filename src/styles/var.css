@@ -1,0 +1,103 @@
+:root {
+  --login-bg-color: #293146;
+
+  --left-menu-max-width: 200px;
+
+  --left-menu-min-width: 64px;
+
+  --left-menu-bg-color: #001529;
+
+  /*--left-menu-bg-light-color: #0f2438;*/
+  /*--left-menu-bg-light-color: transparent;*/
+
+  --left-menu-bg-active-color: var(--el-color-primary);
+
+  --left-menu-bg-hover-color: var(--left-menu-bg-color);
+
+  --left-menu-text-color: #bfcbd9;
+
+  --left-menu-text-active-color: #fff;
+
+  /*--left-menu-text-hover-color: var(--el-color-primary);*/
+  --left-menu-text-hover-color: var(--left-menu-text-active-color);
+
+  /* 左侧菜单收起选中背景颜色 */
+  --left-menu-collapse-bg-active-color: var(--el-color-primary);
+  /* left menu end */
+
+
+  --top-menu-bg-color: transparent;
+  /*--top-menu-bg-color: var(--left-menu-bg-color);*/
+
+  --top-menu-bg-active-color: var(--el-color-primary);
+
+  --top-menu-bg-hover-color: var(--top-menu-bg-color);
+
+  --top-menu-text-color: #bfcbd9;
+
+  /*--top-menu-text-active-color: var(--left-menu-text-active-color);*/
+  --top-menu-text-active-color: #fff;
+
+  --top-menu-text-hover-color: var(--top-menu-text-active-color);
+  /* top menu end */
+
+
+  /* logo start */
+  --logo-height: 50px;
+
+  --logo-title-text-color: #fff;
+  /* logo end */
+
+
+  /* header start */
+  --top-header-bg-color: '#fff';
+
+  --top-header-text-color: 'inherit';
+
+  --top-header-sub-text-color: 'inherit';
+
+  --top-header-hover-color: #f6f6f6;
+
+  --top-tool-height: var(--logo-height);
+
+  --top-tool-p-x: 0;
+
+  --tags-view-height: 35px;
+  /* header end */
+
+
+  /* tab menu start */
+  --tab-menu-max-width: 80px;
+
+  --tab-menu-min-width: 30px;
+
+  --tab-menu-collapse-height: 36px;
+  /* tab menu end */
+
+
+  --app-content-padding: 10px;
+
+  --app-content-bg-color: #E9ECEF;
+
+  --app-footer-height: 50px;
+
+  --transition-time-02: 0.2s;
+}
+
+.dark {
+  --app-content-bg-color: var(--el-bg-color);
+}
+
+html,
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+:after,
+:before {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
