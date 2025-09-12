@@ -207,41 +207,26 @@ const createAuroraFence = (boundaries) => {
   }))
   loca.value = loca
 
-  // 使用行政区查询返回的第一个边界路径
-  const pathLngLat = (boundaries && boundaries[0]) || []
-  if (!pathLngLat.length) return
+  // 使用行政区查询返回的全部边界路径构建 GeoJSON
+  if (!boundaries || !boundaries.length) return
 
-  // 优化后的方向光源配置
-  const dirLight = new Loca.DirectionalLight({
-    intensity: 0.9, // 提高强度增强立体感
-    color: 'rgb(255, 250, 240)', // 暖白色模拟自然阳光
-    target: [0, 1, 0], // 保持Y轴正方向
-    position: [0, -1, 0], // 调整位置创造斜射效果
-    castShadow: true // 启用阴影增强立体切割感
+  // 创建面状GeoJSON（为每个边界生成一个 Feature）
+  const features = boundaries.map((boundary) => {
+    const polygonCoords = (boundary || []).map((p: any) =>
+      Array.isArray(p) ? [p[0], p[1]] : [p.lng, p.lat]
+    )
+    return {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [polygonCoords]
+      }
+    }
   })
-  loca.value.addLight(dirLight)
 
-  // var pointLight = new Loca.PointLight({
-  //   color: 'rgb(100,100,100)',
-  //   position: [117.82, 24.45, 10000], // 使用地图中心点
-  //   intensity: 5,
-  //   distance: 50000
-  // })
-  // loca.addLight(pointLight)
-
-  // 创建面状GeoJSON
-  const polygonCoords = pathLngLat.map((p) => [p.lng, p.lat])
   const geojson = {
     type: 'FeatureCollection',
-    features: [
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [polygonCoords]
-        }
-      }
-    ]
+    features
   }
 
   var geo = new Loca.GeoJSONSource({ data: geojson })
@@ -303,11 +288,11 @@ const addDistrictBoundary = (boundaries: any[]) => {
     // 主体
     new aMap.value.Polygon({
       path: boundary,
-      strokeColor: 'rgba(134, 247, 255, 0.73)',
+      strokeColor: '#1D64CA',
       strokeWeight: 1,
       strokeStyle: 'solid',
-      fillColor: 'rgba(134, 247, 255, 0.37)', // 填充色（透明）
-      fillOpacity: 0.37,
+      fillColor: '#1796FA', // 填充色
+      fillOpacity: 0.45,
       strokeOpacity: 0.9,
       lineJoin: 'round',
       map: map.value,
