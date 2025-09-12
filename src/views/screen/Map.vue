@@ -69,7 +69,7 @@ import Risk310 from '../../assets/imgs/screen/risk310.png'
 
 import { usePermissionStore } from '@/store/modules/permission'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
-import { jiaomeiData } from './jiaomei.ts'
+// import { jiaomeiData } from './jiaomei.ts' // Removed as per edit hint
 
 const emit = defineEmits(['submit', 'reset', 'validated'])
 const companyList = ref<any[]>([])
@@ -80,7 +80,7 @@ const loca = ref<any>(null) // Loca容器实例
 // 新增遮罩相关变量
 const maskPolygon = ref<any>(null)
 const boundariesValue = ref<any>(null)
-const targetDistrict = '龙海区'
+const targetDistrict = '石狮市'
 let currentMarkers: any[] = []
 const riskLevel = ref<string[]>([])
 const loading = ref(true)
@@ -156,13 +156,13 @@ const initMap = async () => {
       level: 'district'
     })
 
-    // 搜索龙海区边界
+    // 搜索石狮市边界
     district.search(targetDistrict, (status: string, result: any) => {
       if (status === 'complete' && result.districtList.length > 0) {
         const boundaries = result.districtList[0].boundaries || []
         boundariesValue.value = boundaries.length > 0 ? boundaries : null
 
-        // 创建地图实例（3D模式）- 直接使用角美镇中心坐标
+        // 创建地图实例（3D模式）- 直接使用石狮市中心坐标
         map.value = new AMap.Map('mapElement', {
           viewMode: '3D', // 使用3D模式
           // terrain: true, // 开启地形图
@@ -172,7 +172,7 @@ const initMap = async () => {
           rotation: 0, // 旋转角度
           zooms: [12, 20],
           zoom: 13.2,
-          center: [117.88, 24.51], // 角美镇中心坐标
+          center: [118.65, 24.73], // 石狮市中心坐标
           mapStyle: 'amap://styles/grey' // 深色底图增强极光效果
         })
 
@@ -189,9 +189,8 @@ const initMap = async () => {
           // 添加遮罩层
           createMaskLayer(boundaries)
 
-          // addDistrictBoundary(boundaries)
-          // 绘制角美镇边界
-          drawJiaomeiBoundary(map.value, AMap)
+          // 绘制石狮市边界线
+          addDistrictBoundary(boundaries)
           // 创建极光围栏
           createAuroraFence(boundaries)
           loading.value = false
@@ -201,17 +200,16 @@ const initMap = async () => {
   })
 }
 
-// 创建极光围栏效果（使用高德坐标）
+// 创建极光围栏效果（使用 DistrictSearch 边界）
 const createAuroraFence = (boundaries) => {
   var loca = (window.loca = new Loca.Container({
     map: map.value
   }))
   loca.value = loca
 
-  // 转换角美镇边界坐标为高德坐标
-  const jiaomeiCoords = jiaomeiData.features[0].geometry.coordinates[0].map((coord) => {
-    return [coord[0], coord[1]] // 原始坐标数组
-  })
+  // 使用行政区查询返回的第一个边界路径
+  const pathLngLat = (boundaries && boundaries[0]) || []
+  if (!pathLngLat.length) return
 
   // 优化后的方向光源配置
   const dirLight = new Loca.DirectionalLight({
@@ -231,85 +229,45 @@ const createAuroraFence = (boundaries) => {
   // })
   // loca.addLight(pointLight)
 
-  // 使用高德API转换坐标
-  aMap.value.convertFrom(jiaomeiCoords, 'gps', (status, result) => {
-    if (status === 'complete' && result.info === 'ok') {
-      const jiaomeiConverted = result.locations
-
-      // 创建面状GeoJSON
-      const geojson = {
-        type: 'FeatureCollection',
-        features: [
-          {
-            type: 'Feature',
-            geometry: {
-              type: 'Polygon',
-              coordinates: [jiaomeiConverted.map((lngLat) => [lngLat.lng, lngLat.lat])]
-            }
-          }
-        ]
-      }
-
-      var geo = new Loca.GeoJSONSource({
-        data: geojson
-      })
-
-      var auroraLayer = new Loca.PolygonLayer({
-        zIndex: 40,
-        cullface: 'none',
-        shininess: 1,
-        hasBottom: false,
-        blockHide: false,
-        hasSide: true,
-        hasTop: false,
-        depth: true
-      })
-
-      auroraLayer.setSource(geo)
-      auroraLayer.setStyle({
-        topColor: function (index, feature) {
-          return '#1796FA'
-        },
-        sideTopColor: function (index, feature) {
-          return '#1796FA'
-        },
-        sideBottomColor: function (index, feature) {
-          return '#1796FA'
-        },
-        height: 450,
-        altitude: -400,
-        glow: {
-          color: '#1796FA',
-          intensity: 0.7,
-          radius: 20
+  // 创建面状GeoJSON
+  const polygonCoords = pathLngLat.map((p) => [p.lng, p.lat])
+  const geojson = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [polygonCoords]
         }
-      })
-      // 3. 设置更逼真的3D切割效果
-      // auroraLayer.setStyle({
-      //   topColor: function (index, feature) {
-      //     // 顶部透明，仅显示边缘
-      //     return 'rgba(255,255,255,0)'
-      //   },
-      //   sideTopColor: function (index, feature) {
-      //     // 顶部边缘使用半透明亮色
-      //     return 'rgba(0,255,255,0.2)'
-      //   },
-      //   sideBottomColor: '#00C6DA',
-      //   height: 500,
-      //   altitude: 0,
-      //   // 添加边缘发光效果
-      //   glow: {
-      //     color: 'rgba(0, 198, 218, 0.5)',
-      //     intensity: 0.7,
-      //     radius: 20
-      //   }
-      // })
-      loca.add(auroraLayer)
-    }
+      }
+    ]
+  }
+
+  var geo = new Loca.GeoJSONSource({ data: geojson })
+  var auroraLayer = new Loca.PolygonLayer({
+    zIndex: 40,
+    cullface: 'none',
+    shininess: 1,
+    hasBottom: false,
+    blockHide: false,
+    hasSide: true,
+    hasTop: false,
+    depth: true
   })
+  auroraLayer.setSource(geo)
+  auroraLayer.setStyle({
+    topColor: () => '#1796FA',
+    sideTopColor: () => '#1796FA',
+    sideBottomColor: () => '#1796FA',
+    height: 450,
+    altitude: -400,
+    glow: { color: '#1796FA', intensity: 0.7, radius: 20 }
+  })
+  loca.add(auroraLayer)
 }
 
-// 创建遮罩层（使用高德坐标）
+// 创建遮罩层（使用 DistrictSearch 边界）
 const createMaskLayer = (boundaries: any[]) => {
   // 清除旧遮罩
   if (maskPolygon.value && map.value) {
@@ -323,33 +281,20 @@ const createMaskLayer = (boundaries: any[]) => {
     new aMap.value.LngLat(140, 15, true), // 东南
     new aMap.value.LngLat(140, 55, true) // 东北
   ]
-
-  // 转换角美镇边界坐标为高德坐标
-  const jiaomeiCoords = jiaomeiData.features[0].geometry.coordinates[0].map((coord) => {
-    return [coord[0], coord[1]] // 原始坐标数组
+  // 使用 DistrictSearch 返回的路径作为孔洞
+  const innerPath = (boundaries && boundaries[0]) || []
+  if (!innerPath.length) return
+  const pathArray = [outer, innerPath]
+  maskPolygon.value = new aMap.value.Polygon({
+    path: pathArray,
+    fillColor: '#0F2038',
+    fillOpacity: 0.75,
+    strokeWeight: 0,
+    zIndex: 1,
+    bubble: true,
+    clickable: false
   })
-
-  // 使用高德API转换坐标
-  aMap.value.convertFrom(jiaomeiCoords, 'gps', (status, result) => {
-    if (status === 'complete' && result.info === 'ok') {
-      const jiaomeiConverted = result.locations
-
-      // 将目标区域作为"孔洞"
-      const pathArray = [outer, jiaomeiConverted]
-
-      maskPolygon.value = new aMap.value.Polygon({
-        path: pathArray,
-        fillColor: '#0F2038',
-        fillOpacity: 0.75,
-        strokeWeight: 0,
-        zIndex: 1,
-        bubble: true,
-        clickable: false
-      })
-
-      map.value.add(maskPolygon.value)
-    }
-  })
+  map.value.add(maskPolygon.value)
 }
 
 // 添加龙海区边界线
@@ -371,57 +316,6 @@ const addDistrictBoundary = (boundaries: any[]) => {
   })
 }
 
-// 绘制角美镇边界函数
-function drawJiaomeiBoundary(map, AMap) {
-  // 添加错误边界处理
-  if (!jiaomeiData?.features) return
-
-  const features = jiaomeiData.features
-
-  if (features && features.length > 0) {
-    const geometry = features[0].geometry
-
-    if (geometry.type === 'Polygon') {
-      // 存储所有转换后的路径
-      const allPaths = []
-
-      // 处理MultiPolygon类型数据
-      geometry.coordinates.forEach((polygon) => {
-        // 转换坐标
-        const convertedCoords = polygon.map((coord) => {
-          return new AMap.LngLat(coord[0].toFixed(6), coord[1].toFixed(6))
-        })
-
-        // 使用高德API转换坐标系
-        AMap.convertFrom(convertedCoords, 'gps', function (status, result) {
-          if (status === 'complete' && result.info === 'ok') {
-            const convertedPath = result.locations
-            allPaths.push(convertedPath)
-
-            // 创建多边形
-            const polygonObj = new AMap.Polygon({
-              path: convertedPath,
-              strokeColor: '#1D64CA',
-              strokeWeight: 1,
-              strokeStyle: 'solid',
-              fillColor: '#1796FA', // 填充色（透明）
-              fillOpacity: 0.45,
-              strokeOpacity: 0.9,
-              lineJoin: 'round',
-              map: map.value,
-              zIndex: 5
-            })
-
-            // 添加到地图
-            map.add(polygonObj)
-          } else {
-            console.error('角美镇边界坐标转换失败', result)
-          }
-        })
-      })
-    }
-  }
-}
 
 const addCompanyMarkers = () => {
   clearMarkers()
