@@ -6,7 +6,7 @@ import request from '@/config/axios'
  */
 export const getCompanyStatistics = () => {
   return request.get({
-    url: '/mws/company/statistics',
+    url: '/shishi/company/statistics',
   })
 }
 

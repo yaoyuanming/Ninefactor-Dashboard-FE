@@ -167,7 +167,9 @@ const chartOption = {
 }
 
 const getInfo = async () => {
+  console.log('getInfo')
   const res = await getCompanyStatistics()
+  console.log('res', res)
   companyDetail.value = res
   console.log('companyDetail', res)
   alarmTypes.value[0].value = res?.enterpriseScaleStatistics?.[0]?.count || 0
