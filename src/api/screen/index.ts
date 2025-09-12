@@ -19,7 +19,7 @@ export const getCompanyList = (params) => {
 
 export const getDangerStatistics = () => {
   return request.get({
-    url: '/prt/danger-statistics/inspected-overview',
+    url: '/shishi/hidden-danger/statistics',
   })
 }
 
@@ -44,7 +44,7 @@ export const getDangerStatisticsDayList = (params) => {
 
 export const getMonthlyAddList = (params) => {
   return request.get({
-    url: '/prt/danger-statistics/monthly-add',
+    url: '/shishi/hidden-danger/monthly-statistics',
     params
   })
 }

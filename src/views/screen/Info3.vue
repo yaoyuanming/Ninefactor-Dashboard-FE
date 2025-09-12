@@ -7,19 +7,13 @@
         <img class="img2" src="@/assets/imgs/screen/hidden-danger2.png" />
         <div class="text-card card-left">
           <div class="title">已排查隐患总数</div>
-          <div class="num">{{ dangerDetail?.totalHazards }}</div>
+          <div class="num">{{ dangerDetail?.totalHiddenDangers }}</div>
         </div>
         <div class="text-card card-right">
           <div class="title">隐患整改率</div>
           <div class="num">{{
-            dangerDetail && dangerDetail.totalHazards > 0
-              ? Number(
-                  ((dangerDetail.totalHazards - dangerDetail.unRectifiedHazards) /
-                    dangerDetail.totalHazards) *
-                    100
-                ).toFixed(1) + '%'
-              : dangerDetail && dangerDetail.totalHazards === 0
-              ? '-'
+            dangerDetail?.rectificationRate 
+              ? (dangerDetail.rectificationRate * 100).toFixed(1) + '%'
               : '-'
           }}</div>
         </div>
@@ -40,10 +34,10 @@
           <div>
             <div class="card-title">隐患总数</div>
             <div v-if="tabs === 'government'" class="card-content">{{
-              inspectionDetail?.totalHazards
+              dangerDetail?.governmentCheck?.totalHiddenDangers
             }}</div>
             <div v-else class="card-content">{{
-              dangerDetail?.totalHazards - inspectionDetail?.totalHazards
+              dangerDetail?.enterpriseSelfCheck?.totalHiddenDangers
             }}</div>
           </div>
         </div>
@@ -52,10 +46,10 @@
           <div>
             <div class="card-title">重大隐患</div>
             <div v-if="tabs === 'government'" class="card-content">{{
-              inspectionDetail?.majorHazards
+              dangerDetail?.governmentCheck?.majorHiddenDangers
             }}</div>
             <div v-else class="card-content">{{
-              dangerDetail?.totalMajorHazards - inspectionDetail?.majorHazards
+              dangerDetail?.enterpriseSelfCheck?.majorHiddenDangers
             }}</div>
           </div>
         </div>
@@ -64,10 +58,10 @@
           <div>
             <div class="card-title">一般隐患</div>
             <div v-if="tabs === 'government'" class="card-content">{{
-              inspectionDetail?.generalHazards
+              dangerDetail?.governmentCheck?.generalHiddenDangers
             }}</div>
             <div v-else class="card-content">{{
-              dangerDetail?.totalGeneralHazards - inspectionDetail?.generalHazards
+              dangerDetail?.enterpriseSelfCheck?.generalHiddenDangers
             }}</div>
           </div>
         </div>
@@ -95,7 +89,7 @@
           <div class="title">近三个月零申报企业数</div>
         </div>
         <div class="number-div">
-          <div class="num">{{ companyDetail || 0 }}</div>
+          <div class="num">{{ dangerDetail?.zeroDeclarationEnterprises || 0 }}</div>
           <div class="unit">家</div>
         </div>
       </div>
@@ -115,7 +109,7 @@ import * as echarts from 'echarts'
 import type { EChartsType } from 'echarts'
 import CenterBg from '../../assets/imgs/screen/center-bg.png' // Vite会处理图片导入
 import CenterImg3 from '../../assets/imgs/screen/center-img3.png' // Vite会处理图片导入
-import { getDangerStatistics, getInspectionStatistics, getMonthlyAddList, getZeroDeclarationCount } from '@/api/screen'
+import { getDangerStatistics, getInspectionStatistics, getMonthlyAddList } from '@/api/screen'
 
 const alarmChartContainer = ref<HTMLElement | null>(null)
 const lineContainer = ref<HTMLElement | null>(null)
@@ -133,10 +127,10 @@ const companyDetail = ref<number>(0)
 const tabs = ref<any>('company')
 
 // 获取近三个月零申报企业数
-const fetchZeroDeclarationCount = async () => {
-  const res = await getZeroDeclarationCount()
-  companyDetail.value = res
-}
+// const fetchZeroDeclarationCount = async () => {
+//   const res = await getZeroDeclarationCount()
+//   companyDetail.value = res
+// }
 
 const chartOption = {
   tooltip: {
@@ -248,14 +242,16 @@ const lineChartOption = {
     {
       type: 'value',
       min: 0,
-      interval: 20,
+      max: 'dataMax', // 自动根据数据最大值设置
+      interval: 'auto', // 自动计算间隔
       axisLine: {
         show: true,
         lineStyle: { color: 'rgba(255, 255, 255, 0.5)' }
       },
       axisLabel: {
         color: 'rgba(255, 255, 255, 0.7)',
-        formatter: '{value}'
+        formatter: '{value}',
+        fontSize: 10
       },
       splitLine: {
         show: true,
@@ -265,14 +261,16 @@ const lineChartOption = {
     {
       type: 'value',
       min: 0,
-      interval: 20,
+      max: 'dataMax', // 自动根据数据最大值设置
+      interval: 'auto', // 自动计算间隔
       axisLine: {
         show: false,
         lineStyle: { color: 'rgba(255, 255, 255, 0.5)' }
       },
       axisLabel: {
         color: 'rgba(255, 255, 255, 0.7)',
-        formatter: '{value}'
+        formatter: '{value}',
+        fontSize: 10
       },
       splitLine: {
         show: true,
@@ -337,20 +335,22 @@ const updateLineChart = () => {
 const getData = () => {
   getDangerStatistics().then((res) => {
     dangerDetail.value = res
-    alarmTypes.value[0].value = res.totalHazards - res.unRectifiedHazards
-    alarmTypes.value[1].value = res.unRectifiedHazards
-    alarmTypes.value[2].value = res.overdueUnRectifiedHazards
+    // 更新饼图数据 - 使用新的数据结构
+    alarmTypes.value[0].value = res.rectificationStatus.rectified // 已整改
+    alarmTypes.value[1].value = res.rectificationStatus.inProgress // 整改中
+    alarmTypes.value[2].value = res.rectificationStatus.overdue // 逾期未整改
     updateChart()
-  })
-
-  getInspectionStatistics().then((res) => {
-    inspectionDetail.value = res
   })
 }
 
+// 移除 getInspectionStatistics 的调用
+// getInspectionStatistics().then((res) => {
+//   inspectionDetail.value = res
+// })
+
 const getLineData = () => {
   getMonthlyAddList({
-    year: new Date().getFullYear()
+    yyyy: new Date().getFullYear()
   }).then((res) => {
     console.log('dangerDetail', res)
     // 整改隐患数
@@ -377,7 +377,7 @@ onMounted(() => {
   }
   getData()
   getLineData()
-  fetchZeroDeclarationCount()
+  // fetchZeroDeclarationCount()
 })
 
 onBeforeUnmount(() => {
