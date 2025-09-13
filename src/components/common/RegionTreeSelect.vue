@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
-import { getRegionTree } from '@/api/systemSettings/dataApplication/region'
+import { getAreaTree } from '@/api/enterpriseArchives'
 
 const props = defineProps<{
   modelValue?: string | number | null
@@ -34,14 +34,14 @@ const regionTree = ref<any[]>([])
 const transformRegionData = (data: any[]): any[] => {
   if (!Array.isArray(data)) return []
   return data.map(item => ({
-    label: item.label || item.regionName,
-    value: item.primaryId || item.id,
+    label: item.name || item.label, // 使用 name 字段作为显示文本
+    value: item.id, // 使用 id 字段作为值
     children: item.children ? transformRegionData(item.children) : []
   }))
 }
 
 onMounted(async () => {
-  const res = await getRegionTree()
+  const res = await getAreaTree()
   if (res) regionTree.value = transformRegionData(res)
 })
 </script> 

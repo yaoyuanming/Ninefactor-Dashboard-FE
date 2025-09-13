@@ -90,7 +90,7 @@ export interface CompanySaveReqVO {
 // 获得企业基本信息表(一企一档)分页
 export const getCompanyPage = (params: CompanyPageReqVO) => {
   return request.get({
-    url: '/mws/company/page',
+    url: '/shishi/company/page',
     params
   })
 }
@@ -115,7 +115,7 @@ export const updateCompany = (data: CompanySaveReqVO) => {
 // 获得企业统计信息
 export const getCompanyStatistics = () => {
   return request.get({
-    url: '/mws/company/statistics'
+    url: '/shishi/company/statistics'
   })
 }
 
@@ -126,3 +126,52 @@ export const getCompanyRiskMapById = (id) => {
     params: { id }
   })
 }
+
+// 获取行业树
+export const getControlTree = () => {
+  return request.get({
+    url: '/shishi/control/tree'
+  })
+}
+
+// 获取区域树
+export const getAreaTree = () => {
+  return request.get({
+    url: '/shishi/area/tree'
+  })
+}
+
+// 根据父区域ID获取子区域列表
+export const getAreaChildren = (parentId: string | number) => {
+  return request.get({
+    url: '/shishi/area/children',
+    params: {
+      parentId
+    }
+  })
+}
+
+// 根据父区域ID查询所有子区域包括下级的ID列表
+export const getSubAreaIds = (parentId: number) => {
+  return request.get({
+    url: '/shishi/area/sub-area-ids',
+    params: {
+      parentId
+    }
+  })
+}
+
+// 根据父区域ID查询所有子区域包括下级
+export const getSubAreas = (parentId: number) => {
+  return request.get({
+    url: '/shishi/area/sub-areas',
+    params: {
+      parentId
+    }
+  })
+}
+
+
+
+
+

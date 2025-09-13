@@ -33,24 +33,27 @@
         </el-form-item>
         <el-form-item label="区域">
           <RegionTreeSelect
-            v-model="filterForm.regionId"
+            v-model="filterForm.areaId"
             placeholder="请选择区域"
             clearable
             filterable
             style="width: 200px"
           />
         </el-form-item>
-        <el-form-item label="国民经济类型">
+        <el-form-item label="管控行业类型">
           <el-cascader
-            v-model="filterForm.industryType"
-            :options="categoryData"
+            v-model="filterForm.controlId"
+            :options="controlTreeData"
             :props="{
-              checkStrictly: true
+              checkStrictly: true,
+              value: 'id',
+              label: 'name',
+              children: 'children'
             }"
-            placeholder="请选择国民经济类型"
+            placeholder="请选择管控行业类型"
             clearable
             style="width: 200px;"
-            @change="handleIndustryChange"
+            @change="handleControlTypeChange"
           />
         </el-form-item>
         <el-form-item label="整体风险等级">
@@ -80,20 +83,20 @@
 
       <el-table :data="enterpriseData" style="width: 100%" v-loading="loading">
         <el-table-column prop="name" label="企业名称" min-width="260" />
-        <el-table-column prop="code" label="统一信用代码" width="180" />
-        <el-table-column prop="regionName" label="区域" min-width="120">
+        <el-table-column prop="creditCode" label="统一信用代码" width="180" />
+        <el-table-column prop="areaName" label="区域" min-width="120">
           <template #default="{ row }">
-            {{ row.regionName || '-' }}
+            {{ row.areaName || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="industryName" label="国民经济类型" width="220">
+        <el-table-column prop="controlName" label="管控行业类型" width="220">
           <template #default="{ row }">
-            {{ row.industryName || '-' }}
+            {{ row.controlName || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="regulatoryDepartmentId" label="行业监管部门" min-width="150">
+        <el-table-column prop="citySupervisionDepartment" label="市级监管部门" min-width="150">
           <template #default="{ row }">
-            {{ getDeptNameById(row.regulatoryDepartmentId) || '-' }}
+            {{ row.citySupervisionDepartment || '-' }}
           </template>
         </el-table-column>
         <el-table-column label="整体风险等级" width="120" align="center" prop="riskLevel">
@@ -130,24 +133,24 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="principal" label="主要负责人" width="120">
+        <el-table-column prop="controlManager" label="主要负责人" width="120">
           <template #default="{ row }">
-            {{ row.principal || '-' }}
+            {{ row.controlManager || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="scale" label="企业规模" width="120">
+        <el-table-column prop="enterpriseScale" label="企业规模" width="120">
           <template #default="{ row }">
-            <span style="color: #333;">{{ row.scale || '-' }}</span>
+            <span style="color: #333;">{{ row.enterpriseScale || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="最近填报时间" width="180">
+        <el-table-column prop="updateTime" label="最近填报时间" width="180">
           <template #default="{ row }">
-            {{ row.createTime ? formatDate(row.createTime) : '-' }}
+            {{ row.updateTime ? formatDate(row.updateTime) : '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="loginTime" label="最近登录时间" width="180">
+        <el-table-column prop="lastLoginTime" label="最近登录时间" width="180">
           <template #default="{ row }">
-            {{ row.loginTime ? formatDate(row.loginTime) : '-' }}
+            {{ row.lastLoginTime ? formatDate(row.lastLoginTime) : '-' }}
           </template>
         </el-table-column>
         <el-table-column label="企业状态" width="100">
@@ -238,11 +241,11 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getCompanyPage, type CompanyPageReqVO, updateCompany,getCompanyStatistics  } from '@/api/enterpriseArchives'
+import { getCompanyPage, type CompanyPageReqVO, updateCompany,getCompanyStatistics, getControlTree } from '@/api/enterpriseArchives'
 import { formatDate } from '@/utils/formatTime'
 import { getSimpleDeptList } from '@/api/system/dept'
 import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
-import { categoryData, CodeToText, TextToCode } from 'element-china-category-data'
+// import { categoryData, CodeToText, TextToCode } from 'element-china-category-data'
 import RegionTreeSelect from '@/components/common/RegionTreeSelect.vue'
 
 const router = useRouter()
@@ -250,10 +253,30 @@ const router = useRouter()
 // 筛选表单
 const filterForm = reactive({
   enterpriseName: '',
-  regionId: '', // 改为 regionId
+  areaId: '', // 改为 areaId
   riskLevel: '',
-  industryType: []
+  controlId: [] // 改为 controlId
 })
+
+// 添加管控行业树数据
+const controlTreeData = ref([])
+
+// 获取管控行业树数据
+const fetchControlTree = async () => {
+  try {
+    const response = await getControlTree()
+    controlTreeData.value = response || []
+  } catch (error) {
+    console.error('获取管控行业树失败:', error)
+    ElMessage.error('获取管控行业树失败')
+  }
+}
+
+// 处理管控行业类型变化
+const handleControlTypeChange = (value) => {
+  console.log('选择的管控行业ID:', value)
+  // 可以在这里添加其他处理逻辑
+}
 
 // 定义组件参数
 const props = defineProps({
@@ -304,32 +327,16 @@ const fetchEnterpriseData = async () => {
       pageSize: pageSize.value.toString(),
       enterpriseName: filterForm.enterpriseName || undefined,
       enterpriseScale: props.enterpriseScale || undefined,
-      regionCode: filterForm.regionId || undefined, // 使用 regionId
+      areaId: filterForm.areaId || undefined, // 改为 areaId
       riskLevel: filterForm.riskLevel || undefined,
-      industryType: filterForm.industryType.length > 0 ? filterForm.industryType.join(',') : undefined
+      controlId: filterForm.controlId.length > 0 ? filterForm.controlId.join(',') : undefined // 修改为 controlId
     }
 
     // 调用API接口
     const response = await getCompanyPage(params)
 
-    if (response && response.list) {
-      // 将API返回的数据映射到表格需要的格式
-      enterpriseData.value = response.list.map(item => ({
-        id: item.id,
-        name: item.enterpriseName || '',
-        code: item.creditCode || '',
-        region: item.registerAddress || '',
-        economyType: item.industryType || '',
-        supervisor: item.regulatoryDepartment || '',
-        riskLevel: item.riskLevel || '',
-        principal: item.principal || '',
-        scale: item.enterpriseScale || '',
-        reportTime: item.lastReportTime || '',
-        loginTime: item.lastLoginTime || '',
-        hasRisk: item.riskLevel === '红' || item.riskLevel === '橙',
-        // 保留原始数据
-        ...item
-      }))
+    if (response && response.records) {
+      enterpriseData.value = response.records
       total.value = response.total || 0
     } else {
       enterpriseData.value = []
@@ -364,9 +371,9 @@ const handleSearch = () => {
 // 重置筛选
 const resetFilter = () => {
   filterForm.enterpriseName = ''
-  filterForm.regionId = '' // 重置 regionId
+  filterForm.areaId = '' 
   filterForm.riskLevel = ''
-  filterForm.industryType = []
+  filterForm.controlId = [] // 重置 controlId
   currentPage.value = 1
   fetchEnterpriseData()
 }
@@ -490,7 +497,7 @@ async function handleDeptUpdate() {
       id: currentRow.value.id,
       enterpriseName: currentRow.value.enterpriseName || '',
       creditCode: currentRow.value.creditCode || '',
-      regionId: currentRow.value.regionId,
+      areaId: currentRow.value.areaId,
       industryId: currentRow.value.industryId,
       regulatoryDepartmentId: regulatoryDepartmentIdStr, // 更新为逗号分隔的字符串
       riskLevel: currentRow.value.riskLevel,
@@ -547,7 +554,8 @@ const handleSizeChange = (size: number) => {
 // 页面初始化
 onMounted(() => {
   fetchEnterpriseData()
-  fetchDeptTreeData() // 在组件挂载时获取监管部门树数据
+  // fetchDeptTreeData() // 在组件挂载时获取监管部门树数据
+  fetchControlTree() // 在组件挂载时获取管控行业树数据
   fetchStatistics() // 在组件挂载时获取统计数据
 })
 </script>
