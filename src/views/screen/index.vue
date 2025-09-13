@@ -36,7 +36,7 @@
         </el-button>
         <div class="content-right-main">
           <Info3 />
-          <Info4 @click="openModal('check')" />
+          <!-- <Info4 @click="openModal('check')" /> -->
         </div>
       </div>
       <div class="content-bottom"> </div>

@@ -66,7 +66,7 @@
           </div>
         </div>
       </div>
-      <!-- <SecTitle class="sec-title" title="隐患整改情况" :tabs="[]" /> -->
+      <SecTitle class="sec-title" title="隐患整改情况" :tabs="[]" />
       <div class="alarm-distribution">
         <!-- 图表容器 -->
         <div ref="alarmChartContainer" class="alarm-chart-container"></div>

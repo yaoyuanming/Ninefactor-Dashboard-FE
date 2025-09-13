@@ -57,20 +57,19 @@
           />
         </el-form-item>
         <el-form-item label="整体风险等级">
-       
           <el-select
-                clearable
-                @change="handleQuery"
-                v-model="filterForm.riskLevel"
-                placeholder="请选择"
-                class="!w-240px"
-              >
-                <el-option
-                  :label="item.label"
-                  :value="item.value"
-                  v-for="(item, key) in getIntDictOptions(DICT_TYPE.RISKLEVEL)"
-                  :key="key"
-                />
+            clearable
+            @change="handleQuery"
+            v-model="filterForm.riskLevel"
+            placeholder="请选择"
+            class="!w-240px"
+          >
+            <el-option
+              :label="item.label"
+              :value="item.value"
+              v-for="(item, key) in riskLevelOptions"
+              :key="key"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -99,38 +98,33 @@
             {{ row.citySupervisionDepartment || '-' }}
           </template>
         </el-table-column>
-        <el-table-column label="整体风险等级" width="120" align="center" prop="riskLevel">
-            <template #default="scope">
-              <el-tag
-                v-if="scope.row.riskLevel == 2"
-                style="background: #c7d3f5; border: 1px solid blue;color: #434343;"
-              >
-                {{ getDictLabel(DICT_TYPE.RISKLEVEL, scope.row.riskLevel) }}
-              </el-tag>
-              <el-tag
-                v-if="scope.row.riskLevel == 5"
-                style="background: #F0E68C; border: 1px solid #bab25b;color: #434343;"
-              >
-                {{ getDictLabel(DICT_TYPE.RISKLEVEL, scope.row.riskLevel) }}
-              </el-tag>
-              <el-tag
-                v-if="scope.row.riskLevel == 8"
-                style="background: #fff0da; border: 1px solid orange;color: #434343;"
-              >
-                {{ getDictLabel(DICT_TYPE.RISKLEVEL, scope.row.riskLevel) }}
-              </el-tag>
-              <el-tag
-                v-if="scope.row.riskLevel == 10"
-                style="background: #f6d4cd; border: 1px solid red;color: #434343;"
-              >
-                {{ getDictLabel(DICT_TYPE.RISKLEVEL, scope.row.riskLevel) }}
+        <el-table-column label="整体风险等级" width="120" align="center" prop="dynamicRiskLevel">
+          <template #default="scope">
+            <el-tag
+              v-if="scope.row.dynamicRiskLevel == 1"
+              style="background: #c7d3f5; border: 1px solid blue;color: #434343;"
+            >
+              {{ getRiskLevelLabel(scope.row.dynamicRiskLevel) }}
             </el-tag>
             <el-tag
-              v-if="scope.row.riskLevel == 0"
-              style="background: #f5f7fa; border: 1px solid #dcdfe6;color: #434343;"
+              v-else-if="scope.row.dynamicRiskLevel == 2"
+              style="background: #F0E68C; border: 1px solid #bab25b;color: #434343;"
             >
-              {{ getDictLabel(DICT_TYPE.RISKLEVEL, scope.row.riskLevel) }}
+              {{ getRiskLevelLabel(scope.row.dynamicRiskLevel) }}
             </el-tag>
+            <el-tag
+              v-else-if="scope.row.dynamicRiskLevel == 3"
+              style="background: #fff0da; border: 1px solid orange;color: #434343;"
+            >
+              {{ getRiskLevelLabel(scope.row.dynamicRiskLevel) }}
+            </el-tag>
+            <el-tag
+              v-else-if="scope.row.dynamicRiskLevel == 4"
+              style="background: #f6d4cd; border: 1px solid red;color: #434343;"
+            >
+              {{ getRiskLevelLabel(scope.row.dynamicRiskLevel) }}
+            </el-tag>
+            <span v-else style="color: #999;">--</span>
           </template>
         </el-table-column>
         <el-table-column prop="controlManager" label="主要负责人" width="120">
@@ -244,7 +238,6 @@ import { ElMessage } from 'element-plus'
 import { getCompanyPage, type CompanyPageReqVO, updateCompany,getCompanyStatistics, getControlTree } from '@/api/enterpriseArchives'
 import { formatDate } from '@/utils/formatTime'
 import { getSimpleDeptList } from '@/api/system/dept'
-import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 // import { categoryData, CodeToText, TextToCode } from 'element-china-category-data'
 import RegionTreeSelect from '@/components/common/RegionTreeSelect.vue'
 
@@ -558,6 +551,31 @@ onMounted(() => {
   fetchControlTree() // 在组件挂载时获取管控行业树数据
   fetchStatistics() // 在组件挂载时获取统计数据
 })
+
+// 添加风险等级数据映射 (1-4 对应 重大-低风险)
+const riskLevelOptions = [
+  { label: '重大风险', value: '1' },
+  { label: '较大风险', value: '2' },
+  { label: '一般风险', value: '3' },
+  { label: '低风险', value: '4' }
+]
+
+// 风险等级映射函数
+const getRiskLevelLabel = (value) => {
+  const option = riskLevelOptions.find(item => item.value === value?.toString())
+  return option ? option.label : '-'
+}
+
+// 风险等级颜色映射
+const getRiskLevelStyle = (value) => {
+  const styles = {
+    '1': { background: '#c7d3f5', border: '1px solid blue', color: '#434343' }, // 重大风险 - 蓝色
+    '2': { background: '#F0E68C', border: '1px solid #bab25b', color: '#434343' }, // 较大风险 - 黄色
+    '3': { background: '#fff0da', border: '1px solid orange', color: '#434343' }, // 一般风险 - 橙色
+    '4': { background: '#f6d4cd', border: '1px solid red', color: '#434343' } // 低风险 - 红色
+  }
+  return styles[value?.toString()] || { background: '#f5f7fa', border: '1px solid #dcdfe6', color: '#434343' }
+}
 </script>
 
 <style lang="scss" scoped>

@@ -31,7 +31,7 @@ import * as echarts from 'echarts'
 import type { EChartsType } from 'echarts'
 import CenterBg from '../../assets/imgs/screen/center-bg.png' // Vite会处理图片导入
 import CenterImg2 from '../../assets/imgs/screen/center-img2.png' // Vite会处理图片导入
-import { getRiskStatistics } from '@/api/screen'
+// import { getRiskStatistics } from '@/api/screen'
 
 const alarmChartContainer = ref<HTMLElement | null>(null)
 let alarmChart = ref<EChartsType | null>(null)

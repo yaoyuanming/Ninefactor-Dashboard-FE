@@ -42,7 +42,7 @@
         <div ref="alarmChartContainer" class="alarm-chart-container"></div>
         <!-- 报警类型列表 -->
         <div class="alarm-type-list">
-          <div v-for="item in alarmTypes" :key="item.name" @click="emit('clickAction', item.name)" class="alarm-legend-item">
+          <div v-for="item in alarmTypes" :key="item.name" @click="emit('clickAction', getProcessedName(item.name))" class="alarm-legend-item">
             <div class="title">
               <span
                 class="legend-color-block"
@@ -172,9 +172,9 @@ const getInfo = async () => {
   console.log('res', res)
   companyDetail.value = res
   console.log('companyDetail', res)
-  alarmTypes.value[0].value = res?.enterpriseScaleStatistics?.[0]?.count || 0
+  alarmTypes.value[0].value = res?.enterpriseScaleStatistics?.[2]?.count || 0
   alarmTypes.value[1].value = res?.enterpriseScaleStatistics?.[1]?.count || 0
-  alarmTypes.value[2].value = res?.enterpriseScaleStatistics?.[2]?.count || 0
+  alarmTypes.value[2].value = res?.enterpriseScaleStatistics?.[0]?.count || 0
   alarmChart.value?.setOption({
     series: [
       {
@@ -183,6 +183,14 @@ const getInfo = async () => {
       }
     ]
   })
+}
+
+// 处理企业规模名称，去掉"企业"后缀
+const getProcessedName = (name: string) => {
+  if (name.includes('企业')) {
+    return name.replace('企业', '')
+  }
+  return name
 }
 
 onMounted(() => {
