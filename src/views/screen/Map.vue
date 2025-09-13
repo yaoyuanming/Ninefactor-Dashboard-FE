@@ -302,15 +302,72 @@ const addDistrictBoundary = (boundaries: any[]) => {
 }
 
 
-const addCompanyMarkers = () => {
-  clearMarkers()
+// 添加自动分页加载所有数据的辅助函数，支持增量显示
+const loadAllDataIncremental = async (params) => {
+  let allData = []
+  let pageNo = 1
+  let hasMore = true
+  
+  console.log('开始增量加载数据，参数:', params)
+  
+  while (hasMore) {
+    console.log(`正在加载第 ${pageNo} 页数据...`)
+    
+    const res = await getCompanyList({
+      ...params,
+      pageNo,
+      pageSize: 50 // 适中的分页大小
+    })
+    
+    console.log(`第 ${pageNo} 页响应数据:`, res)
+    
+    if (res && res.records) {
+      allData = allData.concat(res.records)
+      console.log(`第 ${pageNo} 页获取到 ${res.records.length} 条数据，累计 ${allData.length} 条`)
+      
+      // 立即更新公司列表并显示标记
+      companyList.value = [...allData]
+      addCompanyMarkers()
+      
+      // 判断是否还有更多数据
+      hasMore = res.records.length === 50 && res.total > allData.length
+      console.log(`是否还有更多数据: ${hasMore}, 当前页数据量: ${res.records.length}, 总数: ${res.total}, 已加载: ${allData.length}`)
+      pageNo++
+    } else {
+      console.log('没有更多数据或响应格式不正确')
+      hasMore = false
+    }
+    
+    // 添加短暂延迟，避免请求过于频繁
+    await new Promise(resolve => setTimeout(resolve, 200))
+  }
+  
+  console.log('数据加载完成，总计:', allData.length)
+  return allData
+}
 
-  if (!map.value || !aMap.value || !companyList.value.length) return
+// 修改 addCompanyMarkers 函数，支持增量添加
+const addCompanyMarkers = () => {
+  // 不要清空现有标记，而是增量添加
+  if (!map.value || !aMap.value) {
+    console.log('地图未准备好，无法添加标记')
+    return
+  }
 
   const AMap = aMap.value
+  let newMarkersCount = 0
 
-  companyList.value.forEach((company) => {
-    if (!company.longitude || !company.latitude) return
+  // 只处理新添加的公司（通过比较当前标记数量）
+  const startIndex = currentMarkers.length
+  const newCompanies = companyList.value.slice(startIndex)
+
+  console.log(`开始添加新标记，从第 ${startIndex} 个开始，新增 ${newCompanies.length} 个公司`)
+
+  newCompanies.forEach((company, index) => {
+    if (!company.longitude || !company.latitude) {
+      console.log(`公司 ${company.enterpriseName || '未知'} 缺少坐标信息，跳过`)
+      return
+    }
 
     // 创建标记
     const marker = new AMap.Marker({
@@ -382,26 +439,14 @@ const addCompanyMarkers = () => {
     })
 
     currentMarkers.push(marker)
+    newMarkersCount++
   })
 
-  map.value.add(currentMarkers)
-  nextTick(() => {
-    // 关闭InfoWindow避免冲突
-    if (globalInfoWindow.value.instance?.getIsOpen()) {
-      globalInfoWindow.value.instance.close()
-    }
-
-    // 修复 setFitView 调用
-    if (boundariesValue.value) {
-      // 创建包含所有点的数组
-      const allPoints = boundariesValue.value.flat()
-
-      map.value.setFitView(allPoints, {
-        padding: [50, 50],
-        duration: 450 // 添加动画时长
-      })
-    }
-  })
+  // 将新标记添加到地图
+  if (newMarkersCount > 0) {
+    map.value.add(currentMarkers.slice(-newMarkersCount))
+    console.log(`成功添加 ${newMarkersCount} 个新标记到地图`)
+  }
 }
 
 // 高亮标记
@@ -516,14 +561,19 @@ const clearMarkers = () => {
 
 const getCompanyListIfo = async () => {
   try {
-    loading.value = true // 添加加载状态管理
-    const res = await getCompanyList({
-      pageNo: 1,
-      pageSize: 100,
+    loading.value = true
+    
+    // 清空现有数据
+    companyList.value = []
+    clearMarkers()
+    
+    console.log('开始获取企业列表，风险等级:', riskLevel.value)
+    
+    // 使用增量加载
+    await loadAllDataIncremental({
       riskEnvTypes: riskLevel.value?.join(',')
     })
-    companyList.value = res?.list || []
-    addCompanyMarkers()
+    
   } catch (error) {
     console.error('获取企业列表失败:', error)
   } finally {

@@ -8,7 +8,7 @@
     <div id="max-screen-content" class="screen-modal">
       <div class="content-top">
         <img class="top-image" src="@/assets/imgs/screen/top-header.png" />
-        <div class="top-text">{{ title }}</div>
+        <div class="top-text">石狮市安全管理平台</div>
       </div>
       <div class="content-left">
         <div class="time-modal">

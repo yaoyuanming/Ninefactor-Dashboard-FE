@@ -12,7 +12,7 @@ export const getCompanyStatistics = () => {
 
 export const getCompanyList = (params) => {
   return request.get({
-    url: '/mws/company/page',
+    url: '/shishi/company/page',
     params
   })
 }
