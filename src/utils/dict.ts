@@ -101,14 +101,12 @@ export const getDictObj = (dictType: string, value: any): DictDataType | undefin
  * @return 字典名称
  */
 export const getDictLabel = (dictType: string, value: any): string => {
-  const dictOptions: DictDataType[] = getDictOptions(dictType)
-  const dictLabel = ref('')
-  dictOptions.forEach((dict: DictDataType) => {
-    if (dict.value === value + '') {
-      dictLabel.value = dict.label
-    }
-  })
-  return dictLabel.value
+  return {
+    1: "重大风险",
+    2: "较大风险",
+    3: "一般风险",
+    4: "低风险",
+  }[value]
 }
 
 export enum DICT_CATEGORY {
