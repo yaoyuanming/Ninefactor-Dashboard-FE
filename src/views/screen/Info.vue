@@ -17,21 +17,21 @@
           <img class="card-icon" src="@/assets/imgs/screen/base1.png" />
           <div>
             <div class="card-title">有限空间</div>
-            <div class="card-content">{{ companyDetail?.finiteSpaceCount || 0 }}</div>
+            <div class="card-content">{{ companyDetail?.limitedSpaceTaskCount || 0 }}</div>
           </div>
         </div>
         <div class="company-detail-card">
           <img class="card-icon" src="@/assets/imgs/screen/base2.png" />
           <div>
-            <div class="card-title">粉尘涉爆</div>
-            <div class="card-content">{{ companyDetail?.dustFireCount || 0 }}</div>
+            <div class="card-title">涉爆粉尘</div>
+            <div class="card-content">{{ companyDetail?.metalDustCount || 0 }}</div>
           </div>
         </div>
         <div class="company-detail-card">
           <img class="card-icon" src="@/assets/imgs/screen/base3.png" />
           <div>
             <div class="card-title">涉氨制冷</div>
-            <div class="card-content">{{ companyDetail?.amineCount || 0 }}</div>
+            <div class="card-content">{{ companyDetail?.ammoniaCount || 0 }}</div>
           </div>
         </div>
       </div>

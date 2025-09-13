@@ -23,11 +23,11 @@
             },
             {
               label: '有限空间',
-              value: '1'
+              value: '5'
             },
             {
-              label: '粉尘涉爆',
-              value: '2'
+              label: '涉爆粉尘',
+              value: '1'
             },
             {
               label: '涉氨制冷',
@@ -83,7 +83,7 @@ let labelMarkerLayer: any = ref<any>(null) // LabelMarker图层
 const dangerousTrade = ref<string[]>([])
 const loading = ref(true)
 const INFO_WINDOW_CLOSE_DELAY = 1000
-const pageSize = 500
+const pageSize = 1000
 const { push } = useRouter()
 
 // 全局单例InfoWindow实例
@@ -102,14 +102,14 @@ const companyIcon = {
       2: Risk08,
       1: Risk010
     },
-    1: {
+    5: {
       0: Risk12,
       4: Risk12,
       3: Risk15,
       2: Risk18,
       1: Risk110
     },
-    2: {
+    1: {
       0: Risk22,
       4: Risk22,
       3: Risk25,
@@ -363,7 +363,7 @@ const addCompanyLabelMarkers = () => {
       return
     }
 
-    const riskType = dangerousTrade.value?.[0] || company.riskEnvTypes?.split(',')?.[0] || 0
+    const riskType = dangerousTrade.value?.[0] || company.isHasLimitedSpaceTask || company.isHasDust || company.isHasAmmonia || 0
     const riskLvl = company.dynamicRiskLevel || 0
     const iconUrl = companyIcon.image[riskType]?.[riskLvl] || companyIcon.image[0][0]
 
@@ -529,7 +529,7 @@ const clearLabelMarkers = () => {
 
 const getCompanyListIfo = async () => {
   try {
-    // loading.value = true
+    loading.value = true
     
     // 清空现有数据
     companyList.value = []
@@ -542,7 +542,7 @@ const getCompanyListIfo = async () => {
   } catch (error) {
     console.error('获取企业列表失败:', error)
   } finally {
-    // loading.value = false // 确保loading状态正确
+    loading.value = false // 确保loading状态正确
   }
 }
 
