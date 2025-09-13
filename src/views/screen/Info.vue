@@ -8,7 +8,7 @@
           <div class="title">企业总数</div>
         </div>
         <div class="number-div">
-          <div class="num">{{ companyDetail?.totalCount }}</div>
+          <div class="num">{{ props.companyData?.totalCount }}</div>
           <div class="unit">家</div>
         </div>
       </div>
@@ -17,21 +17,21 @@
           <img class="card-icon" src="@/assets/imgs/screen/base1.png" />
           <div>
             <div class="card-title">有限空间</div>
-            <div class="card-content">{{ companyDetail?.limitedSpaceTaskCount || 0 }}</div>
+            <div class="card-content">{{ props.companyData?.limitedSpaceTaskCount || 0 }}</div>
           </div>
         </div>
         <div class="company-detail-card">
           <img class="card-icon" src="@/assets/imgs/screen/base2.png" />
           <div>
             <div class="card-title">涉爆粉尘</div>
-            <div class="card-content">{{ companyDetail?.metalDustCount || 0 }}</div>
+            <div class="card-content">{{ props.companyData?.metalDustCount || 0 }}</div>
           </div>
         </div>
         <div class="company-detail-card">
           <img class="card-icon" src="@/assets/imgs/screen/base3.png" />
           <div>
             <div class="card-title">涉氨制冷</div>
-            <div class="card-content">{{ companyDetail?.ammoniaCount || 0 }}</div>
+            <div class="card-content">{{ props.companyData?.ammoniaCount || 0 }}</div>
           </div>
         </div>
       </div>
@@ -61,7 +61,7 @@
             <img class="icon" src="@/assets/imgs/screen/edit-text.png" />
           </div>
           <div class="card-right">
-            <div class="num">{{ companyDetail?.reportedCount || '-' }}</div>
+            <div class="num">{{ props.companyData?.reportedCount || '-' }}</div>
             <div class="title">已填报企业</div>
             <img class="jiantou" src="@/assets/imgs/screen/jiantou1.png" />
           </div>
@@ -71,7 +71,7 @@
             <img class="icon" src="@/assets/imgs/screen/no-text.png" />
           </div>
           <div class="card-right">
-            <div class="num">{{ companyDetail?.notReportedCount || '0' }}</div>
+            <div class="num">{{ props.companyData?.notReportedCount || '0' }}</div>
             <div class="title">未填报企业</div>
             <img class="jiantou" src="@/assets/imgs/screen/jiantou2.png" />
           </div>
@@ -89,18 +89,48 @@ import * as echarts from 'echarts'
 import type { EChartsType } from 'echarts'
 import CenterBg from '../../assets/imgs/screen/center-bg.png' // Vite会处理图片导入
 import CenterImg1 from '../../assets/imgs/screen/center-img1.png' // Vite会处理图片导入
-import { getCompanyStatistics } from '@/api/screen' // Vite会处理图片导入
-// import { getCompanyInfo } from '@/api/monitoring/statistics/basicInfo'
 
-const companyDetail = ref<any>({})
+// 定义 props
+const props = defineProps<{
+  companyData: any
+}>()
+
 const alarmChartContainer = ref<HTMLElement | null>(null)
 const emit = defineEmits(['clickAction'])
 let alarmChart = ref<EChartsType | null>(null)
+
 const alarmTypes = ref([
   { value: 0, name: '规上企业', itemStyle: { color: '#3BACEA' } },
   { value: 0, name: '中等企业', itemStyle: { color: '#A4E76C' } },
   { value: 0, name: '小微企业', itemStyle: { color: '#68BBC4' } }
 ])
+
+// 监听数据变化
+watch(() => props.companyData?.enterpriseScaleStatistics, (newData) => {
+  if (newData && newData.length > 0) {
+    updateChartData()
+  }
+}, { deep: true })
+
+const updateChartData = () => {
+  const scaleStats = props.companyData?.enterpriseScaleStatistics
+  if (scaleStats && scaleStats.length > 0) {
+    alarmTypes.value[0].value = scaleStats[2]?.count || 0
+    alarmTypes.value[1].value = scaleStats[1]?.count || 0
+    alarmTypes.value[2].value = scaleStats[0]?.count || 0
+    
+    if (alarmChart.value) {
+      alarmChart.value.setOption({
+        series: [
+          {
+            name: '企业规模',
+            data: alarmTypes.value
+          }
+        ]
+      })
+    }
+  }
+}
 
 const chartOption = {
   tooltip: {
@@ -166,25 +196,6 @@ const chartOption = {
   ]
 }
 
-const getInfo = async () => {
-  console.log('getInfo')
-  const res = await getCompanyStatistics()
-  console.log('res', res)
-  companyDetail.value = res
-  console.log('companyDetail', res)
-  alarmTypes.value[0].value = res?.enterpriseScaleStatistics?.[2]?.count || 0
-  alarmTypes.value[1].value = res?.enterpriseScaleStatistics?.[1]?.count || 0
-  alarmTypes.value[2].value = res?.enterpriseScaleStatistics?.[0]?.count || 0
-  alarmChart.value?.setOption({
-    series: [
-      {
-        name: '企业规模',
-        data: alarmTypes.value
-      }
-    ]
-  })
-}
-
 // 处理企业规模名称，去掉"企业"后缀
 const getProcessedName = (name: string) => {
   if (name.includes('企业')) {
@@ -203,7 +214,6 @@ onMounted(() => {
       // 监听窗口 resize 事件，使图表自适应
     })
   }
-  getInfo()
 })
 
 onBeforeUnmount(() => {

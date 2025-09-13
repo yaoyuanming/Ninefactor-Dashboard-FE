@@ -16,8 +16,8 @@
           <div class="day">{{ utcDate }}</div>
         </div>
         <div class="content-left-main">
-          <Info @clickAction="(type) => openModal('company', type)" />
-          <Info2 @click="openModal('level')" />
+          <Info :companyData="companyData" @clickAction="(type) => openModal('company', type)" />
+          <Info2 :riskLevelStatistics="riskLevelStatistics" @click="openModal('level')" />
         </div>
       </div>
       <div class="content-right">
@@ -89,7 +89,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import { getCompanyStatistics } from '@/api/screen'
 import Info from './Info.vue'
 import Info2 from './Info2.vue'
 import Info3 from './Info3.vue'
@@ -112,23 +113,40 @@ const enterpriseScale = ref('')
 const title = computed(() => appStore.getBackTheme.title)
 const utcDate = ref(dayjs().format('YYYY-MM-DD'))
 const utcTime = ref(dayjs().format('HH:mm:ss'))
+
+// 创建响应式数据
+const companyData = ref({})
+const riskLevelStatistics = ref([])
+
+// 获取统计数据
+const fetchStatistics = async () => {
+  try {
+    console.log('fetchStatistics')
+    const res = await getCompanyStatistics()
+    console.log('res', res)
+    companyData.value = res
+    riskLevelStatistics.value = res?.riskLevelStatistics || []
+    console.log('companyData', res)
+  } catch (error) {
+    console.error('获取统计数据失败:', error)
+  }
+}
+
 const topMenus = computed(() => {
   return permissionStore.getRouters.filter((route) => {
-    // 过滤掉隐藏的路由
     if (route.meta?.hidden) {
       return false
     }
-    // 情况1：如果是一级真实菜单页面（没有children）
     if (!route.children) {
       return true
     }
-    // 情况2：如果是一级菜单且有子菜单
     if (route.children && route.children.length > 0) {
       return true
     }
     return false
   })
 })
+
 const openModal = (type, data = '') => {
   if (type === 'home') {
     const selectedRoute = topMenus.value.find((item) => item.path === '/workbench')
@@ -166,7 +184,11 @@ onMounted(async () => {
     utcDate.value = dayjs().format('YYYY-MM-DD')
     utcTime.value = dayjs().format('HH:mm:ss')
   }, 1000)
+  
+  // 获取统计数据
+  await fetchStatistics()
 })
+
 onBeforeUnmount(() => {
   clearInterval(timeRef.value)
 })

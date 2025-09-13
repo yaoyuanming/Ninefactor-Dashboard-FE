@@ -33,14 +33,51 @@ import CenterBg from '../../assets/imgs/screen/center-bg.png' // Vite会处理�
 import CenterImg2 from '../../assets/imgs/screen/center-img2.png' // Vite会处理图片导入
 // import { getRiskStatistics } from '@/api/screen'
 
+// 定义 props
+const props = defineProps<{
+  riskLevelStatistics: any[]
+}>()
+
 const alarmChartContainer = ref<HTMLElement | null>(null)
 let alarmChart = ref<EChartsType | null>(null)
+
+// 显示所有四个风险等级，包括低风险
 const alarmTypes = ref([
   { value: 0, name: '重大风险', itemStyle: { color: '#FF666A' } },
   { value: 0, name: '较大风险', itemStyle: { color: '#FF9526' } },
   { value: 0, name: '一般风险', itemStyle: { color: '#E5CA29' } },
   { value: 0, name: '低风险', itemStyle: { color: '#2E88F3' } }
 ])
+
+// 监听风险数据变化
+watch(() => props.riskLevelStatistics, (newData) => {
+  if (newData && newData.length > 0) {
+    updateChartData()
+  }
+}, { deep: true })
+
+const updateChartData = () => {
+  const riskStats = props.riskLevelStatistics
+  if (riskStats && riskStats.length > 0) {
+    // 处理所有四个风险等级
+    riskStats.forEach((item, index) => {
+      if (alarmTypes.value[index]) {
+        alarmTypes.value[index].value = item.count || 0
+      }
+    })
+    
+    if (alarmChart.value) {
+      alarmChart.value.setOption({
+        series: [
+          {
+            name: '风险管控',
+            data: alarmTypes.value
+          }
+        ]
+      })
+    }
+  }
+}
 
 const chartOption = {
   tooltip: {
@@ -106,25 +143,6 @@ const chartOption = {
   ]
 }
 
-const getData = () => {
-  getRiskStatistics().then((res) => {
-    alarmTypes.value[0].value = res.highRiskCount
-    alarmTypes.value[1].value = res.mediumHighRiskCount
-    alarmTypes.value[2].value = res.mediumRiskCount
-    alarmTypes.value[3].value = res.lowRiskCount
-    if (alarmChart.value) {
-      alarmChart.value.setOption({
-        series: [
-          {
-            name: '风险管控',
-            data: alarmTypes.value
-          }
-        ]
-      })
-    }
-  })
-}
-
 onMounted(() => {
   // 在 DOM 挂载后初始化 Echarts 实例
   if (alarmChartContainer.value) {
@@ -135,7 +153,6 @@ onMounted(() => {
       // 监听窗口 resize 事件，使图表自适应
     })
   }
-  getData()
 })
 
 onBeforeUnmount(() => {
