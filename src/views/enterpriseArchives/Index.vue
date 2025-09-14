@@ -152,7 +152,8 @@
             <el-tag type="success" effect="plain">正常</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="260" fixed="right" align="center">
+        <!-- 操作列已隐藏 -->
+        <!-- <el-table-column label="操作" width="260" fixed="right" align="center">
           <template #default="{ row }">
             <div class="operation-buttons">
               <el-button type="primary" link size="small" @click="viewInfo(row)">企业信息</el-button>
@@ -163,16 +164,13 @@
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <!-- <el-dropdown-item @click="modifyInfo(row)">企业信息修改</el-dropdown-item> -->
-                    <!-- <el-dropdown-item @click="resetPassword(row)">重置密码</el-dropdown-item>
-                    <el-dropdown-item @click="lockAccount(row)">关闭账号</el-dropdown-item> -->
                     <el-dropdown-item @click="unlockAccount(row)">解除锁定</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
             </div>
           </template>
-        </el-table-column>
+        </el-table-column> -->
       </el-table>
 
       <!-- 分页 -->

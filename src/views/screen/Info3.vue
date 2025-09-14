@@ -460,7 +460,7 @@ onBeforeUnmount(() => {
       cursor: pointer;
       .card-left,
       .card-right {
-        width: 210px;
+        width: 220px;
         height: 46.8px;
         opacity: 1;
         /* 自动布局 */
@@ -556,13 +556,13 @@ onBeforeUnmount(() => {
       align-items: flex-start;
 
       .alarm-chart-container {
-        width: 160px;
-        height: 130px;
+        width: 200px;
+        height: 160px;
       }
       .alarm-type-list {
         display: flex;
-        height: 130px;
-        width: 260px;
+        height: 160px;
+        width: 300px;
         flex-direction: column;
         justify-content: center;
         padding: 0px 20px;
@@ -613,7 +613,7 @@ onBeforeUnmount(() => {
     .echarts-line {
       display: flex;
       .line-container {
-        height: 100px;
+        height: 220px; 
         width: 100%;
       }
     }
