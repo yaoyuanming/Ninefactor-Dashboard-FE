@@ -17,7 +17,8 @@
         </div>
         <div class="content-left-main">
           <Info :companyData="companyData" @clickAction="(type) => openModal('company', type)" />
-          <Info2 :riskLevelStatistics="riskLevelStatistics" @click="openModal('level')" />
+          <!-- <Info2 :riskLevelStatistics="riskLevelStatistics" @click="openModal('level')" /> -->
+          <Info2 :riskLevelStatistics="riskLevelStatistics" />
         </div>
       </div>
       <div class="content-right">
