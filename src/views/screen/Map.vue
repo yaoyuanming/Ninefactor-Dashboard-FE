@@ -159,8 +159,8 @@ const initMap = async () => {
           pitch: 40, // 俯仰角度
           rotation: 0, // 旋转角度
           zooms: [12, 20],
-          zoom: 13.2,
-          center: [118.65, 24.73], // 石狮市中心坐标
+          zoom: 13.5,
+          center: [118.6855, 24.73], // 石狮市中心坐标
           mapStyle: 'amap://styles/grey' // 深色底图增强极光效果
         })
 
