@@ -322,8 +322,8 @@ const loadAllDataIncremental = async (params) => {
       companyList.value = [...allData]
       addCompanyLabelMarkers()
       
-      // 判断是否还有更多数据
-      hasMore = res.records.length === pageSize && res.total > allData.length
+      // 只要已加载数据少于总数，就继续加载
+      hasMore = allData.length < res.total
       console.log(`是否还有更多数据: ${hasMore}, 当前页数据量: ${res.records.length}, 总数: ${res.total}, 已加载: ${allData.length}`)
       pageNo++
     } else {
@@ -350,8 +350,9 @@ const addCompanyLabelMarkers = () => {
   const AMap = aMap.value
   let newMarkersCount = 0
 
-  // 只处理新添加的公司
-  const startIndex = companyList.value.length > 0 ?  companyList.value.length -pageSize : 0
+  // 修复标记添加逻辑：只处理新添加的公司
+  const currentMarkerCount = labelMarkerLayer.value.getAllOverlays()?.length || 0
+  const startIndex = currentMarkerCount
   const newCompanies = companyList.value.slice(startIndex)
 
   console.log(`开始添加新标记，从第 ${startIndex} 个开始，新增 ${newCompanies.length} 个公司`)
@@ -485,8 +486,8 @@ const createInfoWindowContent = (company: any) => {
       <span>${company.enterprisesBusinessAddress || '暂无数据'}</span>
     </div>
     <div class="info-item">
-      <span class="item-label">国民经济类型：</span>
-      <span>${company.industryName || '暂无数据'}</span>
+      <span class="item-label">管控行业类型：</span>
+      <span>${company.controlName || '暂无数据'}</span>
     </div>
     <div class="info-item">
       <span class="item-label">企业规模：</span>
@@ -500,7 +501,7 @@ const createInfoWindowContent = (company: any) => {
       <span class="item-label">是否涉及高危环境：</span>
       <span>${getRiskEnvTypes(company.riskEnvTypes) || '暂无数据'}</span>
     </div>
-    <div class="info-footer">
+    <div class="info-footer" style="display: none;">
       <button class="company-detail-btn">查看企业详情</button>
     </div>
   `
