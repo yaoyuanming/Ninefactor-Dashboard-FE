@@ -1,31 +1,29 @@
 <template>
   <div class="risk-detail">
     <el-form inline>
-      <el-form-item label="区域">
-        <el-tree-select
-          v-model="detailsFilterForm.region"
-          :data="regionTree"
-          :props="{ label: 'regionName', value: 'primaryId', children: 'children' }"
-          check-strictly
-          default-expand-all
+      <!-- <el-form-item label="区域">
+        <RegionTreeSelect
+          v-model="detailsFilterForm.areaId"
           placeholder="请选择区域"
-          value-key="primaryId"
           clearable
           filterable
           style="width: 200px"
         />
-      </el-form-item>
-      <el-form-item label="国民经济类型">
+      </el-form-item> -->
+      <el-form-item label="管控行业类型">
         <el-cascader
-          v-model="detailsFilterForm.industryType"
-          :options="categoryData"
+          v-model="detailsFilterForm.controlId"
+          :options="controlTreeData"
           :props="{
-            checkStrictly: true
+            checkStrictly: true,
+            value: 'id',
+            label: 'name',
+            children: 'children'
           }"
-          placeholder="请选择国民经济类型"
+          placeholder="请选择管控行业类型"
           clearable
           style="width: 200px"
-          @change="handleIndustryChange"
+          @change="handleControlTypeChange"
         />
       </el-form-item>
       <el-form-item label="风险等级">
@@ -58,50 +56,45 @@
     </el-form>
 
     <el-table :data="tableData" style="width: 100%">
-      <el-table-column prop="enterpriseName" label="企业名称">
-        <template #default="{ row }">
-          <el-link type="primary" @click="goToEnterpriseDetail(row.id)">
-            {{ row.enterpriseName }}
-          </el-link>
-        </template>
-      </el-table-column>
-      <el-table-column prop="regionName" label="区域" />
+      <el-table-column prop="name" label="企业名称"  />
+  
+      <el-table-column prop="areaName" label="区域" />
       <el-table-column prop="dynamicRiskLevel" label="动态风险等级">
         <template #default="{ row }">
           <el-tag
-            v-if="row.riskLevel == 2"
+            v-if="row.dynamicRiskLevel == 4"
             style="background: #c7d3f5; border: 1px solid blue;color: #434343;"
           >
-            {{ getDictLabel(DICT_TYPE.RISKLEVEL, row.riskLevel) }}
+            {{ getRiskLevelText(String(row.dynamicRiskLevel)) }}
           </el-tag>
           <el-tag
-            v-if="row.riskLevel == 5"
+            v-if="row.dynamicRiskLevel == 3"
             style="background: #F0E68C; border: 1px solid #bab25b;color: #434343;"
           >
-            {{ getDictLabel(DICT_TYPE.RISKLEVEL, row.riskLevel) }}
+            {{ getRiskLevelText(String(row.dynamicRiskLevel)) }}
           </el-tag>
           <el-tag
-            v-if="row.riskLevel == 8"
+            v-if="row.dynamicRiskLevel == 2"
             style="background: #fff0da; border: 1px solid orange;color: #434343;"
           >
-            {{ getDictLabel(DICT_TYPE.RISKLEVEL, row.riskLevel) }}
+            {{ getRiskLevelText(String(row.dynamicRiskLevel)) }}
           </el-tag>
           <el-tag
-            v-if="row.riskLevel == 10"
+            v-if="row.dynamicRiskLevel == 1"
             style="background: #f6d4cd; border: 1px solid red;color: #434343;"
           >
-            {{ getDictLabel(DICT_TYPE.RISKLEVEL, row.riskLevel) }}
+            {{ getRiskLevelText(String(row.dynamicRiskLevel)) }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="totalRiskPoints" label="风险点总数" />
-      <el-table-column prop="inspectionCoverageRate" label="风险巡查到位率">
+      <el-table-column prop="riskPointTotal" label="风险点总数" />
+      <!-- <el-table-column prop="riskInspectionRate" label="风险巡查到位率">
         <template #default="{ row }">{{ row.inspectionCoverageRate }}</template>
-      </el-table-column>
-      <el-table-column prop="controlMeasuresCount" label="风险管控措施数" />
-      <el-table-column prop="highRiskPoints" label="重大风险点数量" />
-      <el-table-column prop="mediumHighRiskPoints" label="较大风险点数量" />
-      <el-table-column prop="mediumRiskPoints" label="一般风险点数量" />
+      </el-table-column> -->
+      <el-table-column prop="riskControlMeasures" label="风险管控措施数" />
+      <el-table-column prop="majorRiskPoints" label="重大风险点数量" />
+      <el-table-column prop="significantRiskPoints" label="较大风险点数量" />
+      <el-table-column prop="generalRiskPoints" label="一般风险点数量" />
       <el-table-column prop="lowRiskPoints" label="低风险点数量" />
     </el-table>
     <div style="margin-top: 12px; display: flex; justify-content: flex-end;">
@@ -121,26 +114,32 @@
 <script lang="ts" setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getRiskControlDetail } from '@/api/standardization/risks'
-import { getRegionTree } from '@/api/systemSettings/dataApplication/region'
-import { getIndustryTree } from '@/api/systemSettings/dataApplication/national'
-import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
-import { categoryData, CodeToText, TextToCode } from 'element-china-category-data'
+import { getCompanyRiskPage } from '@/api/screen'
+import { getControlTree } from '@/api/enterpriseArchives'
+import RegionTreeSelect from '@/components/common/RegionTreeSelect.vue'
 
-const router = useRouter() // 路由
+const router = useRouter()
 
-const regionTree = ref<any[]>([])
-const industryTree = ref<any[]>([])
-const riskEnvOptions = ref(getIntDictOptions(DICT_TYPE.RISK_ENV_TYPE) || [])
-const riskLevelOptions = ref(getIntDictOptions(DICT_TYPE.RISKLEVEL) || [])
+const controlTreeData = ref([])
+const riskEnvOptions = ref([
+  { label: '不涉及', value: '0' },
+  { label: '有限空间', value: '5' },
+  { label: '涉爆粉尘', value: '1' },
+  { label: '涉氨制冷', value: '3' }
+])
+const riskLevelOptions = ref([
+  { label: '重大风险', value: '1' },
+  { label: '较大风险', value: '2' },
+  { label: '一般风险', value: '3' },
+  { label: '低风险', value: '4' }
+])
 
 const detailsFilterForm = reactive({
-  region: '',
-  industryId: '',
+  areaId: '',
+  controlId: [], // 改为数组
   level: '',
   enterpriseName: '',
   riskEnvType: '',
-  industryType: [] as string[]
 })
 
 const tableData = ref<any[]>([])
@@ -151,14 +150,6 @@ const pagination = reactive({
   total: 0
 })
 
-const transformRegionData = (data: any[]) => {
-  if (!data || !Array.isArray(data)) return []
-  return data.map(item => ({
-    primaryId: item.primaryId || item.id,
-    regionName: item.label || item.regionName,
-    children: item.children ? transformRegionData(item.children) : []
-  }))
-}
 const transformIndustryData = (data: any[]): any[] => {
   if (!data || !Array.isArray(data)) return []
   return data.map(item => ({
@@ -168,29 +159,37 @@ const transformIndustryData = (data: any[]): any[] => {
   }))
 }
 
-const loadTrees = async () => {
-  const regionRes = await getRegionTree()
-  if (regionRes) regionTree.value = transformRegionData(regionRes)
-  const industryRes = await getIndustryTree()
-  if (industryRes) industryTree.value = transformIndustryData(industryRes)
+const fetchControlTree = async () => {
+  try {
+    const response = await getControlTree()
+    controlTreeData.value = response || []
+  } catch (error) {
+    console.error('获取管控行业树失败:', error)
+  }
+}
+
+const handleControlTypeChange = (value) => {
+  console.log('选择的管控行业ID:', value)
+  // 可以在这里添加其他处理逻辑
 }
 
 const loadDetailData = async () => {
-  // 构建查询参数，将 riskEnvType 数组转换为逗号分隔的字符串
   const params = {
     pageNo: pagination.currentPage.toString(),
     pageSize: pagination.pageSize.toString(),
-    regionId: detailsFilterForm.region || undefined,
-    riskLevel: detailsFilterForm.level,
-    enterpriseName: detailsFilterForm.enterpriseName,
-    industryId: detailsFilterForm.industryId || undefined,
-    riskEnvTypes: Array.isArray(detailsFilterForm.riskEnvType) && detailsFilterForm.riskEnvType.length > 0 
+    infoStatus: 1,
+    name: detailsFilterForm.enterpriseName || undefined,
+    areaId: detailsFilterForm.areaId || undefined,
+    riskLevel: detailsFilterForm.level || undefined,
+    controlId: detailsFilterForm.controlId && detailsFilterForm.controlId.length > 0 ? detailsFilterForm.controlId.join(',') : undefined,
+    riskEnvTypes: detailsFilterForm.riskEnvType && detailsFilterForm.riskEnvType.length > 0 
       ? detailsFilterForm.riskEnvType.join(',') 
       : undefined
   }
   
-  const res = await getRiskControlDetail(params)
-  tableData.value = res?.list ?? []
+  const res = await getCompanyRiskPage(params)
+  
+  tableData.value = res?.records ?? []
   pagination.total = res?.total || 0
 }
 
@@ -215,8 +214,8 @@ const getRiskLevelTagType = (level: string) => {
 
 const handleDetailSearch = () => loadDetailData()
 const handleDetailReset = () => {
-  detailsFilterForm.region = ''
-  detailsFilterForm.industryId = ''
+  detailsFilterForm.areaId = ''
+  detailsFilterForm.controlId = [] // 重置为空数组
   detailsFilterForm.level = ''
   detailsFilterForm.enterpriseName = ''
   detailsFilterForm.riskEnvType = []
@@ -233,16 +232,12 @@ const handleCurrentChange = (val: number) => {
   loadDetailData()
 }
 
-const handleIndustryChange = (value: string[]) => {
-  detailsFilterForm.industryId = value.join(',')
-}
-
 const goToEnterpriseDetail = (id: string) => {
   router.push('/enterpriseArchives/basic/' + id + '?tab=risk')
 }
 
 onMounted(async () => {
-  await loadTrees()
+  await fetchControlTree()
   await loadDetailData()
 })
 </script>

@@ -17,6 +17,14 @@ export const getCompanyList = (params) => {
   })
 }
 
+// 获得企业信息分页（风险管控）
+export const getCompanyRiskPage = (params) => {
+  return request.get({
+    url: '/shishi/company/risk-page',
+    params
+  })
+}
+
 export const getDangerStatistics = () => {
   return request.get({
     url: '/shishi/hidden-danger/statistics',

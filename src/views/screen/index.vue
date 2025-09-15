@@ -17,8 +17,8 @@
         </div>
         <div class="content-left-main">
           <Info :companyData="companyData" @clickAction="(type) => openModal('company', type)" />
-          <!-- <Info2 :riskLevelStatistics="riskLevelStatistics" @click="openModal('level')" /> -->
-          <Info2 :riskLevelStatistics="riskLevelStatistics" />
+          <Info2 :riskLevelStatistics="riskLevelStatistics" @click="openModal('level')" />
+          <!-- <Info2 :riskLevelStatistics="riskLevelStatistics" /> -->
         </div>
       </div>
       <div class="content-right">
@@ -150,12 +150,13 @@ const topMenus = computed(() => {
 
 const openModal = (type, data = '') => {
   if (type === 'home') {
-    const selectedRoute = topMenus.value.find((item) => item.path === '/workbench')
-    permissionStore.setLeftMenuTabRouterIs('/workbench')
-    permissionStore.setLeftMenuTabRouters(selectedRoute.children)
-    push({
-      path: '/workbench/home'
-    })
+    // const selectedRoute = topMenus.value.find((item) => item.path === '/workbench')
+    // permissionStore.setLeftMenuTabRouterIs('/workbench')
+    // permissionStore.setLeftMenuTabRouters(selectedRoute.children)
+    // push({
+    //   path: '/workbench/home'
+    // })
+      window.location.href = 'https://risk-ss-admin.zyrcsoft.com/home/index'
   }
   if (type === 'company') {
     enterpriseScale.value = data
