@@ -482,7 +482,7 @@ const createInfoWindowContent = (company: any) => {
     </div>
     <div class="info-item">
       <span class="item-label">企业生产经营地址：</span>
-      <span>${company.productionAddress || '暂无数据'}</span>
+      <span>${company.enterprisesBusinessAddress || '暂无数据'}</span>
     </div>
     <div class="info-item">
       <span class="item-label">国民经济类型：</span>
