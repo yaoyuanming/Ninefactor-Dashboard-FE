@@ -42,17 +42,4 @@ export default defineConfig({
   define: {
     'process.env': {},
   },
-  css: {
-    preprocessorOptions: {
-      less: {
-        modifyVars: {
-          hack: `true; @import (reference) "${resolve(
-            'src/assets/style/breakpoint.less'
-          )}";`,
-        },
-        additionalData: `@import "${resolve('src/assets/style/global.less')}";`,
-        javascriptEnabled: true,
-      },
-    },
-  },
 });
