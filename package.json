@@ -30,6 +30,7 @@
     ]
   },
   "dependencies": {
+    "@amap/amap-jsapi-loader": "^1.0.1",
     "@arco-design/web-vue": "^2.40.0",
     "@arco-themes/vue-jiuyin-web": "0.0.3",
     "@kangc/v-md-editor": "^2.3.18",

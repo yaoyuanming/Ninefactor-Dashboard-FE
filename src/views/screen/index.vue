@@ -27,6 +27,7 @@
 <script lang="ts" setup>
   import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
   import Top from '@/views/screen/Top/index.vue';
+  import Map from '@/views/screen/Map/index.vue';
   import { baseConfig } from './config';
   // import Info2 from './Info2.vue';
   // import Info3 from './Info3.vue';
