@@ -27,18 +27,11 @@
 
   function adjustScale() {
     const designWidth = 1920;
-    const designHeight = 1080;
     const scaleX = window.innerWidth / designWidth;
-    const scaleY = window.innerHeight / designHeight;
-    const scaleMax = Math.max(scaleX, scaleY);
-    const scaleMin = Math.min(scaleX, scaleY);
     const screenContent = document.getElementById('max-screen-content');
+
     if (screenContent) {
-      if (scaleMax >= 1) {
-        screenContent.style.transform = `scale(${scaleMax})`;
-      } else {
-        screenContent.style.transform = `scale(${scaleMin})`;
-      }
+      screenContent.style.transform = `scale(${scaleX})`;
     }
   }
 
@@ -55,10 +48,9 @@
     width: 100%;
     height: 100vh;
     overflow: hidden;
+    overflow-y: auto;
     background: linear-gradient(180deg, #265d96 0%, #0f2038 100%);
     user-select: none;
-
-    /* Safari */
   }
 
   .screen-base {
