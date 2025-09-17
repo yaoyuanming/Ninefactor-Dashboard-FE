@@ -173,6 +173,23 @@
       });
       map.value.add(labelMarkerLayer.value);
 
+      const canvas = document.createElement('canvas');
+      // 将 canvas 宽高设置为地图实例的宽高
+      canvas.width = map.value.getSize().width;
+      canvas.height = map.value.getSize().height;
+
+      // 创建一个自定义图层
+      const customLayer = new AMap.CustomLayer(canvas, {
+        zIndex: 12,
+        zooms: [12, 20], // 设置可见级别，[最小级别，最大级别]
+      });
+
+      map.value.add(customLayer);
+
+      const drawBoundaryCanvas = () => {
+        drawBoundaryWithCanvas(canvas, map.value, AMap, boundaries.value);
+      };
+
       // 将Loca初始化移到地图complete事件中
       map.value.on('complete', () => {
         // 创建全局单例InfoWindow
@@ -200,16 +217,10 @@
             // 绘制区域内遮罩
             areaBoundaries();
             // 绘制边界
-            // if (strokeType === '发光边缘' && boundaries.value) {
-            //   drawBoundaryWithCanvas(
-            //     canvas,
-            //     ctxRef.value,
-            //     map.value,
-            //     AMap,
-            //     boundaries.value,
-            //     CanvasLayer
-            //   );
-            // }
+            if (strokeType === '发光边缘' && boundaries.value) {
+              customLayer.render = drawBoundaryCanvas;
+              customLayer.render();
+            }
             if (strokeType === '光栅') {
               createAuroraFence();
             }
@@ -217,6 +228,17 @@
         });
 
         loading.value = false;
+      });
+
+      map.value.on('mapmove', () => {
+        if (strokeType === '发光边缘' && boundaries.value) {
+          customLayer.render();
+        }
+      });
+      map.value.on('zoomchange', () => {
+        if (strokeType === '发光边缘' && boundaries.value) {
+          customLayer.render();
+        }
       });
     });
   };
