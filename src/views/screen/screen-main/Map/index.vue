@@ -68,7 +68,7 @@
     maskPolygon.value = new aMap.value.Polygon({
       path: pathArray,
       fillColor: '#0F2038',
-      fillOpacity: 0.75,
+      fillOpacity: 0.9,
       strokeWeight: 0,
       zIndex: 1,
       bubble: true,
@@ -88,7 +88,7 @@
         strokeStyle: 'solid',
         fillColor: '#1796FA', // 填充色
         fillOpacity: 0.45,
-        strokeOpacity: 1, // 将边框透明度设置为1，使其可见
+        strokeOpacity: 0, // 将边框透明度设置为1，使其可见
         map: map.value,
         zIndex: 3,
       });
@@ -118,11 +118,19 @@
         },
       };
     });
-
     const geojson = {
       type: 'FeatureCollection',
       features,
     };
+
+    const dirLight = new window.Loca.DirectionalLight({
+      intensity: 0.9, // 提高强度增强立体感
+      color: 'rgb(255, 250, 240)', // 暖白色模拟自然阳光
+      target: [0, 1, 0], // 保持Y轴正方向
+      position: [0, -1, 0], // 调整位置创造斜射效果
+      castShadow: true, // 启用阴影增强立体切割感
+    });
+    mapLoca.value.addLight(dirLight);
 
     const geo = new window.Loca.GeoJSONSource({ data: geojson });
     const auroraLayer = new window.Loca.PolygonLayer({
@@ -154,7 +162,7 @@
 
       // 创建地图实例（3D模式）- 直接使用石狮市中心坐标
       map.value = new AMap.Map('mapElement', {
-        viewMode: '3D', // 使用3D模式
+        viewMode: strokeType === '发光边缘' ? '2D' : '3D', // 使用3D模式
         rotateEnable: false, // 禁用旋转
         pitchEnable: false, // 禁用俯仰
         pitch: 40, // 俯仰角度
@@ -228,17 +236,6 @@
         });
 
         loading.value = false;
-      });
-
-      map.value.on('mapmove', () => {
-        if (strokeType === '发光边缘' && boundaries.value) {
-          customLayer.render();
-        }
-      });
-      map.value.on('zoomchange', () => {
-        if (strokeType === '发光边缘' && boundaries.value) {
-          customLayer.render();
-        }
       });
     });
   };
