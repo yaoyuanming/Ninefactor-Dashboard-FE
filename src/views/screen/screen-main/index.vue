@@ -77,7 +77,7 @@
     top: 0;
     left: 0;
     width: 1920px;
-    height: 100%;
+    height: 1080px;
     transform-origin: 0 0;
     pointer-events: none;
   }
