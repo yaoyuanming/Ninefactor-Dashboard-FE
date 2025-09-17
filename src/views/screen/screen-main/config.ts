@@ -5,6 +5,14 @@ export const baseConfig = {
     show: true, // 是否展示
     zIndex: 10,
   },
+  leftConfig: {
+    show: true, // 是否展示
+    zIndex: 9,
+  },
+  rightConfig: {
+    show: true, // 是否展示
+    zIndex: 9,
+  },
 };
 
 export const topConfig = {

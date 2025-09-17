@@ -59,11 +59,19 @@ export const companyIcon = {
   },
 };
 
+export const strokeType = ['光栅', '发光边缘'][0];
 export const targetArea = '石狮市';
 export const targetAreaLevel = 'district'; // 目标地址级别
-
-export const centerPoint = [118.6855, 24.73];
-
+export const centerPoint = [118.6855, 24.73]; // 中心点
+export const dynamicZoom = (zoom: number) => {
+  const designWidth = 1920;
+  const scaleX = window.innerWidth / designWidth;
+  if (scaleX > 1) {
+    const newZoom = Number(zoom) + Number((scaleX - 1).toFixed(2));
+    return newZoom;
+  }
+  return zoom;
+};
 export const mockData = {
   records: [
     {

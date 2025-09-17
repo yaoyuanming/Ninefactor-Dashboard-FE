@@ -4,44 +4,7 @@
     class="screen-map"
     style="position: relative; width: 100%; height: 100%"
   >
-    <div class="search-box">
-      <el-select
-        v-model="dangerousTrade"
-        multiple
-        clearable
-        placeholder="全部"
-        class="select"
-        @change="getCompanyListIfo"
-      >
-        <el-option
-          v-for="(item, key) in [
-            {
-              label: '全部',
-              value: '',
-            },
-            {
-              label: '不涉及',
-              value: '0',
-            },
-            {
-              label: '有限空间',
-              value: '5',
-            },
-            {
-              label: '涉爆粉尘',
-              value: '1',
-            },
-            {
-              label: '涉氨制冷',
-              value: '3',
-            },
-          ]"
-          :key="key"
-          :label="item.label"
-          :value="item.value"
-        />
-      </el-select>
-    </div>
+    <div class="search-box"> </div>
     <div
       id="mapElement"
       style="position: relative; width: 100%; height: 100%"
@@ -58,9 +21,11 @@
     centerPoint,
     mockData,
     targetAreaLevel,
+    dynamicZoom,
+    strokeType,
   } from './config';
+  import drawBoundaryWithCanvas from './boundary';
 
-  const emit = defineEmits(['submit', 'reset', 'validated']);
   const companyList = ref<any[]>([]);
 
   const map = ref<any>(null);
@@ -68,6 +33,10 @@
   const mapLoca = ref<any>(null);
   // 新增遮罩相关变量
   const maskPolygon = ref<any>(null);
+  // canvasLayer
+  const canvasLayerRef = ref<any>(null);
+  const ctxRef = ref<any>(null);
+
   const boundaries = ref<any>(null);
   const labelMarkerLayer = ref<any>(null); // LabelMarker图层
   const dangerousTrade = ref<string[]>([]);
@@ -108,20 +77,21 @@
     map.value.add(maskPolygon.value);
   };
 
-  // 添加边界线
+  // 绘制区域内遮罩
   const areaBoundaries = () => {
     // 主体
-    return new aMap.value.Polygon({
-      path: boundaries,
-      strokeColor: '#1D64CA',
-      strokeWeight: 1,
-      strokeStyle: 'solid',
-      fillColor: '#1796FA', // 填充色
-      fillOpacity: 0.45,
-      strokeOpacity: 0.9,
-      lineJoin: 'round',
-      map: map.value,
-      zIndex: 2,
+    boundaries.value?.forEach((boundaryItem) => {
+      return new aMap.value.Polygon({
+        path: boundaryItem,
+        strokeColor: '#1D64CA',
+        strokeWeight: 2, // 增加边框宽度以便查看
+        strokeStyle: 'solid',
+        fillColor: '#1796FA', // 填充色
+        fillOpacity: 0.45,
+        strokeOpacity: 1, // 将边框透明度设置为1，使其可见
+        map: map.value,
+        zIndex: 3,
+      });
     });
   };
 
@@ -190,16 +160,16 @@
         pitch: 40, // 俯仰角度
         rotation: 0, // 旋转角度
         zooms: [12, 20],
-        zoom: 13.5,
+        zoom: dynamicZoom(13),
         center: centerPoint, // 石狮市中心坐标
         mapStyle: 'amap://styles/grey', // 深色底图增强极光效果
       });
 
       // 创建LabelMarker图层
       labelMarkerLayer.value = new AMap.LabelsLayer({
-        zooms: [3, 20],
+        zooms: [1, 20],
         zIndex: 200,
-        collision: true, // 避免碰撞
+        collision: false, // 避免碰撞
       });
       map.value.add(labelMarkerLayer.value);
 
@@ -218,6 +188,7 @@
           extensions: 'all',
           level: targetAreaLevel,
         });
+
         // 搜索边界
         district.search(targetArea, (status: string, result: any) => {
           if (status === 'complete' && result.districtList.length > 0) {
@@ -226,59 +197,28 @@
               boundariesItems.length > 0 ? boundariesItems : null;
             // 添加遮罩层
             createMaskLayer();
-            // 绘制边界线
+            // 绘制区域内遮罩
             areaBoundaries();
-            // 创建极光围栏
-            createAuroraFence();
+            // 绘制边界
+            // if (strokeType === '发光边缘' && boundaries.value) {
+            //   drawBoundaryWithCanvas(
+            //     canvas,
+            //     ctxRef.value,
+            //     map.value,
+            //     AMap,
+            //     boundaries.value,
+            //     CanvasLayer
+            //   );
+            // }
+            if (strokeType === '光栅') {
+              createAuroraFence();
+            }
           }
         });
 
         loading.value = false;
       });
     });
-  };
-
-  // 添加自动分页加载所有数据的辅助函数，支持增量显示
-  const loadAllDataIncremental = async (params) => {
-    let allData: any = [];
-    let pageNo = 1;
-    let hasMore = true;
-
-    console.log('开始增量加载数据，参数:', params);
-
-    while (hasMore) {
-      console.log(`正在加载第 ${pageNo} 页数据...`);
-
-      const res = mockData;
-      console.log(`第 ${pageNo} 页响应数据:`, res);
-
-      if (res && res.records) {
-        allData = allData.concat(res.records);
-        console.log(
-          `第 ${pageNo} 页获取到 ${res.records.length} 条数据，累计 ${allData.length} 条`
-        );
-
-        // 立即更新公司列表并显示标记
-        companyList.value = [...allData];
-        setTimeout(() => {
-          // eslint-disable-next-line no-use-before-define
-          addCompanyLabelMarkers();
-        }, 3000);
-
-        // 只要已加载数据少于总数，就继续加载
-        hasMore = allData.length < res.total;
-        console.log(
-          `是否还有更多数据: ${hasMore}, 当前页数据量: ${res.records.length}, 总数: ${res.total}, 已加载: ${allData.length}`
-        );
-        pageNo += 1;
-      } else {
-        console.log('没有更多数据或响应格式不正确');
-        hasMore = false;
-      }
-    }
-
-    console.log('数据加载完成，总计:', allData.length);
-    return allData;
   };
 
   // 高亮LabelMarker
@@ -347,26 +287,16 @@
     return div;
   };
   // 使用LabelMarker创建企业标记
-  const addCompanyLabelMarkers = () => {
-    debugger;
+  const addCompanyLabelMarkers = (newCompanies: any) => {
     if (!map.value || !aMap.value || !labelMarkerLayer.value) {
       console.log('地图或LabelMarker图层未准备好，无法添加标记');
       return;
     }
-    // debugger
 
     const AMap = aMap.value;
     let newMarkersCount = 0;
 
-    // 修复标记添加逻辑：只处理新添加的公司
-    const currentMarkerCount =
-      labelMarkerLayer.value.getAllOverlays()?.length || 0;
-    const startIndex = currentMarkerCount;
-    const newCompanies = companyList.value.slice(startIndex);
-
-    console.log(
-      `开始添加新标记，从第 ${startIndex} 个开始，新增 ${newCompanies.length} 个公司`
-    );
+    console.log(`开始添加新标记，新增 ${newCompanies.length} 个公司`);
 
     const markers: any = [];
     newCompanies.forEach((company, index) => {
@@ -385,7 +315,7 @@
         0;
       const riskLvl = company.dynamicRiskLevel || 0;
       const iconUrl =
-        companyIcon.image[riskType]?.[riskLvl] || companyIcon.image[0][0];
+        companyIcon?.image?.[riskType]?.[riskLvl] || companyIcon.image[0][0];
 
       // 创建LabelMarker
       const labelMarker = new AMap.LabelMarker({
@@ -493,7 +423,34 @@
       companyList.value = [];
       clearLabelMarkers();
       // 使用增量加载
-      await loadAllDataIncremental({
+      // 添加自动分页加载所有数据的辅助函数，支持增量显示
+      const loadAllDataIncremental = async (params: any) => {
+        const newParams = {
+          pageNo: 1,
+          ...params,
+          pageSize,
+        };
+        console.log('开始增量加载数据，参数:', params);
+        // 请求数据
+        const getData = () => {
+          return mockData;
+        };
+        const res = getData();
+        companyList.value = [...companyList.value, ...res.records];
+        addCompanyLabelMarkers(res.records);
+        nextTick(() => {
+          if (res.total > companyList.value.length) {
+            loadAllDataIncremental({
+              ...newParams,
+              pageNo: 1 + newParams.pageNo,
+            });
+          }
+        });
+
+        console.log('数据加载完成，总计:', companyList.value.length);
+      };
+
+      loadAllDataIncremental({
         riskEnvTypes: dangerousTrade.value?.join(','),
       });
     } catch (error) {
@@ -503,19 +460,11 @@
     }
   };
 
-  const getRiskEnvTypes = (value: string) => {
-    if (!value) return '';
-    const types = value.split(',');
-    const label: string[] = [];
-    if (types.includes('1')) label.push('有限空间');
-    if (types.includes('2')) label.push('粉尘涉爆');
-    if (types.includes('3')) label.push('涉氨制冷');
-    return label.join(',');
-  };
-
   onMounted(async () => {
     await initMap();
-    await getCompanyListIfo();
+    setTimeout(() => {
+      getCompanyListIfo();
+    }, 3000);
   });
 
   onUnmounted(() => {
@@ -637,16 +586,6 @@
       top: 8.5%;
       left: 25.5%;
       z-index: 200;
-
-      .select {
-        width: 220px;
-
-        &:deep(.el-select__wrapper) {
-          background: rgb(14 26 47 / 80%);
-          border-radius: 5px;
-          box-shadow: none;
-        }
-      }
     }
   }
 </style>

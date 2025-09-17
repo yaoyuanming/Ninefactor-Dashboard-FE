@@ -6,28 +6,19 @@
       </div>
     </div>
     <div id="max-screen-content" class="screen-content">
-      <Top />
-      <div class="content-left">
-        <div class="content-left-main">
-          <!-- <Info @clickAction="(type) => openModal('company', type)" />
-          <Info2 @click="openModal('level')" /> -->
-        </div>
-      </div>
-      <div class="content-right">
-        <div class="content-right-main">
-          <!-- <Info3 />
-          <Info4 @click="openModal('check')" /> -->
-        </div>
-      </div>
-      <div class="content-bottom"> </div>
+      <Top v-if="baseConfig.topConfig.show" />
+      <Left v-if="baseConfig.leftConfig.show" />
+      <Right v-if="baseConfig.rightConfig.show" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
   import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-  import Top from '@/views/screen/Top/index.vue';
-  import Map from '@/views/screen/Map/index.vue';
+  import Top from './Top/index.vue';
+  import Map from './Map/index.vue';
+  import Left from './Left/index.vue';
+  import Right from './Right/index.vue';
   import { baseConfig } from './config';
   // import Info2 from './Info2.vue';
   // import Info3 from './Info3.vue';
@@ -97,15 +88,5 @@
     height: 100%;
     transform-origin: 0 0;
     pointer-events: none;
-  }
-
-  .modal-mask {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 60;
-    width: 100%;
-    height: 100vh;
-    background: rgb(0 0 0 / 60%);
   }
 </style>
