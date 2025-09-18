@@ -27,11 +27,29 @@
 
   function adjustScale() {
     const designWidth = 1920;
-    const scaleX = window.innerWidth / designWidth;
-    const screenContent = document.getElementById('max-screen-content');
+    const designHeight = 1080;
+    const currentWidth = window.innerWidth;
+    const currentHeight = window.innerHeight;
 
+    // 计算宽高缩放比例，取最小值保证内容完整显示
+    const scaleX = currentWidth / designWidth;
+    const scaleY = currentHeight / designHeight;
+    const scale = Math.min(scaleX, scaleY);
+
+    // 设置最小缩放比例，避免内容过小
+    const minScale = 0.6;
+    const finalScale = Math.max(scale, minScale);
+
+    const screenContent = document.getElementById('max-screen-content');
     if (screenContent) {
-      screenContent.style.transform = `scale(${scaleX})`;
+      screenContent.style.transform = `scale(${finalScale})`;
+      screenContent.style.transformOrigin = '0 0';
+
+      // 计算偏移量使内容居中
+      const offsetX = (currentWidth - designWidth * finalScale) / 2;
+      // const offsetY = (currentHeight - designHeight * finalScale) / 2;
+      screenContent.style.left = `${offsetX}px`;
+      screenContent.style.top = `0px`;
     }
   }
 

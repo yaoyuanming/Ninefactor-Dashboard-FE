@@ -30,7 +30,7 @@ const router = createRouter({
         {
           path: '/index',
           name: 'index',
-          component: () => import('@/views/screen/screen-main/index.vue'),
+          component: () => import('@/views/screen/screen-map/index.vue'),
           meta: {
             locale: '主页',
             icon: 'icon-home',
