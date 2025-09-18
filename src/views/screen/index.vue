@@ -32,9 +32,9 @@
             src="https://i.tianqi.com?c=code&id=53&color=%23ffffff&icon=1&site=12&lang=cn"
           ></iframe>
         </div>
-        <el-button class="work-home" @click="openModal('home')">
+        <!-- <el-button class="work-home" @click="openModal('home')">
           <img class="img" src="@/assets/imgs/screen/work-home.png" />
-        </el-button>
+        </el-button> -->
         <div class="content-right-main">
           <Info3 />
           <!-- <Info4 @click="openModal('check')" /> -->
@@ -340,7 +340,7 @@ onBeforeUnmount(() => {
   .work-weather {
     position: absolute;
     z-index: 200;
-    right: 85px;
+    right: 0px;
     top: 35px;
   }
   .work-home {

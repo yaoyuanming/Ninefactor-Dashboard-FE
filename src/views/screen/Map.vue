@@ -225,6 +225,16 @@ const createAuroraFence = (boundaries) => {
     features
   }
 
+    // 优化后的方向光源配置
+  const dirLight = new Loca.DirectionalLight({
+    intensity: 0.9, // 提高强度增强立体感
+    color: 'rgb(255, 250, 240)', // 暖白色模拟自然阳光
+    target: [0, 1, 0], // 保持Y轴正方向
+    position: [0, -1, 0], // 调整位置创造斜射效果
+    castShadow: true // 启用阴影增强立体切割感
+  })
+  loca.value.addLight(dirLight)
+
   var geo = new Loca.GeoJSONSource({ data: geojson })
   var auroraLayer = new Loca.PolygonLayer({
     zIndex: 3,
@@ -345,8 +355,6 @@ const addCompanyLabelMarkers = () => {
     console.log('地图或LabelMarker图层未准备好，无法添加标记')
     return
   }
-  // debugger
-
   const AMap = aMap.value
   let newMarkersCount = 0
 
@@ -386,7 +394,15 @@ const addCompanyLabelMarkers = () => {
     labelMarker.on('mouseover', (e: any) => {
       const marker = e.target
       const companyData = marker.getExtData()
-      
+
+      // 优化切换节点弹出框问题
+      if (globalInfoWindow.value.currentMarker && globalInfoWindow.value.currentMarker !== marker) {
+        clearTimeout(globalInfoWindow.value.currentMarker.closeTimer)
+        globalInfoWindow.value.currentMarker.closeTimer = null
+      }
+      globalInfoWindow.value.currentMarker = marker
+
+
       // 高亮标记
       highlightLabelMarker(marker, true)
 
@@ -476,7 +492,7 @@ const createInfoWindowContent = (company: any) => {
   div.className = 'custom-info-window'
 
   div.innerHTML = `
-    <div class="info-title">${company.enterpriseName || '企业名称'}</div>
+    <div class="info-title">${company.name || '企业名称'}</div>
     <div class="info-item">
       <span class="item-label">统一社会信用代码：</span>
       <span>${company.creditCode || '暂无数据'}</span>
