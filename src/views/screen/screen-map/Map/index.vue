@@ -48,6 +48,7 @@
   // 全局单例InfoWindow实例
   const globalInfoWindow = ref<any>({
     instance: null,
+    currentMarker: null,
   });
 
   // 创建遮罩层（使用 DistrictSearch 边界）
@@ -206,6 +207,7 @@
           offset: new AMap.Pixel(260, 100),
           closeWhenClickMap: true,
         });
+        globalInfoWindow.value.currentMarker = null;
 
         // 创建行政区查询实例
         const district = new AMap.DistrictSearch({
@@ -357,6 +359,17 @@
       labelMarker.on('mouseover', (e: any) => {
         const marker = e.target;
         const companyData = marker.getExtData();
+
+        // 切换节点时清空上一个节点的计时器
+        if (
+          globalInfoWindow.value.currentMarker &&
+          globalInfoWindow.value.currentMarker !== marker
+        ) {
+          clearTimeout(globalInfoWindow.value.currentMarker.closeTimer);
+          globalInfoWindow.value.currentMarker.closeTimer = null;
+        }
+
+        globalInfoWindow.value.currentMarker = marker;
 
         // 高亮标记
         highlightLabelMarker(marker, true);
@@ -521,6 +534,7 @@
   /* 信息窗口样式 */
   .custom-info-window {
     position: relative;
+    width: 420px;
     overflow: hidden;
     background: linear-gradient(
         180deg,
@@ -532,7 +546,7 @@
     .info-title {
       display: flex;
       box-sizing: border-box;
-      width: 418px;
+      width: 100%;
       height: 44px;
       margin-bottom: 10px;
       padding-left: 20px;
@@ -565,7 +579,7 @@
     }
 
     .info-item {
-      width: 418px;
+      width: 100%;
       margin-bottom: 10px;
       padding-left: 20px;
       color: #fff;

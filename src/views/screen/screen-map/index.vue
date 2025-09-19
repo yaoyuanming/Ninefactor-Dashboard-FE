@@ -20,10 +20,6 @@
   import Left from './Left/index.vue';
   import Right from './Right/index.vue';
   import { baseConfig } from './config';
-  // import Info2 from './Info2.vue';
-  // import Info3 from './Info3.vue';
-  // import Info4 from './Info4.vue';
-  // import Map from './Map.vue';
 
   function adjustScale() {
     const designWidth = 1920;
