@@ -1,0 +1,187 @@
+import Risk02 from '@/assets/screen/map/risk02.png';
+import Risk05 from '@/assets/screen/map/risk05.png';
+import Risk08 from '@/assets/screen/map/risk08.png';
+import Risk010 from '@/assets/screen/map/risk010.png';
+
+import Risk12 from '@/assets/screen/map/risk12.png';
+import Risk15 from '@/assets/screen/map/risk15.png';
+import Risk18 from '@/assets/screen/map/risk18.png';
+import Risk110 from '@/assets/screen/map/risk110.png';
+
+import Risk22 from '@/assets/screen/map/risk22.png';
+import Risk25 from '@/assets/screen/map/risk25.png';
+import Risk28 from '@/assets/screen/map/risk28.png';
+import Risk210 from '@/assets/screen/map/risk210.png';
+
+import Risk32 from '@/assets/screen/map/risk32.png';
+import Risk35 from '@/assets/screen/map/risk35.png';
+import Risk38 from '@/assets/screen/map/risk38.png';
+import Risk310 from '@/assets/screen/map/risk310.png';
+
+export const companyIcon = {
+  size: [30, 36],
+  image: {
+    0: {
+      0: Risk02,
+      4: Risk02,
+      3: Risk05,
+      2: Risk08,
+      1: Risk010,
+    },
+    5: {
+      0: Risk12,
+      4: Risk12,
+      3: Risk15,
+      2: Risk18,
+      1: Risk110,
+    },
+    1: {
+      0: Risk22,
+      4: Risk22,
+      3: Risk25,
+      2: Risk28,
+      1: Risk210,
+    },
+    3: {
+      0: Risk32,
+      4: Risk32,
+      3: Risk35,
+      2: Risk38,
+      1: Risk310,
+    },
+  },
+  color: {
+    0: '#00C6DA',
+    4: '#00C6DA',
+    3: '#E1CE2B',
+    2: '#FF9C23',
+    1: '#FF363C',
+  },
+};
+
+export const strokeType = ['光栅', '发光边缘'][0];
+export const targetArea = '福州市';
+export const targetAreaLevel = 'district'; // 目标地址级别
+export const centerPoint = [119.18, 25.85]; // 中心点
+export const dynamicZoom = (zoom: number) => {
+  const designWidth = 1920;
+  const scaleX = window.innerWidth / designWidth;
+  if (scaleX > 1) {
+    const newZoom = Number(zoom) + Number((scaleX - 1).toFixed(2));
+    return newZoom;
+  }
+  return zoom;
+};
+export const dynamicZooms = (zoom: number) => {
+  const newZoom = dynamicZoom(zoom);
+  return [newZoom - 1, 20];
+};
+
+export const mapZoom = dynamicZoom(9.8); // 中心点
+export const mapZooms = dynamicZooms(9.8); // 中心点
+
+export const mockData = {
+  records: [
+    {
+      id: 87821,
+      createTime: '2025-07-18T11:34:00.000+00:00',
+      updateTime: '2025-09-15T16:34:46.000+00:00',
+      controlId: 211,
+      controlName: '商贸',
+      industryCodeId: 1227,
+      industryCode: '[1152,1225,1227]',
+      checkStatus: 0,
+      infoStatus: 1,
+      name: '泉州市南有牧之贸易有限公司',
+      riskLevel: 4,
+      riskScore: 0,
+      dynamicRiskLevel: 2,
+      lastRiskLevel: null,
+      lastRiskScore: null,
+      lastDynamicRiskLevel: 2,
+      standarLevel: null,
+      creditCode: '91350581MA8THWYM4J',
+      cityId: 3505,
+      areaId: 350581,
+      areaName: '泉州市/石狮市',
+      town: '350581100',
+      village: 2912,
+      address: '',
+      longitude: 119.18,
+      latitude: 25.85,
+      registrationDate: null,
+      productionScope: null,
+      areaCovered: null,
+      staffNumber: 28,
+      salesRevenue: 200,
+      productionStatus: '正常',
+      enterpriseScale: '小微',
+      enterpriseType: '',
+      operator: '蔡良钿',
+      operatorMobile: '13599948019',
+      isMajorHazardSource: null,
+      majorHazardSource1Count: null,
+      majorHazardSource2Count: null,
+      majorHazardSource3Count: null,
+      majorHazardSource4Count: null,
+      legalManager: '许剑烽',
+      legalManagerTitle: '法定代表人',
+      legalManagerTel: '',
+      legalManagerMobile: '13123135330',
+      controlManager: '许剑烽',
+      controlManagerTitle: '主要负责人',
+      controlManagerTel: '',
+      controlManagerMobile: '13123135330',
+      safetyManager: '许剑烽',
+      safetyManagerTitle: '',
+      safetyManagerTel: '',
+      safetyManagerMobile: '13123135330',
+      hazardCheckRectificationNum: null,
+      miniEditTime: '2025-08-30T00:58:51.000+00:00',
+      areaDepartmentRef: null,
+      cityDepartmentRef: null,
+      deviceStatus: 0,
+      workStatus: 0,
+      hiddenStatus: 0,
+      staffStatus: 0,
+      enterprisesRegisteredAddress: '石狮市南洋路288号B区5432号',
+      enterprisesBusinessAddress: '石狮市南洋路288号B区5432号',
+      citySupervisionDepartment: '市商务局,市消防救援支队',
+      citySupervisionDepartmentId: '78,86',
+      areaSupervisionDepartment: '石狮市商务局,石狮市消防救援大队',
+      areaSupervisionDepartmentId: '193,254',
+      lastControlIndex: 0,
+      lastControlLevel: '',
+      checkRate: 0,
+      hiddenDoneRate: 0,
+      timeOutRate: 0,
+      controlLevel: '警告',
+      dynamicCurrentIndex: 40,
+      dynamicDefaultIndex: 40,
+      dynamicTips: '存在重大隐患未整改；',
+      isHasDust: 0,
+      isHasMetalDust: 0,
+      isHasAmmonia: 0,
+      isHasChlorine: 0,
+      isHasLimitedSpaceTask: 0,
+      riskControlRate: 0,
+      hiddenCheckRate: 0,
+      hdidenRectifyRate: 0,
+      isTreeMonthUnControl: 0,
+      isRedHiddenUnRectify: 0,
+      isTreeMonthHiddenUnCreate: 0,
+      isRedHiddenOverTime: 0,
+      gridStatus: 1,
+      safetyManagerTitleTwo: null,
+      safetyManagerTwo: '蔡良钿',
+      safetyManagerMobileTwo: '13599948019',
+      safetyManagerUrlTwo:
+        'https://risk-city.oss-cn-hangzhou.aliyuncs.com/risk_shishi/file/b9e9a1a6f0b1efdc9a06e2146e7a4565.jpg',
+      lastLoginTime: null,
+    },
+  ],
+  total: 24,
+  size: 1000,
+  current: 1,
+  pages: 1,
+};
