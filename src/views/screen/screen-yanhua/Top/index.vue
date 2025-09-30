@@ -20,7 +20,7 @@
     </div>
     <!-- 工作台 -->
     <el-button class="work-home" @click="openModal('home')">
-      <img class="img" src="@/assets/screen/top/work-home.png" />
+      <img class="img" src="@/assets/screen/top/setting.png" />
     </el-button>
 
     <!-- 操作按钮 -->
@@ -47,12 +47,14 @@
   import { baseConfig } from '../config';
   import zha from '../../../../assets/screen/top/zh-a.png';
   import zh from '../../../../assets/screen/top/zh.png';
-  import xta from '../../../../assets/screen/top/xt-a.png';
-  import xt from '../../../../assets/screen/top/xt.png';
+  import yja from '../../../../assets/screen/top/yj-a.png';
+  import yj from '../../../../assets/screen/top/yj.png';
   import jka from '../../../../assets/screen/top/jk-a.png';
   import jk from '../../../../assets/screen/top/jk.png';
   import fxa from '../../../../assets/screen/top/fx-a.png';
   import fx from '../../../../assets/screen/top/fx.png';
+  import tja from '../../../../assets/screen/top/tj-a.png';
+  import tj from '../../../../assets/screen/top/tj.png';
   import spa from '../../../../assets/screen/top/sp-a.png';
   import sp from '../../../../assets/screen/top/sp.png';
 
@@ -69,8 +71,8 @@
       iconA: zha,
     },
     {
-      icon: xt,
-      iconA: xta,
+      icon: yj,
+      iconA: yja,
     },
     {
       icon: jk,
@@ -79,6 +81,10 @@
     {
       icon: fx,
       iconA: fxa,
+    },
+    {
+      icon: tj,
+      iconA: tja,
     },
     {
       icon: sp,
@@ -189,11 +195,11 @@
       pointer-events: all;
 
       .operation-tab {
-        width: 170px;
+        width: 160.54px;
         cursor: pointer;
 
         .tab-icon {
-          width: 170px;
+          width: 160.54px;
           cursor: pointer;
         }
       }
