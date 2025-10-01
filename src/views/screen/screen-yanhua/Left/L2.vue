@@ -1,13 +1,21 @@
 <template>
   <div class="stats-section alarm-stats-section">
-    <Title title="仓库概况" :src="TitleImage" :tabs="[]" />
-    <div style="padding: 20px 24px; text-align: center">
+    <Title
+      title="仓库概况"
+      :src="TitleImage"
+      :tabs="[]"
+      @click="handleWarehouseClick"
+    />
+    <div
+      style="padding: 20px 24px; text-align: center"
+      @click="handleWarehouseClick"
+    >
       <img
-        style="width: 410px; margin-bottom: 12px"
+        style="width: 410px; margin-bottom: 12px; cursor: pointer"
         src="@/assets/screen/left21.png"
       />
       <img
-        style="width: 410px; margin-bottom: 12px"
+        style="width: 410px; margin-bottom: 12px; cursor: pointer"
         src="@/assets/screen/left22.png"
       />
     </div>
@@ -51,13 +59,40 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
+  import {
+    ref,
+    onMounted,
+    onBeforeUnmount,
+    nextTick,
+    watch,
+    inject,
+  } from 'vue';
   // 引入 Echarts
   import * as echarts from 'echarts';
   import type { EChartsType } from 'echarts';
   import Title from '../components/Title.vue';
   import AlarmBg from '../../../../assets/screen/imgs/alarm-bg.png';
   import Drop from '../../../../assets/screen/imgs/drop.png';
+
+  const openDrawer = inject<any>('openDrawer');
+
+  // 点击仓库概况
+  const handleWarehouseClick = () => {
+    openDrawer?.('warehouse', '仓库概况', {
+      name: '1号危化品仓库',
+      code: 'WH2025001',
+      company: '福州市XXXXX公司',
+      type: '危险品仓库',
+      dangerLevel: '01-1.1级库房',
+      capacity: '500吨',
+      manager: '李四',
+      phone: '13800138000',
+      address: '福建省福州市仓山区金山大道XXX号仓储区A区',
+      area: '1200㎡',
+      startDate: '2019-03-15',
+      safetyLevel: 'A级',
+    });
+  };
 
   // Echarts 容器的引用
   const alarmChartContainer = ref<HTMLElement | null>(null);

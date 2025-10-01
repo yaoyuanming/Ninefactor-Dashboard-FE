@@ -7,23 +7,76 @@
     </div>
     <div id="max-screen-content" class="screen-content">
       <Top @action="(index) => (operationTab = index)" />
+
+      <!-- 左右面板布局（综合、应急） -->
       <Left v-if="operationTab === 0" />
       <Left2 v-if="operationTab === 1" />
       <Right v-if="operationTab === 0" />
+
+      <!-- 底部全屏布局（报警、风险、统计、监控） -->
+      <Bottom v-if="operationTab === 2">
+        <Alarm />
+      </Bottom>
+
+      <Bottom v-if="operationTab === 3">
+        <Risk />
+      </Bottom>
+
+      <Bottom v-if="operationTab === 4">
+        <Statistics />
+      </Bottom>
+
+      <Bottom v-if="operationTab === 5">
+        <Monitor />
+      </Bottom>
     </div>
+
+    <!-- 底部抽屉 -->
+    <DetailDrawer
+      v-model:visible="drawerVisible"
+      :title="drawerTitle"
+      :type="drawerType"
+      :data="drawerData"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-  import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+  import { computed, onBeforeUnmount, onMounted, ref, provide } from 'vue';
   import Top from './Top/index.vue';
   import Map from './Map/index.vue';
   import Left from './Left/index.vue';
   import Left2 from './Left2/index.vue';
   import Right from './Right/index.vue';
+  import Bottom from './Bottom/index.vue';
+  import Alarm from './Bottom/Alarm.vue';
+  import Risk from './Bottom/Risk.vue';
+  import Statistics from './Bottom/Statistics.vue';
+  import Monitor from './Bottom/Monitor.vue';
+  import DetailDrawer from './DetailDrawer/index.vue';
   import { baseConfig } from './config';
 
   const operationTab = ref(0);
+
+  // 底部抽屉相关
+  const drawerVisible = ref(false);
+  const drawerTitle = ref('');
+  const drawerType = ref<'company' | 'warehouse'>('company');
+  const drawerData = ref<any>(null);
+
+  // 提供给子组件调用的方法
+  const openDrawer = (
+    type: 'company' | 'warehouse',
+    title: string,
+    data: any
+  ) => {
+    drawerType.value = type;
+    drawerTitle.value = title;
+    drawerData.value = data;
+    drawerVisible.value = true;
+  };
+
+  provide('openDrawer', openDrawer);
 
   function adjustScale() {
     const designWidth = 1920;
