@@ -102,7 +102,6 @@
               :show-line="false"
               :default-expand-all="false"
               :checkable="true"
-              :check-strictly="true"
               :only-check-leaf="true"
               :checked-keys="selectedCameraIds"
               :load-more="loadTreeNode"
@@ -401,11 +400,11 @@
 
     console.log('复选框变化:', checkedKeys, data);
 
-    // Arco Tree check-strictly 模式下，checkedKeys 是字符串数组
+    // 级联选择模式下，only-check-leaf=true 时，checkedKeys 只包含叶子节点的 key
     const keys = Array.isArray(checkedKeys) ? checkedKeys : [];
     selectedCameraIds.value = keys;
 
-    // 从 checkedNodes 中提取摄像头节点信息
+    // 从 checkedNodes 中提取摄像头节点信息（只收集叶子节点）
     const checkedNodes = data.checkedNodes || [];
     const cameraNodes = checkedNodes.filter(
       (node: TreeNode) => node.isLeaf && node.dataNodeType === 'camera'
