@@ -37,6 +37,7 @@
       :title="drawerTitle"
       :type="drawerType"
       :data="drawerData"
+      @success="handleDrawerSuccess"
     />
   </div>
 </template>
@@ -54,6 +55,7 @@
   import Statistics from './Bottom/Statistics.vue';
   import Monitor from './Bottom/Monitor.vue';
   import DetailDrawer from './DetailDrawer/index.vue';
+  import { type DrawerTypeValue, DrawerType } from './DetailDrawer/types';
   import { baseConfig } from './config';
 
   const operationTab = ref(0);
@@ -61,15 +63,11 @@
   // 底部抽屉相关
   const drawerVisible = ref(false);
   const drawerTitle = ref('');
-  const drawerType = ref<'company' | 'warehouse'>('company');
+  const drawerType = ref<DrawerTypeValue>(DrawerType.COMPANY);
   const drawerData = ref<any>(null);
 
   // 提供给子组件调用的方法
-  const openDrawer = (
-    type: 'company' | 'warehouse',
-    title: string,
-    data: any
-  ) => {
+  const openDrawer = (type: DrawerTypeValue, title: string, data?: any) => {
     drawerType.value = type;
     drawerTitle.value = title;
     drawerData.value = data;
@@ -77,6 +75,19 @@
   };
 
   provide('openDrawer', openDrawer);
+
+  // 抽屉成功回调（通知子组件刷新数据）
+  const drawerSuccessCallback = ref<(() => void) | null>(null);
+
+  const handleDrawerSuccess = () => {
+    if (drawerSuccessCallback.value) {
+      drawerSuccessCallback.value();
+    }
+  };
+
+  provide('setDrawerSuccessCallback', (callback: () => void) => {
+    drawerSuccessCallback.value = callback;
+  });
 
   function adjustScale() {
     const designWidth = 1920;

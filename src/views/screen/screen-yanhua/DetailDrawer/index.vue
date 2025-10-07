@@ -13,8 +13,26 @@
     @cancel="handleClose"
   >
     <div class="drawer-content">
-      <CompanyDetail v-if="type === 'company'" :data="data" />
-      <WarehouseDetail v-if="type === 'warehouse'" :data="data" />
+      <CompanyDetail v-if="type === DrawerType.COMPANY" :data="data" />
+      <WarehouseDetail v-if="type === DrawerType.WAREHOUSE" :data="data" />
+      <CreateRegionalTask
+        v-if="type === DrawerType.REGIONAL_TASK"
+        @close="handleClose"
+        @success="handleSuccess"
+      />
+      <CreateEnterpriseTask
+        v-if="type === DrawerType.ENTERPRISE_TASK"
+        @close="handleClose"
+        @success="handleSuccess"
+      />
+      <ViewRegionalTask
+        v-if="type === DrawerType.VIEW_REGIONAL_TASK"
+        :task-id="data?.id || data"
+      />
+      <ViewEnterpriseTask
+        v-if="type === DrawerType.VIEW_ENTERPRISE_TASK"
+        :task-id="data?.id || data"
+      />
     </div>
   </a-drawer>
 </template>
@@ -22,20 +40,30 @@
 <script lang="ts" setup>
   import CompanyDetail from './CompanyDetail.vue';
   import WarehouseDetail from './WarehouseDetail.vue';
+  import CreateRegionalTask from './statistics/CreateRegionalTask.vue';
+  import CreateEnterpriseTask from './statistics/CreateEnterpriseTask.vue';
+  import ViewRegionalTask from './statistics/ViewRegionalTask.vue';
+  import ViewEnterpriseTask from './statistics/ViewEnterpriseTask.vue';
+  import { DrawerType, type DrawerTypeValue } from './types';
 
   const props = defineProps<{
     visible: boolean;
     title: string;
-    type: 'company' | 'warehouse';
+    type: DrawerTypeValue;
     data?: any;
   }>();
 
   const emit = defineEmits<{
     (e: 'update:visible', value: boolean): void;
+    (e: 'success'): void;
   }>();
 
   const handleClose = () => {
     emit('update:visible', false);
+  };
+
+  const handleSuccess = () => {
+    emit('success');
   };
 </script>
 
