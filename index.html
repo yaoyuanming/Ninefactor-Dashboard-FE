@@ -3,11 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="./src/assets/logo.ico" type="image/x-icon" />
+
+    <link rel="stylesheet" href="/static/dhPro/WSPlayer/player.css">
+    <link rel="stylesheet" href="/static/dhPro/WSPlayer/window.division.css">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>九因Screen</title>
   </head>
   <body>
     <div id="app" style="height: 100%;"></div>
+
+    <!-- 引入WSPlayer脚本 -->
+    <script type="text/javascript" src="/static/dhPro/WSPlayer/audioTalkWorker.js"></script>
+    <script type="text/javascript" src="/static/dhPro/WSPlayer/PlaySDKInterface.js"></script>
+    <script type="text/javascript" src="/static/dhPro/WSPlayer/WSPlayer.js"></script>
+
+    <script type="text/javascript" src="/bin/h5player.min.js"></script>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

@@ -19,9 +19,9 @@
       ></iframe>
     </div>
     <!-- 工作台 -->
-    <el-button class="work-home" @click="openModal('home')">
+    <a-button class="work-home" @click="openModal('home')">
       <img class="img" src="@/assets/screen/top/setting.png" />
-    </el-button>
+    </a-button>
 
     <!-- 操作按钮 -->
     <div class="action-button">
