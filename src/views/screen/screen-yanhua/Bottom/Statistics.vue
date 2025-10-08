@@ -1,7 +1,7 @@
 <template>
   <div class="statistics-page">
-    <!-- 左侧导航栏 -->
-    <div class="left-nav">
+    <!-- 顶部导航栏 -->
+    <div class="top-nav">
       <div
         v-for="item in navList"
         :key="item.value"
@@ -19,8 +19,8 @@
       </div>
     </div>
 
-    <!-- 右侧内容区域 -->
-    <div class="right-content">
+    <!-- 内容区域 -->
+    <div class="content-area">
       <!-- 动态感知 -->
       <DynamicSensing v-if="activeNav === 'dynamic'" />
 
@@ -63,6 +63,7 @@
 <style scoped lang="less">
   .statistics-page {
     display: flex;
+    flex-direction: column;
     box-sizing: border-box;
     width: 100%;
     height: 100%;
@@ -70,12 +71,13 @@
     overflow: hidden;
     background: transparent;
 
-    // 左侧导航栏
-    .left-nav {
+    // 顶部导航栏
+    .top-nav {
+      display: flex;
       flex-shrink: 0;
-      width: 180px;
-      margin-right: 20px;
-      padding: 10px 0;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 10px 20px;
       background: rgb(10 30 60 / 30%);
       border: 1px solid rgb(23 150 250 / 10%);
       border-radius: 4px;
@@ -83,8 +85,7 @@
       .nav-item {
         display: flex;
         align-items: center;
-        margin: 4px 8px;
-        padding: 16px 20px;
+        padding: 12px 24px;
         color: rgb(255 255 255 / 70%);
         border-radius: 4px;
         cursor: pointer;
@@ -94,13 +95,14 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-right: 12px;
-          font-size: 20px;
+          margin-right: 8px;
+          font-size: 18px;
         }
 
         .nav-label {
           font-weight: 500;
           font-size: 14px;
+          white-space: nowrap;
         }
 
         &:hover {
@@ -116,8 +118,8 @@
       }
     }
 
-    // 右侧内容区域
-    .right-content {
+    // 内容区域
+    .content-area {
       display: flex;
       flex: 1;
       flex-direction: column;
