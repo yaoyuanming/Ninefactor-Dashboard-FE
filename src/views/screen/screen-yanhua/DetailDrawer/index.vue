@@ -33,6 +33,7 @@
         v-if="type === DrawerType.VIEW_ENTERPRISE_TASK"
         :task-id="data?.id || data"
       />
+      <EmergencyManagement v-if="type === DrawerType.EMERGENCY_MANAGEMENT" />
     </div>
   </a-drawer>
 </template>
@@ -44,6 +45,7 @@
   import CreateEnterpriseTask from './statistics/CreateEnterpriseTask.vue';
   import ViewRegionalTask from './statistics/ViewRegionalTask.vue';
   import ViewEnterpriseTask from './statistics/ViewEnterpriseTask.vue';
+  import EmergencyManagement from './emergency/index.vue';
   import { DrawerType, type DrawerTypeValue } from './types';
 
   const props = defineProps<{
@@ -124,9 +126,10 @@
     }
 
     .drawer-content {
+      display: flex;
+      flex-direction: column;
       width: 100%;
-      max-width: 1400px;
-      margin: 0 auto;
+      height: 100%;
       animation: fadeInUp 0.4s ease-out;
     }
 

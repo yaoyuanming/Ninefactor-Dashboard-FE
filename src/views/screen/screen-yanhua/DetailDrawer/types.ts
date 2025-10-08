@@ -13,6 +13,9 @@ export enum DrawerType {
   VIEW_REGIONAL_TASK = 'view-regional-task',
   VIEW_ENTERPRISE_TASK = 'view-enterprise-task',
 
+  // 应急管理
+  EMERGENCY_MANAGEMENT = 'emergency-management',
+
   // 可以继续添加其他类型...
   // ALARM_DETAIL = 'alarm-detail',
   // RISK_DETAIL = 'risk-detail',
