@@ -1,10 +1,10 @@
 <template>
-  <div class="enterprise-committee-list">
+  <div class="enterprise-plan-list">
     <div class="list-header">
-      <div class="header-title">企业委员会列表</div>
+      <div class="header-title">企业应急预案列表</div>
       <a-button type="primary" @click="handleCreate">
         <icon-plus />
-        新增企业
+        新增预案
       </a-button>
     </div>
 
@@ -148,7 +148,7 @@
   };
 
   const handleDelete = (record: any) => {
-    Message.success(`删除企业：${record.name}`);
+    Message.success(`删除预案：${record.name}`);
     fetchData();
   };
 
@@ -156,7 +156,7 @@
 </script>
 
 <style scoped lang="less">
-  .enterprise-committee-list {
+  .enterprise-plan-list {
     display: flex;
     flex-direction: column;
     width: 100%;

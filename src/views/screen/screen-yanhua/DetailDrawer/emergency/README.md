@@ -4,12 +4,12 @@
 
 ```text
 emergency/
-├── emergency-committee/      # 应急委员会
+├── government-plan/          # 政府应急预案
 │   ├── index.vue             # 主容器（列表、详情、新增切换）
 │   ├── List.vue              # 列表页
 │   ├── Detail.vue            # 详情页
 │   └── Create.vue            # 新增/编辑页
-├── enterprise-committee/     # 企业委员会
+├── enterprise-plan/          # 企业应急预案
 │   ├── index.vue
 │   ├── List.vue
 │   ├── Detail.vue
@@ -24,12 +24,17 @@ emergency/
 │   ├── List.vue
 │   ├── Detail.vue
 │   └── Create.vue
-├── emergency-supplies/       # 应急物资
+├── medical-institution/      # 医疗机构
 │   ├── index.vue
 │   ├── List.vue
 │   ├── Detail.vue
 │   └── Create.vue
 ├── emergency-equipment/      # 应急装备
+│   ├── index.vue
+│   ├── List.vue
+│   ├── Detail.vue
+│   └── Create.vue
+├── emergency-supplies/       # 应急物资
 │   ├── index.vue
 │   ├── List.vue
 │   ├── Detail.vue
@@ -42,7 +47,7 @@ emergency/
 
 ### 主入口（index.vue）
 
-- 顶部导航栏：6个tab切换（应急委员会、企业委员会、应急专家、救援力量、应急物资、应急装备）
+- 顶部导航栏：7个tab切换（政府应急预案、企业应急预案、应急专家、救援力量、医疗机构、应急装备、应急物资）
 - 每个tab对应一个模块，点击切换显示不同内容
 
 ### 各模块功能
@@ -138,7 +143,7 @@ const fetchData = async () => {
 
 ## 📝 数据结构示例
 
-### 应急委员会
+### 政府应急预案
 
 ```typescript
 {
@@ -152,7 +157,7 @@ const fetchData = async () => {
 }
 ```
 
-### 企业委员会
+### 企业应急预案
 
 ```typescript
 {
@@ -190,16 +195,18 @@ const fetchData = async () => {
 }
 ```
 
-### 应急物资
+### 医疗机构
 
 ```typescript
 {
   id: number;
-  name: string;        // 物资名称
-  type: string;        // 物资类型
-  quantity: number;    // 数量
-  unit: string;        // 单位
-  location: string;    // 存放位置
+  name: string;        // 机构名称
+  type: string;        // 机构类型
+  principal: string;   // 负责人
+  phone: string;       // 联系电话
+  beds: number;        // 床位数
+  address: string;     // 地址
+  remark?: string;     // 备注
 }
 ```
 
@@ -212,6 +219,19 @@ const fetchData = async () => {
   type: string;        // 装备类型
   quantity: number;    // 数量
   status: string;      // 状态（正常/维修/报废）
+  location: string;    // 存放位置
+}
+```
+
+### 应急物资
+
+```typescript
+{
+  id: number;
+  name: string;        // 物资名称
+  type: string;        // 物资类型
+  quantity: number;    // 数量
+  unit: string;        // 单位
   location: string;    // 存放位置
 }
 ```

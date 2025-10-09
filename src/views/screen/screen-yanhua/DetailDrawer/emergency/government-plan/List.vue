@@ -1,10 +1,10 @@
 <template>
-  <div class="emergency-committee-list">
+  <div class="government-plan-list">
     <div class="list-header">
-      <div class="header-title">应急委员会列表</div>
+      <div class="header-title">政府应急预案列表</div>
       <a-button type="primary" @click="handleCreate">
         <icon-plus />
-        新增成员
+        新增预案
       </a-button>
     </div>
 
@@ -184,7 +184,7 @@
   // 删除
   const handleDelete = (record: any) => {
     // TODO: 调用删除接口
-    Message.success(`删除成员：${record.name}`);
+    Message.success(`删除预案：${record.name}`);
     fetchData();
   };
 
@@ -193,7 +193,7 @@
 </script>
 
 <style scoped lang="less">
-  .emergency-committee-list {
+  .government-plan-list {
     display: flex;
     flex-direction: column;
     width: 100%;

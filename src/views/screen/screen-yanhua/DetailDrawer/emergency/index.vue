@@ -15,11 +15,11 @@
 
     <!-- 内容区域 -->
     <div class="emergency-content">
-      <!-- 应急委员会 -->
-      <EmergencyCommittee v-if="activeNav === 'emergency-committee'" />
+      <!-- 政府应急预案 -->
+      <GovernmentPlan v-if="activeNav === 'government-plan'" />
 
-      <!-- 企业委员会 -->
-      <EnterpriseCommittee v-if="activeNav === 'enterprise-committee'" />
+      <!-- 企业应急预案 -->
+      <EnterprisePlan v-if="activeNav === 'enterprise-plan'" />
 
       <!-- 应急专家 -->
       <EmergencyExpert v-if="activeNav === 'emergency-expert'" />
@@ -27,36 +27,41 @@
       <!-- 救援力量 -->
       <RescueForce v-if="activeNav === 'rescue-force'" />
 
-      <!-- 应急物资 -->
-      <EmergencySupplies v-if="activeNav === 'emergency-supplies'" />
+      <!-- 医疗机构 -->
+      <MedicalInstitution v-if="activeNav === 'medical-institution'" />
 
       <!-- 应急装备 -->
       <EmergencyEquipment v-if="activeNav === 'emergency-equipment'" />
+
+      <!-- 应急物资 -->
+      <EmergencySupplies v-if="activeNav === 'emergency-supplies'" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
   import { ref } from 'vue';
-  import EmergencyCommittee from './emergency-committee/index.vue';
-  import EnterpriseCommittee from './enterprise-committee/index.vue';
+  import GovernmentPlan from './government-plan/index.vue';
+  import EnterprisePlan from './enterprise-plan/index.vue';
   import EmergencyExpert from './emergency-expert/index.vue';
   import RescueForce from './rescue-force/index.vue';
-  import EmergencySupplies from './emergency-supplies/index.vue';
+  import MedicalInstitution from './medical-institution/index.vue';
   import EmergencyEquipment from './emergency-equipment/index.vue';
+  import EmergencySupplies from './emergency-supplies/index.vue';
 
   // 导航配置
   const navList = [
-    { label: '应急委员会', value: 'emergency-committee' },
-    { label: '企业委员会', value: 'enterprise-committee' },
+    { label: '政府应急预案', value: 'government-plan' },
+    { label: '企业应急预案', value: 'enterprise-plan' },
     { label: '应急专家', value: 'emergency-expert' },
     { label: '救援力量', value: 'rescue-force' },
-    { label: '应急物资', value: 'emergency-supplies' },
+    { label: '医疗机构', value: 'medical-institution' },
     { label: '应急装备', value: 'emergency-equipment' },
+    { label: '应急物资', value: 'emergency-supplies' },
   ];
 
   // 当前激活的导航
-  const activeNav = ref('emergency-committee');
+  const activeNav = ref('government-plan');
 
   // 导航切换
   const handleNavChange = (value: string) => {

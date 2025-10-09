@@ -1,11 +1,11 @@
 <template>
-  <div class="enterprise-committee-detail">
+  <div class="enterprise-plan-detail">
     <div class="detail-header">
       <a-button @click="handleBack">
         <icon-arrow-left />
         返回列表
       </a-button>
-      <div class="header-title">企业详情</div>
+      <div class="header-title">企业应急预案详情</div>
     </div>
 
     <div class="detail-content">
@@ -45,7 +45,7 @@
 </script>
 
 <style scoped lang="less">
-  .enterprise-committee-detail {
+  .enterprise-plan-detail {
     display: flex;
     flex-direction: column;
     width: 100%;

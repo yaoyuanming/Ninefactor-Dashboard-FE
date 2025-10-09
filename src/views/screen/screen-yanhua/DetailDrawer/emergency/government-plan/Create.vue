@@ -1,11 +1,11 @@
 <template>
-  <div class="emergency-committee-create">
+  <div class="government-plan-create">
     <div class="create-header">
       <a-button @click="handleBack">
         <icon-arrow-left />
         返回列表
       </a-button>
-      <div class="header-title">{{ isEdit ? '编辑成员' : '新增成员' }}</div>
+      <div class="header-title">{{ isEdit ? '编辑预案' : '新增预案' }}</div>
     </div>
 
     <div class="create-content">
@@ -130,7 +130,7 @@
 </script>
 
 <style scoped lang="less">
-  .emergency-committee-create {
+  .government-plan-create {
     display: flex;
     flex-direction: column;
     width: 100%;

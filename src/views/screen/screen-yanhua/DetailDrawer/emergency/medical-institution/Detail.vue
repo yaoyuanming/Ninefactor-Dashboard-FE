@@ -1,29 +1,35 @@
 <template>
-  <div class="emergency-committee-detail">
+  <div class="medical-institution-detail">
     <div class="detail-header">
       <a-button @click="handleBack">
         <icon-arrow-left />
         返回列表
       </a-button>
-      <div class="header-title">应急委员会成员详情</div>
+      <div class="header-title">医疗机构详情</div>
     </div>
 
     <div class="detail-content">
       <a-descriptions :column="2" bordered>
-        <a-descriptions-item label="姓名">{{
+        <a-descriptions-item label="机构名称">{{
           data?.name || '-'
         }}</a-descriptions-item>
-        <a-descriptions-item label="单位">{{
-          data?.unit || '-'
+        <a-descriptions-item label="机构类型">{{
+          data?.type || '-'
         }}</a-descriptions-item>
-        <a-descriptions-item label="职务">{{
-          data?.position || '-'
+        <a-descriptions-item label="负责人">{{
+          data?.principal || '-'
         }}</a-descriptions-item>
         <a-descriptions-item label="联系电话">{{
           data?.phone || '-'
         }}</a-descriptions-item>
-        <a-descriptions-item label="创建时间" :span="2">{{
+        <a-descriptions-item label="床位数">{{
+          data?.beds || '-'
+        }}</a-descriptions-item>
+        <a-descriptions-item label="创建时间">{{
           data?.createTime || '-'
+        }}</a-descriptions-item>
+        <a-descriptions-item label="地址" :span="2">{{
+          data?.address || '-'
         }}</a-descriptions-item>
         <a-descriptions-item label="备注" :span="2">{{
           data?.remark || '无'
@@ -48,7 +54,7 @@
 </script>
 
 <style scoped lang="less">
-  .emergency-committee-detail {
+  .medical-institution-detail {
     display: flex;
     flex-direction: column;
     width: 100%;
