@@ -68,10 +68,7 @@
   const loadCompanyOptions = async () => {
     loading.value = true;
     try {
-      const response = await getCompanyPage({
-        pageNo: 1,
-        pageSize: 1000, // 获取所有企业
-      });
+      const response = await getCompanyPage();
 
       if (response && response.data) {
         companyOptions.value =
