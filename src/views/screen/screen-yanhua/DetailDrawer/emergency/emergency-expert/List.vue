@@ -299,24 +299,13 @@
 
     .list-header {
       display: flex;
-      flex-shrink: 0;
-      align-items: center;
       justify-content: space-between;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
 
       .header-title {
-        color: rgb(255 255 255 / 95%);
+        color: #fff;
         font-weight: 600;
         font-size: 18px;
-      }
-
-      :deep(.arco-btn-primary) {
-        background: linear-gradient(135deg, rgb(23 150 250), rgb(20 120 200));
-        border: none;
-
-        &:hover {
-          background: linear-gradient(135deg, rgb(40 160 255), rgb(30 130 210));
-        }
       }
     }
 

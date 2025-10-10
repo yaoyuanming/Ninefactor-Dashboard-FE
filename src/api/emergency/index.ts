@@ -2,3 +2,4 @@
 export * from './plan';
 export * from './expert';
 export * from './rescueTeam';
+export * from './medicalInstitution';

@@ -1,158 +1,323 @@
 <template>
   <div class="medical-institution-create">
+    <!-- 顶部操作栏 -->
     <div class="create-header">
-      <a-button @click="handleBack">
+      <a-button @click="emit('back')">
         <icon-arrow-left />
         返回列表
       </a-button>
-      <div class="header-title">{{ isEdit ? '编辑机构' : '新增机构' }}</div>
-    </div>
-
-    <div class="create-content">
-      <a-form
-        ref="formRef"
-        :model="formData"
-        :rules="formRules"
-        :label-col-props="{ span: 6 }"
-        :wrapper-col-props="{ span: 18 }"
-      >
-        <a-form-item label="机构名称" field="name">
-          <a-input v-model="formData.name" placeholder="请输入机构名称" />
-        </a-form-item>
-        <a-form-item label="机构类型" field="type">
-          <a-select
-            v-model="formData.type"
-            placeholder="请选择机构类型"
-            allow-clear
-          >
-            <a-option value="综合医院">综合医院</a-option>
-            <a-option value="专科医院">专科医院</a-option>
-            <a-option value="社区卫生服务中心">社区卫生服务中心</a-option>
-            <a-option value="急救中心">急救中心</a-option>
-            <a-option value="其他">其他</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="负责人" field="principal">
-          <a-input v-model="formData.principal" placeholder="请输入负责人" />
-        </a-form-item>
-        <a-form-item label="联系电话" field="phone">
-          <a-input v-model="formData.phone" placeholder="请输入联系电话" />
-        </a-form-item>
-        <a-form-item label="床位数" field="beds">
-          <a-input-number
-            v-model="formData.beds"
-            placeholder="请输入床位数"
-            :min="0"
-            style="width: 100%"
-          />
-        </a-form-item>
-        <a-form-item label="地址" field="address">
-          <a-input v-model="formData.address" placeholder="请输入地址" />
-        </a-form-item>
-        <a-form-item label="备注" field="remark">
-          <a-textarea
-            v-model="formData.remark"
-            placeholder="请输入备注"
-            :rows="4"
-            :max-length="200"
-            show-word-limit
-          />
-        </a-form-item>
-      </a-form>
-    </div>
-
-    <div class="create-footer">
+      <div class="header-title">
+        {{ editData ? '编辑医疗机构' : '新增医疗机构' }}
+      </div>
       <a-space>
-        <a-button @click="handleBack">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">提交</a-button>
+        <a-button @click="emit('back')">取消</a-button>
+        <a-button type="primary" :loading="submitLoading" @click="handleSubmit">
+          {{ editData ? '更新' : '保存' }}
+        </a-button>
       </a-space>
     </div>
+
+    <!-- 表单内容区 -->
+    <a-spin :loading="loading" style="flex: 1; width: 100%; min-height: 0">
+      <div class="create-content">
+        <!-- 左侧：表单 -->
+        <div class="form-section">
+          <a-form
+            ref="formRef"
+            :model="formData"
+            :rules="rules"
+            layout="horizontal"
+            :label-col-props="{ span: 7 }"
+            :wrapper-col-props="{ span: 17 }"
+          >
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="机构名称" field="institutionName" required>
+                  <a-input
+                    v-model="formData.institutionName"
+                    placeholder="请输入机构名称"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="机构等级" field="institutionLevel" required>
+                  <a-select
+                    v-model="formData.institutionLevel"
+                    placeholder="请选择机构等级"
+                  >
+                    <a-option :value="1">一级</a-option>
+                    <a-option :value="2">二级</a-option>
+                    <a-option :value="3">三级</a-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="机构类型" field="institutionType" required>
+                  <a-select
+                    v-model="formData.institutionType"
+                    placeholder="请选择机构类型"
+                  >
+                    <a-option :value="1">综合医院</a-option>
+                    <a-option :value="2">专科医院</a-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="所在区域" field="areaCodes" required>
+                  <RegionSelect
+                    v-model="formData.areaCodes"
+                    placeholder="请选择区域"
+                    :clearable="true"
+                    style="width: 100%"
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="急诊床位数" field="emergencyBeds">
+                  <a-input-number
+                    v-model="formData.emergencyBeds"
+                    :min="0"
+                    placeholder="请输入急诊床位数"
+                    style="width: 100%"
+                  >
+                    <template #suffix>张</template>
+                  </a-input-number>
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="急诊电话" field="emergencyPhone" required>
+                  <a-input
+                    v-model="formData.emergencyPhone"
+                    placeholder="请输入急诊电话"
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="经度" field="longitude">
+                  <a-input
+                    v-model="formData.longitude"
+                    placeholder="请选择"
+                    readonly
+                  >
+                    <template #append>
+                      <a-button type="primary" @click="openMapPicker">
+                        <icon-location />
+                        地图获取
+                      </a-button>
+                    </template>
+                  </a-input>
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="纬度" field="latitude">
+                  <a-input
+                    v-model="formData.latitude"
+                    placeholder="请选择"
+                    readonly
+                  >
+                    <template #append>
+                      <a-button type="primary" @click="openMapPicker">
+                        <icon-location />
+                        地图获取
+                      </a-button>
+                    </template>
+                  </a-input>
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="详细地址" field="detailedAddress">
+                  <a-input
+                    v-model="formData.detailedAddress"
+                    placeholder="请输入详细地址"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="备注" field="remark">
+                  <a-textarea
+                    v-model="formData.remark"
+                    :rows="3"
+                    placeholder="请输入备注"
+                    :max-length="500"
+                    show-word-limit
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
+          </a-form>
+        </div>
+
+        <!-- 右侧：图片上传 -->
+        <div class="upload-section">
+          <div class="section-title">机构图片</div>
+          <ImageUpload
+            v-model="formData.images"
+            upload-text="上传图片"
+            :max-size="5"
+          />
+          <div class="upload-tip">
+            建议尺寸：800x600像素，支持 jpg、png 格式，大小不超过 5MB
+          </div>
+        </div>
+      </div>
+    </a-spin>
+
+    <!-- 地图选择器 -->
+    <MapPicker ref="mapPickerRef" @confirm="handleMapConfirm" />
   </div>
 </template>
 
 <script lang="ts" setup>
-  import { ref, reactive, computed, watch } from 'vue';
-  import { Message } from '@arco-design/web-vue';
+  import { ref, reactive, onMounted } from 'vue';
+  import { FormInstance, Message } from '@arco-design/web-vue';
+  import RegionSelect from '@/views/screen/screen-yanhua/components/RegionSelect/index.vue';
+  import ImageUpload from '@/views/screen/screen-yanhua/components/ImageUpload/index.vue';
+  import MapPicker from '@/views/screen/screen-yanhua/components/MapPicker/index.vue';
+  import {
+    createMedicalInstitution,
+    updateMedicalInstitution,
+    getMedicalInstitution,
+    type MedicalInstitutionVO,
+  } from '@/api/emergency';
 
-  const props = defineProps<{
-    data?: any;
-  }>();
-
+  const props = defineProps<{ editData?: MedicalInstitutionVO }>();
   const emit = defineEmits<{
     (e: 'back'): void;
     (e: 'success'): void;
   }>();
 
-  const isEdit = computed(() => !!props.data);
+  const formRef = ref<FormInstance>();
+  const loading = ref(false);
+  const submitLoading = ref(false);
+  const mapPickerRef = ref();
 
-  // 表单引用
-  const formRef = ref();
-
-  // 表单数据
-  const formData = reactive({
-    name: '',
-    type: '',
-    principal: '',
-    phone: '',
-    beds: undefined,
-    address: '',
+  const formData = reactive<MedicalInstitutionVO>({
+    institutionName: '',
+    institutionLevel: undefined,
+    institutionType: undefined,
+    areaCodes: '',
+    emergencyBeds: undefined,
+    emergencyPhone: '',
+    longitude: undefined,
+    latitude: undefined,
+    detailedAddress: '',
+    images: '',
     remark: '',
   });
 
   // 表单验证规则
-  const formRules = {
-    name: [{ required: true, message: '请输入机构名称' }],
-    type: [{ required: true, message: '请选择机构类型' }],
-    principal: [{ required: true, message: '请输入负责人' }],
-    phone: [
-      { required: true, message: '请输入联系电话' },
-      { match: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码' },
-    ],
-    address: [{ required: true, message: '请输入地址' }],
+  const rules = {
+    institutionName: [{ required: true, message: '请输入机构名称' }],
+    institutionLevel: [{ required: true, message: '请选择机构等级' }],
+    institutionType: [{ required: true, message: '请选择机构类型' }],
+    areaCodes: [{ required: true, message: '请选择所在区域' }],
+    emergencyPhone: [{ required: true, message: '请输入急诊电话' }],
   };
 
-  // 监听数据变化，用于编辑时回显
-  watch(
-    () => props.data,
-    (newData) => {
-      if (newData) {
-        Object.assign(formData, {
-          name: newData.name || '',
-          type: newData.type || '',
-          principal: newData.principal || '',
-          phone: newData.phone || '',
-          beds: newData.beds || undefined,
-          address: newData.address || '',
-          remark: newData.remark || '',
-        });
-      }
-    },
-    { immediate: true }
-  );
+  // 加载详情数据
+  const loadDetail = async () => {
+    if (!props.editData?.id) {
+      // 新建模式，重置表单
+      Object.assign(formData, {
+        institutionName: '',
+        institutionLevel: undefined,
+        institutionType: undefined,
+        areaCodes: '',
+        emergencyBeds: undefined,
+        emergencyPhone: '',
+        longitude: undefined,
+        latitude: undefined,
+        detailedAddress: '',
+        images: '',
+        remark: '',
+      });
+      return;
+    }
 
-  // 返回
-  const handleBack = () => {
-    emit('back');
-  };
+    // 编辑模式，加载详情
+    loading.value = true;
+    try {
+      const response: any = await getMedicalInstitution(props.editData.id);
+      const detail = response.data;
 
-  // 提交
-  const handleSubmit = async () => {
-    const valid = await formRef.value?.validate();
-    if (!valid) {
-      try {
-        // TODO: 调用接口提交数据
-        // if (isEdit.value) {
-        //   await updateMedicalInstitution({ id: props.data.id, ...formData });
-        // } else {
-        //   await createMedicalInstitution(formData);
-        // }
-        Message.success(isEdit.value ? '编辑成功' : '新增成功');
-        emit('success');
-      } catch (error) {
-        Message.error('操作失败');
-      }
+      // 回显数据
+      formData.institutionName = detail.institutionName || '';
+      formData.institutionLevel = detail.institutionLevel;
+      formData.institutionType = detail.institutionType;
+      formData.areaCodes = detail.areaCodes || '';
+      formData.emergencyBeds = detail.emergencyBeds;
+      formData.emergencyPhone = detail.emergencyPhone || '';
+      formData.longitude = detail.longitude;
+      formData.latitude = detail.latitude;
+      formData.detailedAddress = detail.detailedAddress || '';
+      formData.images = detail.images || '';
+      formData.remark = detail.remark || '';
+    } catch (error: any) {
+      Message.error(error?.message || '加载医疗机构详情失败');
+    } finally {
+      loading.value = false;
     }
   };
+
+  // 提交表单
+  const handleSubmit = async () => {
+    const errors = await formRef.value?.validate();
+    if (errors) return;
+
+    submitLoading.value = true;
+    try {
+      if (props.editData?.id) {
+        await updateMedicalInstitution({ ...formData, id: props.editData.id });
+        Message.success('更新成功');
+      } else {
+        await createMedicalInstitution(formData);
+        Message.success('保存成功');
+      }
+      emit('success');
+      emit('back');
+    } catch (error: any) {
+      Message.error(error?.message || '保存失败');
+    } finally {
+      submitLoading.value = false;
+    }
+  };
+
+  // 打开地图选择器
+  const openMapPicker = () => {
+    // 如果已有经纬度，传入初始位置
+    let initialLocation;
+    if (formData.longitude && formData.latitude) {
+      initialLocation = {
+        lng: Number(formData.longitude),
+        lat: Number(formData.latitude),
+      };
+    }
+    mapPickerRef.value?.open(initialLocation);
+  };
+
+  // 地图选择确认
+  const handleMapConfirm = (data: any) => {
+    // 保存经纬度
+    formData.longitude = data.position.lng;
+    formData.latitude = data.position.lat;
+    // 如果有详细地址也可以保存
+    if (data.formattedAddress) {
+      formData.detailedAddress = data.formattedAddress;
+    }
+    Message.success(`已选择位置：${data.formattedAddress}`);
+  };
+
+  onMounted(() => {
+    loadDetail();
+  });
 </script>
 
 <style scoped lang="less">
@@ -164,57 +329,121 @@
 
     .create-header {
       display: flex;
+      flex-shrink: 0;
       gap: 16px;
       align-items: center;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
 
       .header-title {
-        color: #fff;
+        flex: 1;
+        color: rgb(255 255 255 / 95%);
         font-weight: 600;
         font-size: 18px;
+      }
+
+      :deep(.arco-btn) {
+        color: rgb(255 255 255 / 85%);
+        background: rgb(255 255 255 / 8%);
+        border-color: rgb(255 255 255 / 15%);
+
+        &:hover {
+          background: rgb(255 255 255 / 12%);
+          border-color: rgb(23 150 250 / 50%);
+        }
+      }
+
+      :deep(.arco-btn-primary) {
+        color: #fff;
+        background: linear-gradient(135deg, rgb(23 150 250), rgb(20 120 200));
+        border: none;
+
+        &:hover {
+          background: linear-gradient(135deg, rgb(40 160 255), rgb(30 130 210));
+        }
       }
     }
 
     .create-content {
+      display: grid;
       flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      background: rgb(10 30 60 / 20%);
-      border: 1px solid rgb(23 150 250 / 10%);
-      border-radius: 8px;
+      grid-template-columns: 1fr 320px;
+      gap: 16px;
+      min-height: 0;
+      overflow: hidden;
 
-      :deep(.arco-form) {
-        max-width: 800px;
+      .form-section {
+        padding: 20px;
+        overflow-y: auto;
+        background: rgb(10 30 60 / 30%);
+        border: 1px solid rgb(23 150 250 / 15%);
+        border-radius: 4px;
 
-        .arco-form-item-label-col {
-          color: rgb(255 255 255 / 85%);
-        }
+        :deep(.arco-form) {
+          .arco-form-item-label-col {
+            color: rgb(255 255 255 / 85%);
+            font-weight: 500;
+          }
 
-        .arco-input,
-        .arco-textarea,
-        .arco-select-view,
-        .arco-input-number {
-          color: rgb(255 255 255 / 85%);
-          background: rgb(10 30 60 / 30%);
-          border-color: rgb(23 150 250 / 20%);
+          .arco-input-wrapper,
+          .arco-select-view-single,
+          .arco-textarea-wrapper,
+          .arco-input-number-wrapper {
+            color: rgb(255 255 255 / 85%);
+            background: rgb(10 30 60 / 50%);
+            border-color: rgb(23 150 250 / 30%);
 
-          &::placeholder {
-            color: rgb(255 255 255 / 30%);
+            &:hover {
+              border-color: rgb(23 150 250 / 50%);
+            }
+
+            &:focus-within {
+              border-color: rgb(23 150 250 / 70%);
+            }
+
+            input,
+            textarea,
+            .arco-select-view-value {
+              color: rgb(255 255 255 / 85%);
+              background: transparent;
+
+              &::placeholder {
+                color: rgb(255 255 255 / 40%);
+              }
+            }
+
+            .arco-input,
+            .arco-textarea {
+              background: transparent;
+            }
+          }
+
+          .arco-input-number-suffix {
+            color: rgb(255 255 255 / 60%);
           }
         }
+      }
 
-        .arco-select-view-value {
-          color: rgb(255 255 255 / 85%);
+      .upload-section {
+        padding: 20px;
+        overflow-y: auto;
+        background: rgb(10 30 60 / 30%);
+        border: 1px solid rgb(23 150 250 / 15%);
+        border-radius: 4px;
+
+        .section-title {
+          margin-bottom: 16px;
+          color: rgb(255 255 255 / 95%);
+          font-weight: 600;
+          font-size: 16px;
+        }
+
+        .upload-tip {
+          margin-top: 12px;
+          color: rgb(255 255 255 / 50%);
+          font-size: 12px;
+          line-height: 1.6;
         }
       }
-    }
-
-    .create-footer {
-      display: flex;
-      justify-content: center;
-      margin-top: 24px;
-      padding-top: 16px;
-      border-top: 1px solid rgb(23 150 250 / 10%);
     }
   }
 </style>

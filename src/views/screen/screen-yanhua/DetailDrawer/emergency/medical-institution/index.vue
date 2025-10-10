@@ -17,7 +17,7 @@
     <!-- 新增/编辑页 -->
     <Create
       v-if="currentView === 'create'"
-      :data="currentData"
+      :edit-data="currentData"
       @back="handleBack"
       @success="handleSuccess"
     />
@@ -26,33 +26,29 @@
 
 <script lang="ts" setup>
   import { ref } from 'vue';
+  import { type MedicalInstitutionVO } from '@/api/emergency';
   import List from './List.vue';
   import Detail from './Detail.vue';
   import Create from './Create.vue';
 
-  // 当前视图：list-列表, detail-详情, create-新增/编辑
   const currentView = ref<'list' | 'detail' | 'create'>('list');
-  const currentData = ref<any>(null);
+  const currentData = ref<MedicalInstitutionVO | null>(null);
 
-  // 查看详情
-  const handleView = (data: any) => {
+  const handleView = (data: MedicalInstitutionVO) => {
     currentData.value = data;
     currentView.value = 'detail';
   };
 
-  // 新增
-  const handleCreate = (data?: any) => {
+  const handleCreate = (data?: MedicalInstitutionVO) => {
     currentData.value = data || null;
     currentView.value = 'create';
   };
 
-  // 返回列表
   const handleBack = () => {
     currentView.value = 'list';
     currentData.value = null;
   };
 
-  // 操作成功
   const handleSuccess = () => {
     currentView.value = 'list';
     currentData.value = null;

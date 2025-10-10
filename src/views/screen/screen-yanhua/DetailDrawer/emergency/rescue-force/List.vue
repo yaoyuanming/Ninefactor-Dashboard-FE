@@ -6,8 +6,8 @@
         <icon-plus />新增队伍
       </a-button>
     </div>
-    <div class="list-search">
-      <a-space>
+    <div class="search-filter">
+      <a-space size="medium">
         <a-input
           v-model="searchForm.teamName"
           placeholder="请输入队伍名称"
@@ -248,8 +248,62 @@
       }
     }
 
-    .list-search {
-      margin-bottom: 20px;
+    .search-filter {
+      flex-shrink: 0;
+      margin-bottom: 16px;
+      padding: 16px;
+      background: rgb(10 30 60 / 30%);
+      border: 1px solid rgb(23 150 250 / 20%);
+      border-radius: 4px;
+
+      :deep(.arco-input-wrapper),
+      :deep(.arco-select-view-single) {
+        color: rgb(255 255 255 / 85%);
+        background: rgb(10 30 60 / 50%);
+        border-color: rgb(23 150 250 / 30%);
+
+        &:hover {
+          border-color: rgb(23 150 250 / 50%);
+        }
+
+        &:focus-within {
+          border-color: rgb(23 150 250 / 70%);
+        }
+
+        input,
+        .arco-select-view-value {
+          color: rgb(255 255 255 / 85%);
+          background: transparent;
+
+          &::placeholder {
+            color: rgb(255 255 255 / 40%);
+          }
+        }
+
+        .arco-input {
+          background: transparent;
+        }
+      }
+
+      :deep(.arco-btn-primary) {
+        background: linear-gradient(135deg, rgb(23 150 250), rgb(20 120 200));
+        border: none;
+
+        &:hover {
+          background: linear-gradient(135deg, rgb(40 160 255), rgb(30 130 210));
+        }
+      }
+
+      :deep(.arco-btn:not(.arco-btn-primary)) {
+        color: rgb(255 255 255 / 75%);
+        background: rgb(255 255 255 / 8%);
+        border-color: rgb(255 255 255 / 15%);
+
+        &:hover {
+          background: rgb(255 255 255 / 12%);
+          border-color: rgb(23 150 250 / 50%);
+        }
+      }
     }
 
     .table-container {
