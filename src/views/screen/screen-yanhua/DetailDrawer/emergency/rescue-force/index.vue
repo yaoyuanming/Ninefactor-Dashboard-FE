@@ -12,7 +12,7 @@
     />
     <Create
       v-if="currentView === 'create'"
-      :data="currentData"
+      :edit-data="currentData"
       @back="handleBack"
       @success="handleSuccess"
     />
@@ -21,19 +21,20 @@
 
 <script lang="ts" setup>
   import { ref } from 'vue';
+  import { type RescueTeamVO } from '@/api/emergency';
   import List from './List.vue';
   import Detail from './Detail.vue';
   import Create from './Create.vue';
 
   const currentView = ref<'list' | 'detail' | 'create'>('list');
-  const currentData = ref<any>(null);
+  const currentData = ref<RescueTeamVO | null>(null);
 
-  const handleView = (data: any) => {
+  const handleView = (data: RescueTeamVO) => {
     currentData.value = data;
     currentView.value = 'detail';
   };
 
-  const handleCreate = (data?: any) => {
+  const handleCreate = (data?: RescueTeamVO) => {
     currentData.value = data || null;
     currentView.value = 'create';
   };
