@@ -5,7 +5,13 @@
       <div class="section-title">
         <img class="img1" src="@/assets/screen/imgs/title1.png" />
         <img class="img2" src="@/assets/screen/imgs/title2.png" />
-        <div class="text">{{ title }}</div>
+
+        <div class="text">
+          {{ title }}
+          <span v-if="src" class="img-wrapper" @click.stop="handleImgClick">
+            <img class="border-line" :src="src" @click.stop="handleImgClick" />
+          </span>
+        </div>
       </div>
       <!-- 可配置的时间切换标签 -->
       <div class="time-tabs">
@@ -20,12 +26,11 @@
         </span>
       </div>
     </div>
-    <!-- <img class="border-line" src="@/assets/imgs/screen/line.png" /> -->
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, watch, defineEmits } from 'vue';
+  import { ref, watch, defineEmits, onMounted } from 'vue';
 
   // 定义组件参数
   const props = defineProps({
@@ -64,7 +69,7 @@
   });
 
   // 定义组件事件
-  const emit = defineEmits(['tab-change']);
+  const emit = defineEmits(['tabChange', 'imgClick']);
 
   // 当前选中标签
   const activeTab = ref(props.initialTab);
@@ -85,6 +90,49 @@
     emit('tabChange', tab);
   };
 
+  // 图片点击处理函数
+  const handleImgClick = () => {
+    console.log('Title组件：图片被点击了');
+    console.log('src prop值：', props.src);
+    emit('imgClick');
+  };
+
+  // 组件挂载后检查
+  onMounted(() => {
+    console.log(`Title组件已挂载 - ${props.title}`);
+    console.log('props.src:', props.src);
+    console.log('src是否存在:', !!props.src);
+
+    // 添加调试：检查图片元素
+    setTimeout(() => {
+      // 查找所有的标题文本元素
+      const allTexts = document.querySelectorAll('.text');
+      let targetElement = null;
+
+      allTexts.forEach((el) => {
+        if (el.textContent?.trim().includes(props.title)) {
+          targetElement = el;
+        }
+      });
+
+      if (targetElement) {
+        const imgWrapper = targetElement.querySelector('.img-wrapper');
+        const img = targetElement.querySelector('.border-line');
+        console.log(`${props.title} - 找到目标元素`);
+        console.log(`${props.title} - imgWrapper元素:`, imgWrapper);
+        console.log(`${props.title} - img元素:`, img);
+        if (img) {
+          console.log(
+            `${props.title} - img的src属性:`,
+            (img as HTMLImageElement).src
+          );
+        }
+      } else {
+        console.log(`${props.title} - 未找到目标元素`);
+      }
+    }, 500);
+  });
+
   // 提供可选的函数接口用于外部切换当前标签
   const setActiveTab = (tab: string) => {
     if (props.tabs.includes(tab)) {
@@ -100,7 +148,10 @@
 
 <style scoped lang="less">
   .title-common {
+    position: relative;
+    z-index: 100;
     width: 100%;
+    pointer-events: auto !important;
 
     .monitoring-section-title {
       display: flex;
@@ -135,10 +186,36 @@
         .text {
           position: absolute;
           left: 25px;
+          z-index: 2;
+          display: flex;
+          gap: 8px;
+          align-items: center;
           height: 35px;
           color: #fff;
           font-weight: bold;
           line-height: 35px;
+
+          .img-wrapper {
+            position: relative;
+            z-index: 9999;
+            display: inline-block;
+            margin-left: 10px;
+            cursor: pointer;
+            pointer-events: auto !important;
+
+            .border-line {
+              width: 25px;
+              height: 25px;
+              vertical-align: middle;
+              cursor: pointer;
+              transition: opacity 0.3s ease;
+              pointer-events: auto !important;
+            }
+
+            &:hover .border-line {
+              opacity: 0.8;
+            }
+          }
         }
       }
 
@@ -169,10 +246,6 @@
           }
         }
       }
-    }
-
-    .border-line {
-      width: 100%;
     }
   }
 </style>

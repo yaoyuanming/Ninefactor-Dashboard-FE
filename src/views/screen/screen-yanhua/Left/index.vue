@@ -1,8 +1,13 @@
 <template>
   <div class="content-left" :style="`z-index: ${baseConfig.leftConfig.zIndex}`">
     <div class="content-left-main">
-      <div class="company-overview-wrapper" @click="handleCompanyClick">
-        <img style="width: 460px" src="@/assets/screen/left1.png" />
+      <div class="company-overview-section">
+        <Title
+          title="企业概况"
+          :src="TitleImage"
+          :tabs="[]"
+          @imgClick="handleCompanyClick"
+        />
       </div>
       <L2 />
     </div>
@@ -12,14 +17,17 @@
 <script lang="ts" setup>
   import { inject } from 'vue';
   import { baseConfig } from '../config';
+  import { DrawerType } from '../DetailDrawer/types';
   import AlarmBg from '../../../../assets/screen/imgs/alarm-bg.png';
   import L2 from './L2.vue';
+  import Title from '../components/Title.vue';
+  import TitleImage from '../../../../assets/screen/lien.png';
 
   const openDrawer = inject<any>('openDrawer');
 
   // 点击企业概况
   const handleCompanyClick = () => {
-    openDrawer?.('company', '企业概况', {
+    openDrawer?.(DrawerType.COMPANY, '企业概况', {
       name: '福州市XXXXX公司',
       code: '91350100MA2XN7KU4X',
       type: '有限责任公司',
@@ -44,6 +52,7 @@
     width: 700px;
     min-width: 440px;
     height: 100%;
+    pointer-events: all;
 
     .content-left-main {
       display: flex;
@@ -53,13 +62,24 @@
       margin-top: 80px;
       padding-left: 20px;
 
-      .company-overview-wrapper {
-        cursor: pointer;
-        transition: all 0.3s;
+      .company-overview-section {
+        background: linear-gradient(
+          90deg,
+          #0c2249 0%,
+          rgb(65 106 146 / 69%) 97%
+        );
+        border-radius: 4px;
+        pointer-events: all;
 
-        &:hover {
-          transform: scale(1.02);
-          filter: brightness(1.1);
+        .company-overview-wrapper {
+          padding: 20px 24px;
+          cursor: pointer;
+          transition: all 0.3s;
+
+          &:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+          }
         }
       }
     }

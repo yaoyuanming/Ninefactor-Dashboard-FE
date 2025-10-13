@@ -4,12 +4,9 @@
       title="仓库概况"
       :src="TitleImage"
       :tabs="[]"
-      @click="handleWarehouseClick"
+      @imgClick="handleWarehouseClick"
     />
-    <div
-      style="padding: 20px 24px; text-align: center"
-      @click="handleWarehouseClick"
-    >
+    <div style="padding: 20px 24px; text-align: center">
       <img
         style="width: 410px; margin-bottom: 12px; cursor: pointer"
         src="@/assets/screen/left21.png"
@@ -70,7 +67,9 @@
   // 引入 Echarts
   import * as echarts from 'echarts';
   import type { EChartsType } from 'echarts';
+  import { DrawerType } from '../DetailDrawer/types';
   import Title from '../components/Title.vue';
+  import TitleImage from '../../../../assets/screen/lien.png';
   import AlarmBg from '../../../../assets/screen/imgs/alarm-bg.png';
   import Drop from '../../../../assets/screen/imgs/drop.png';
 
@@ -78,7 +77,9 @@
 
   // 点击仓库概况
   const handleWarehouseClick = () => {
-    openDrawer?.('warehouse', '仓库概况', {
+    console.log('Left/L2组件：handleWarehouseClick被调用了');
+    console.log('openDrawer是否存在：', !!openDrawer);
+    openDrawer?.(DrawerType.WAREHOUSE, '仓库概况', {
       name: '1号危化品仓库',
       code: 'WH2025001',
       company: '福州市XXXXX公司',

@@ -2,7 +2,11 @@
   <div class="screen-container">
     <div class="screen-base">
       <div class="screen-base-canvas">
-        <Map />
+        <!-- 综合监测显示Map，应急管理显示Map2 -->
+        <Map v-if="operationTab === 0" />
+        <Map2 v-if="operationTab === 1" />
+        <!-- 其他模式（报警、风险、统计、监控）显示渐变背景 -->
+        <div v-if="operationTab >= 2" class="default-background"></div>
       </div>
     </div>
     <div id="max-screen-content" class="screen-content">
@@ -46,6 +50,7 @@
   import { computed, onBeforeUnmount, onMounted, ref, provide } from 'vue';
   import Top from './Top/index.vue';
   import Map from './Map/index.vue';
+  import Map2 from './Map2/index.vue';
   import Left from './Left/index.vue';
   import Left2 from './Left2/index.vue';
   import Right from './Right/index.vue';
@@ -131,7 +136,7 @@
     height: 100vh;
     overflow: hidden;
     overflow-y: auto;
-    background: linear-gradient(180deg, #265d96 0%, #0f2038 100%);
+    background: #061834 !important;
     user-select: none;
   }
 
@@ -144,6 +149,7 @@
     min-width: 1920px;
     height: 100vh;
     min-height: 920px;
+    background: transparent; /* 确保基础层透明，显示容器背景 */
 
     .screen-base-canvas {
       display: flex;
@@ -151,6 +157,7 @@
       justify-content: center;
       width: 100%;
       height: 100%;
+      background: transparent; /* 画布层也保持透明 */
     }
   }
 
@@ -162,5 +169,15 @@
     height: 1080px;
     transform-origin: 0 0;
     pointer-events: none;
+  }
+
+  .default-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0; /* 确保在最底层 */
+    width: 100%;
+    height: 100%;
+    background: #061834;
   }
 </style>

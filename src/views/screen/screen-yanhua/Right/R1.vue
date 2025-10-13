@@ -9,6 +9,7 @@
           selectTab = value;
         }
       "
+      @imgClick="handleAlarmStatsClick"
     />
     <div class="overview-section">
       <div :style="{ flexGrow: 100 }" class="stat-item">
@@ -51,13 +52,32 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
+  import {
+    ref,
+    onMounted,
+    onBeforeUnmount,
+    nextTick,
+    watch,
+    inject,
+  } from 'vue';
   // 引入 Echarts
   import * as echarts from 'echarts';
   import type { EChartsType } from 'echarts';
   import Title from '../components/Title.vue';
+  import TitleImage from '../../../../assets/screen/lien.png';
   import AlarmBg from '../../../../assets/screen/imgs/alarm-bg.png';
   import Drop from '../../../../assets/screen/imgs/drop.png';
+
+  // 注入打开抽屉的方法
+  const openDrawer =
+    inject<(type: string, title: string, data?: any) => void>('openDrawer');
+
+  // 点击报警统计图标
+  const handleAlarmStatsClick = () => {
+    console.log('点击了报警统计图标');
+    // 这里可以根据需要打开相应的抽屉或执行其他操作
+    // 例如：openDrawer?.('alarm-stats', '报警统计详情');
+  };
 
   // Echarts 容器的引用
   const alarmChartContainer = ref<HTMLElement | null>(null);

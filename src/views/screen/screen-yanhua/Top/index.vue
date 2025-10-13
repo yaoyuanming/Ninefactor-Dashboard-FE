@@ -188,15 +188,18 @@
     .action-button {
       position: absolute;
       top: 75px;
+      right: 0;
+      left: 0;
       display: flex;
       justify-content: center;
       width: 100%;
       cursor: pointer;
-      pointer-events: all;
+      pointer-events: none; // 默认不接收点击事件
 
       .operation-tab {
         width: 160.54px;
         cursor: pointer;
+        pointer-events: all; // 只有tab按钮本身接收点击事件
 
         .tab-icon {
           width: 160.54px;
