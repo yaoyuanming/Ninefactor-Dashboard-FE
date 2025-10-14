@@ -4,7 +4,6 @@
     class="screen-map"
     style="position: relative; width: 100%; height: 100%"
   >
-    <div class="search-box"> </div>
     <div
       id="mapElement2"
       style="position: relative; width: 100%; height: 100%"
@@ -13,19 +12,24 @@
 </template>
 
 <script lang="ts" setup>
-  import mapLoader from '@/utils/aMap.js';
   import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+
+  import mapLoader from '@/utils/aMap';
+
+  import drawBoundaryWithCanvas from './boundary';
   import {
     emergencyIcons,
     targetArea,
     centerPoint,
     targetAreaLevel,
+    strokeType,
     mapZoom,
     mapZooms,
   } from './config';
 
   const map = ref<any>(null);
   const aMap = ref<any>(null);
+  const mapLoca = ref<any>(null);
   // 新增遮罩相关变量
   const maskPolygon = ref<any>(null);
 
@@ -33,6 +37,21 @@
   const allBoundaries = ref<any>(null);
   const labelMarkerLayer = ref<any>(null); // LabelMarker图层
   const loading = ref(true);
+
+  // 筛选条件（从外部传入）
+  const currentFilterTypes = ref({
+    govt: true,
+    rescue: true,
+    medical: true,
+    supplies: false,
+    equipment: false,
+  });
+
+  // 搜索关键词（从外部传入）
+  const currentSearchKeyword = ref('');
+
+  // 存储所有标记数据
+  const allMarkers = ref<any[]>([]);
 
   // 全局单例InfoWindow实例
   const globalInfoWindow = ref<any>({
@@ -85,6 +104,89 @@
         map: map.value,
         zIndex: 3,
       });
+    });
+  };
+
+  // 创建极光围栏效果（使用 DistrictSearch 边界）
+  const createAuroraFence = () => {
+    const vloca = new window.Loca.Container({
+      map: map.value,
+    });
+    mapLoca.value = vloca;
+
+    // 使用行政区查询返回的全部边界路径构建 GeoJSON
+    if (!boundaries.value || !boundaries.value.length) return;
+
+    // 创建面状GeoJSON（为每个边界生成一个 Feature）
+    const features = boundaries.value.map((boundary: any) => {
+      const polygonCoords = (boundary || []).map((p: any) =>
+        Array.isArray(p) ? [p[0], p[1]] : [p.lng, p.lat]
+      );
+      return {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [polygonCoords],
+        },
+      };
+    });
+    const geojson = {
+      type: 'FeatureCollection',
+      features,
+    };
+
+    const dirLight = new window.Loca.DirectionalLight({
+      intensity: 0.9,
+      color: 'rgb(255, 250, 240)',
+      target: [0, 1, 0],
+      position: [0, -1, 0],
+      castShadow: true,
+    });
+    mapLoca.value.addLight(dirLight);
+
+    const geo = new window.Loca.GeoJSONSource({ data: geojson });
+    const auroraLayer = new window.Loca.PolygonLayer({
+      zIndex: 3,
+      cullface: 'none',
+      shininess: 1,
+      hasBottom: false,
+      blockHide: false,
+      hasSide: true,
+      hasTop: false,
+      depth: true,
+    });
+    auroraLayer.setSource(geo);
+    auroraLayer.setStyle({
+      topColor: () => '#1796FA',
+      sideTopColor: () => '#1796FA',
+      sideBottomColor: () => '#1796FA',
+      height: 1450,
+      altitude: -1400,
+      glow: { color: '#1796FA', intensity: 0.7, radius: 20 },
+    });
+    mapLoca.value.add(auroraLayer);
+  };
+
+  // 新增：查询区级边界
+  const queryDistrictBoundaries = (districtName: any, level: string) => {
+    return new Promise((resolve) => {
+      const district = new aMap.value.DistrictSearch({
+        subdistrict: 0,
+        extensions: 'all',
+        level,
+      });
+
+      district.search(
+        districtName,
+        (status: string, result: { districtList: string | any[] }) => {
+          if (status === 'complete' && result.districtList.length > 0) {
+            const boundaries1 = result.districtList[0].boundaries || [];
+            resolve(boundaries1.length > 0 ? boundaries1 : null);
+          } else {
+            resolve(null);
+          }
+        }
+      );
     });
   };
 
@@ -148,6 +250,82 @@
 
     globalInfoWindow.value.instance.open(map.value, data.position);
     globalInfoWindow.value.currentMarker = marker;
+  };
+
+  // 更新标记显示
+  const updateMarkers = () => {
+    if (!labelMarkerLayer.value || !allMarkers.value.length) return;
+
+    // 清除所有标记
+    labelMarkerLayer.value.clear();
+
+    // 根据筛选条件过滤数据
+    const filteredData = allMarkers.value.filter((item) => {
+      // 搜索过滤
+      if (currentSearchKeyword.value) {
+        const keyword = currentSearchKeyword.value.toLowerCase();
+        if (!item.name.toLowerCase().includes(keyword)) {
+          return false;
+        }
+      }
+
+      // 类型筛选
+      return currentFilterTypes.value[item.type];
+    });
+
+    // 重新添加符合条件的标记
+    filteredData.forEach((item) => {
+      const icon = emergencyIcons[item.type];
+      if (!icon) return;
+
+      const labelMarker = new aMap.value.LabelMarker({
+        position: item.position,
+        zIndex: 10,
+        icon: {
+          type: 'image',
+          image: icon.url,
+          size: icon.size,
+          anchor: icon.anchor,
+        },
+        text: {
+          content: item.name,
+          direction: 'bottom',
+          offset: [0, 5],
+          style: {
+            fontSize: 12,
+            fontWeight: 'normal',
+            fillColor: '#ffffff',
+            strokeColor: '#004c99',
+            strokeWidth: 2,
+          },
+        },
+      });
+
+      // 添加点击事件
+      labelMarker.on('click', () => {
+        showEmergencyInfo(item, labelMarker);
+      });
+
+      labelMarkerLayer.value.add(labelMarker);
+    });
+  };
+
+  // 设置搜索关键词（供外部调用）
+  const setSearchKeyword = (keyword: string) => {
+    currentSearchKeyword.value = keyword;
+    updateMarkers();
+  };
+
+  // 设置筛选条件（供外部调用）
+  const setFilterTypes = (filterTypes: Record<string, boolean>) => {
+    currentFilterTypes.value = { ...filterTypes };
+    updateMarkers();
+  };
+
+  // 清除搜索（供外部调用）
+  const clearSearch = () => {
+    currentSearchKeyword.value = '';
+    updateMarkers();
   };
 
   // 初始化应急资源标记点
@@ -243,41 +421,11 @@
       },
     ];
 
-    // 创建标记点
-    mockEmergencyData.forEach((item) => {
-      const icon = emergencyIcons[item.type];
-      if (!icon) return;
+    // 保存所有数据
+    allMarkers.value = mockEmergencyData;
 
-      const labelMarker = new aMap.value.LabelMarker({
-        position: item.position,
-        zIndex: 10,
-        icon: {
-          type: 'image',
-          image: icon.url,
-          size: icon.size,
-          anchor: icon.anchor,
-        },
-        text: {
-          content: item.name,
-          direction: 'bottom',
-          offset: [0, 5],
-          style: {
-            fontSize: 12,
-            fontWeight: 'normal',
-            fillColor: '#ffffff',
-            strokeColor: '#004c99',
-            strokeWidth: 2,
-          },
-        },
-      });
-
-      // 添加点击事件
-      labelMarker.on('click', () => {
-        showEmergencyInfo(item, labelMarker);
-      });
-
-      labelMarkerLayer.value.add(labelMarker);
-    });
+    // 初始化显示标记
+    updateMarkers();
   };
 
   // 初始化地图
@@ -289,64 +437,177 @@
 
       // 使用不同的容器ID避免冲突
       map.value = new AMap.Map('mapElement2', {
-        zoom: mapZoom,
+        viewMode: strokeType === '发光边缘' ? '2D' : '3D',
+        rotateEnable: false,
+        pitchEnable: false,
+        pitch: 30,
+        rotation: 0,
         zooms: mapZooms,
+        zoom: mapZoom,
         center: centerPoint,
-        mapStyle: 'amap://styles/darkblue',
-        viewMode: '2D',
-        features: ['bg', 'road'],
-        showLabel: false,
+        mapStyle: 'amap://styles/grey',
       });
 
-      // 获取行政区域边界
-      const district = new AMap.DistrictSearch({
-        subdistrict: 0,
-        extensions: 'all',
-        level: targetAreaLevel,
+      // 创建LabelMarker图层
+      labelMarkerLayer.value = new AMap.LabelsLayer({
+        zooms: mapZooms,
+        zIndex: 200,
+        collision: false,
       });
+      map.value.add(labelMarkerLayer.value);
 
-      district.search(targetArea, (status: any, result: any) => {
-        if (status === 'complete') {
-          const bounds = result.districtList[0].boundaries;
-          boundaries.value = bounds;
-          allBoundaries.value = bounds;
+      // 创建Canvas自定义图层（用于发光边缘效果）
+      const canvas = document.createElement('canvas');
+      canvas.width = map.value.getSize().width;
+      canvas.height = map.value.getSize().height;
 
-          // 创建遮罩层
-          createMaskLayer();
+      const customLayer = new AMap.CustomLayer(canvas, {
+        zIndex: 12,
+        zooms: mapZooms,
+      });
+      map.value.add(customLayer);
 
-          // 绘制区域边界
-          areaBoundaries();
+      const drawBoundaryCanvas = () => {
+        drawBoundaryWithCanvas(canvas, map.value, AMap, boundaries.value);
+      };
 
-          // 初始化应急资源标记
-          initEmergencyMarkers();
+      // 将Loca初始化移到地图complete事件中
+      map.value.on('complete', () => {
+        // 创建行政区查询实例
+        const district = new AMap.DistrictSearch({
+          subdistrict: 1,
+          extensions: 'all',
+          level: targetAreaLevel,
+        });
 
-          loading.value = false;
-        }
+        // 搜索边界
+        district.search(targetArea, async (status: string, result: any) => {
+          if (status === 'complete' && result.districtList.length > 0) {
+            const cityData = result.districtList[0];
+            // 获取市级边界
+            const boundariesItems = result.districtList[0].boundaries || [];
+            boundaries.value =
+              boundariesItems.length > 0 ? boundariesItems : null;
+
+            // 获取区级边界
+            const districtBoundaries: any[] = [];
+            if (cityData.districtList && cityData.districtList.length > 0) {
+              // 并行查询所有区的边界
+              const districtQueries = cityData.districtList.map(
+                async (districtItem: { name: any }) => {
+                  const boundaries2 = await queryDistrictBoundaries(
+                    districtItem.name,
+                    'district'
+                  );
+                  return boundaries2;
+                }
+              );
+
+              const results = await Promise.all(districtQueries);
+              results.forEach((boundary) => {
+                if (boundary) {
+                  districtBoundaries.push(...boundary);
+                }
+              });
+            }
+
+            // 合并市级和区级边界
+            allBoundaries.value = [
+              ...(boundaries.value || []),
+              ...districtBoundaries,
+            ];
+
+            // 添加遮罩层
+            createMaskLayer();
+            // 绘制区域内遮罩
+            areaBoundaries(boundaries.value, 0.55);
+            areaBoundaries(districtBoundaries, 0);
+
+            // 绘制边界
+            if (strokeType === '发光边缘' && boundaries.value) {
+              customLayer.render = drawBoundaryCanvas;
+              customLayer.render();
+            }
+            if (strokeType === '光栅') {
+              createAuroraFence();
+            }
+
+            // 初始化应急资源标记
+            initEmergencyMarkers();
+
+            loading.value = false;
+          }
+        });
       });
     } catch (error) {
-      console.error('Map2 initialization failed:', error);
       loading.value = false;
     }
   };
 
+  // 计算缩放比例
+  const calculateScale = () => {
+    const designWidth = 1920;
+    const designHeight = 1080;
+    const currentWidth = window.innerWidth;
+    const currentHeight = window.innerHeight;
+
+    // 计算缩放比例（取宽高比例的较小值）
+    const scaleX = currentWidth / designWidth;
+    const scaleY = currentHeight / designHeight;
+    const scaleRatio = Math.min(scaleX, scaleY);
+
+    // 设置CSS变量供样式使用
+    document.documentElement.style.setProperty(
+      '--scale-ratio',
+      scaleRatio.toString()
+    );
+  };
+
+  // 监听窗口大小变化
+  const handleResize = () => {
+    calculateScale();
+  };
+
   onMounted(() => {
+    // 初始计算缩放比例
+    calculateScale();
+
+    // 监听窗口大小变化
+    window.addEventListener('resize', handleResize);
+
     nextTick(() => {
       initMap();
     });
   });
 
   onUnmounted(() => {
+    // 移除事件监听
+    window.removeEventListener('resize', handleResize);
+
+    // 销毁全局InfoWindow
     if (globalInfoWindow.value.instance) {
-      globalInfoWindow.value.instance.close();
+      globalInfoWindow.value.instance.destroy();
+      globalInfoWindow.value.instance = null;
     }
+    // 销毁Loca实例
+    if (mapLoca.value) {
+      mapLoca.value.destroy();
+      mapLoca.value = null;
+    }
+    // 确保地图被销毁
     if (map.value) {
       map.value.destroy();
+      map.value = null;
     }
   });
 
   // 暴露方法供外部调用
   defineExpose({
     refreshMarkers: initEmergencyMarkers,
+    setSearchKeyword,
+    setFilterTypes,
+    clearSearch,
+    updateMarkers,
   });
 </script>
 
@@ -355,13 +616,6 @@
     position: relative;
     width: 100%;
     height: 100%;
-
-    .search-box {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      z-index: 100;
-    }
   }
 
   :deep(.amap-info-window) {
@@ -372,5 +626,16 @@
 
   :deep(.amap-info-window-content) {
     padding: 0;
+  }
+
+  /* 隐藏高德Logo */
+  :deep(.amap-logo) {
+    display: none !important;
+  }
+
+  /* 隐藏版权信息 */
+  :deep(.amap-copyright) {
+    display: none !important;
+    opacity: 0 !important;
   }
 </style>
