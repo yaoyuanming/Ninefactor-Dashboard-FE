@@ -1,0 +1,7 @@
+/*.json
+/*.js
+dist
+public/bin/
+public/static/dhPro/
+src/views/screen/screen-yanhua/Bottom/Monitor/icc/PlayerManager.js
+src/views/screen/screen-yanhua/Bottom/Monitor/icc/api.js
