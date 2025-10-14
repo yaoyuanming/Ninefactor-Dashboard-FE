@@ -4,16 +4,7 @@
       <!-- 应急管理模块 -->
       <div class="stats-section emergency-stats-section">
         <div class="title-wrapper">
-<<<<<<< HEAD
-          <Title
-            title="应急管理"
-            :src="TitleImage"
-            :tabs="[]"
-            @imgClick="handleOpenEmergencyDrawer"
-          />
-=======
           <Title title="应急管理" :src="TitleImage" :tabs="[]" @imgClick="handleOpenEmergencyDrawer" />
->>>>>>> main
         </div>
 
         <!-- 内容区域 -->
