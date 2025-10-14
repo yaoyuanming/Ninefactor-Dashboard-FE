@@ -41,6 +41,15 @@ const router = createRouter({
         },
       ],
     },
+    {
+      path: '/system',
+      name: 'system',
+      component: () => import('@/views/system/index.vue'),
+      meta: {
+        locale: '系统设置',
+        requiresAuth: true,
+      },
+    },
     // {
     //   path: '/buy',
     //   name: 'buy',
