@@ -35,20 +35,36 @@ export const emergencyIcons: Record<string, any> = {
 };
 
 // 地图中心点（福州）
-export const centerPoint = [119.306239, 26.075302];
+export const centerPoint = [119.18, 25.85];
 
 // 目标区域
 export const targetArea = '福州市';
 
 // 行政区域级别
-export const targetAreaLevel = 'city';
+export const targetAreaLevel = 'district';
 
-// 边框样式
-export const strokeType = 'solid';
+// 边框样式 - 使用光栅效果
+export const strokeType = ['光栅', '发光边缘'][0];
+
+// 动态缩放函数
+export const dynamicZoom = (zoom: number) => {
+  const designWidth = 1920;
+  const scaleX = window.innerWidth / designWidth;
+  if (scaleX > 1) {
+    const newZoom = Number(zoom) + Number((scaleX - 1).toFixed(2));
+    return newZoom;
+  }
+  return zoom;
+};
+
+export const dynamicZooms = (zoom: number) => {
+  const newZoom = dynamicZoom(zoom);
+  return [newZoom - 1, 20];
+};
 
 // 地图缩放级别
-export const mapZoom = 11;
-export const mapZooms = [8, 16];
+export const mapZoom = dynamicZoom(9.8);
+export const mapZooms = dynamicZooms(9.8);
 
 // 应急资源类型
 export const emergencyTypes = {

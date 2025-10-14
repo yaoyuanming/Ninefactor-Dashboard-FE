@@ -4,7 +4,7 @@
       <div class="screen-base-canvas">
         <!-- 综合监测显示Map，应急管理显示Map2 -->
         <Map v-if="operationTab === 0" />
-        <Map2 v-if="operationTab === 1" />
+        <Map2 v-if="operationTab === 1" ref="map2Ref" />
         <!-- 其他模式（报警、风险、统计、监控）显示渐变背景 -->
         <div v-if="operationTab >= 2" class="default-background"></div>
       </div>
@@ -16,6 +16,13 @@
       <Left v-if="operationTab === 0" />
       <Left2 v-if="operationTab === 1" />
       <Right v-if="operationTab === 0" />
+      <!-- 应急管理模式下的搜索和筛选 -->
+      <SearchBox
+        v-if="operationTab === 1"
+        @search="handleSearch"
+        @clear="handleClearSearch"
+      />
+      <Right2 v-if="operationTab === 1" @filter-change="handleFilterChange" />
 
       <!-- 底部全屏布局（报警、风险、统计、监控） -->
       <Bottom v-if="operationTab === 2">
@@ -47,13 +54,15 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, onBeforeUnmount, onMounted, ref, provide } from 'vue';
+  import { onBeforeUnmount, onMounted, ref, provide } from 'vue';
   import Top from './Top/index.vue';
   import Map from './Map/index.vue';
   import Map2 from './Map2/index.vue';
   import Left from './Left/index.vue';
   import Left2 from './Left2/index.vue';
   import Right from './Right/index.vue';
+  import Right2 from './Right2/index.vue';
+  import SearchBox from './SearchBox/index.vue';
   import Bottom from './Bottom/index.vue';
   import Alarm from './Bottom/Alarm.vue';
   import Risk from './Bottom/Risk.vue';
@@ -61,9 +70,9 @@
   import Monitor from './Bottom/Monitor.vue';
   import DetailDrawer from './DetailDrawer/index.vue';
   import { type DrawerTypeValue, DrawerType } from './DetailDrawer/types';
-  import { baseConfig } from './config';
 
   const operationTab = ref(0);
+  const map2Ref = ref<any>(null);
 
   // 底部抽屉相关
   const drawerVisible = ref(false);
@@ -93,6 +102,27 @@
   provide('setDrawerSuccessCallback', (callback: () => void) => {
     drawerSuccessCallback.value = callback;
   });
+
+  // 处理搜索
+  const handleSearch = (keyword: string) => {
+    if (map2Ref.value) {
+      map2Ref.value.setSearchKeyword(keyword);
+    }
+  };
+
+  // 处理清除搜索
+  const handleClearSearch = () => {
+    if (map2Ref.value) {
+      map2Ref.value.clearSearch();
+    }
+  };
+
+  // 处理筛选变化
+  const handleFilterChange = (filterTypes: Record<string, boolean>) => {
+    if (map2Ref.value) {
+      map2Ref.value.setFilterTypes(filterTypes);
+    }
+  };
 
   function adjustScale() {
     const designWidth = 1920;
@@ -126,7 +156,9 @@
     adjustScale();
     window.addEventListener('resize', adjustScale);
   });
-  onBeforeUnmount(() => {});
+  onBeforeUnmount(() => {
+    window.removeEventListener('resize', adjustScale);
+  });
 </script>
 
 <style scoped lang="less">
