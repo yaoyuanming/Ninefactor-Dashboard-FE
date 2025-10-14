@@ -1,686 +1,313 @@
 <template>
   <div class="stats-section alarm-stats-section">
-    <Title
-      title="仓库概况"
-      :src="TitleImage"
-      :tabs="[]"
-      @imgClick="handleWarehouseClick"
-    />
-    <div style="padding: 20px 24px; text-align: center">
-      <img
-        style="width: 410px; margin-bottom: 12px; cursor: pointer"
-        src="@/assets/screen/left21.png"
-      />
-      <img
-        style="width: 410px; margin-bottom: 12px; cursor: pointer"
-        src="@/assets/screen/left22.png"
-      />
+    <Title title="仓库概况" :src="TitleImage" :tabs="[]" @imgClick="handleWarehouseClick" />
+    <div class="tabbar-flex" style="padding: 12px 24px; text-align: center;">
+      <div class="tabbar">
+        <div class="items" :style="ItemsStyle(items.id)" v-for="items in WarehouseItems" :key="items.id">{{ items.label
+          }}</div>
+      </div>
+      <div class="tabbar">
+        <div class="items" :style="ItemsStyle(items.id)" v-for="items in ConfigItems" :key="items.id">{{ items.label }}
+        </div>
+      </div>
     </div>
 
-    <!-- <div class="overview-section">
-      <div :style="{ flexGrow: 100 }" class="stat-item">
-        <div class="title">
-          <img class="icon" src="@/assets/screen/imgs/second-title.png" />
-          <div class="label">消警数</div>
-        </div>
-        <div class="num">{{ clearanceNum }}</div>
-      </div>
-      <div :style="{ flexGrow: 315 }" class="stat-item">
-        <div class="rlabel">消警率</div>
-        <a-progress class="rnum" :percent="clearanceRate" />
-      </div>
-    </div> -->
-    <!-- 报警类型分布（图表和列表） -->
-    <!-- <div class="alarm-distribution">
-      <div ref="alarmChartContainer" class="alarm-chart-container"></div>
-      <div class="alarm-type-list">
-        <div
-          v-for="item in alarmTypes"
-          :key="item.name"
-          class="alarm-legend-item"
-        >
-          <div class="title">
-            <span
-              class="legend-color-block"
-              :style="{
-                backgroundColor: item.itemStyle.color?.colorStops?.[0]?.color,
-              }"
-            ></span>
-            <span class="legend-text">{{ item.name }}</span>
-          </div>
-          <div class="num">{{ item.value }}</div>
+    <div class="charts-compons">
+      <!-- 环形图容器 -->
+      <div class="chart-container">
+        <div ref="ringChart" class="ring-chart"></div>
+        <!-- 中心部分 -->
+        <div class="center-image">
+          <img src="@/assets/screen/imgs/chatr-center.png" alt="">
         </div>
       </div>
-    </div> -->
+      <div class="flex-lines-views">
+        <div class="views-cop" v-for="views in ViewsItems" :key="views.id">
+          <div class="line" :style="{ background: views.background }"></div>
+          <div class="title">{{ views.label }}</div>
+          <div class="text">52</div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import {
-    ref,
-    onMounted,
-    onBeforeUnmount,
-    nextTick,
-    watch,
-    inject,
-  } from 'vue';
-  // 引入 Echarts
-  import * as echarts from 'echarts';
-  import type { EChartsType } from 'echarts';
-  import { DrawerType } from '../DetailDrawer/types';
-  import Title from '../components/Title.vue';
-  import TitleImage from '../../../../assets/screen/lien.png';
-  import AlarmBg from '../../../../assets/screen/imgs/alarm-bg.png';
-  import Drop from '../../../../assets/screen/imgs/drop.png';
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  nextTick,
+  watch,
+  inject,
+} from 'vue';
+// 引入 Echarts
+import * as echarts from 'echarts';
+import type { EChartsType } from 'echarts';
+import { DrawerType } from '../DetailDrawer/types';
+import Title from '../components/Title.vue';
+import TitleImage from '@/assets/screen/lien.png';
 
-  const openDrawer = inject<any>('openDrawer');
+// 图表实例
+const ringChart = ref<HTMLDivElement | null>(null);
+let chartInstance: EChartsType | null = null;
 
-  // 点击仓库概况
-  const handleWarehouseClick = () => {
-    console.log('Left/L2组件：handleWarehouseClick被调用了');
-    console.log('openDrawer是否存在：', !!openDrawer);
-    openDrawer?.(DrawerType.WAREHOUSE, '仓库概况', {
-      name: '1号危化品仓库',
-      code: 'WH2025001',
-      company: '福州市XXXXX公司',
-      type: '危险品仓库',
-      dangerLevel: '01-1.1级库房',
-      capacity: '500吨',
-      manager: '李四',
-      phone: '13800138000',
-      address: '福建省福州市仓山区金山大道XXX号仓储区A区',
-      area: '1200㎡',
-      startDate: '2019-03-15',
-      safetyLevel: 'A级',
-    });
-  };
+// 仓库tabbar
+const WarehouseItems = [
+  { id: 0, label: '仓库' },
+  { id: 1, label: '库房' },
+]
 
-  // Echarts 容器的引用
-  const alarmChartContainer = ref<HTMLElement | null>(null);
+const ConfigItems = [
+  { id: 0, label: '危险等级' },
+  { id: 1, label: '核定药量' },
+  { id: 2, label: '面积' },
+]
 
-  // Echarts 实例的引用
-  const alarmChart = ref<EChartsType | null>(null);
+const ViewsItems = [
+  { id: 0, label: '1.1级仓库', background: '#FFA262' },
+  { id: 1, label: '1.3级仓库', background: '#FF595E' },
+  { id: 2, label: '无药仓库', background: '#A4E76C' },
+]
 
-  // 报警类型数据 (响应式数组，用于图表和列表)
-  // 使用静态模拟数据，避免外部依赖
-  const alarmTypes = ref([
-    {
-      value: 0,
-      handle: 0,
-      untreated: 0,
-      name: '超员作业',
-      itemStyle: {
-        color: {
-          type: 'linear',
-          x: 0,
-          y: 0,
-          x2: 1,
-          y2: 0,
-          colorStops: [
-            { offset: 0, color: '#4285F4' }, // 起始颜色
-            { offset: 1, color: 'rgba(66, 133, 244, 0.1)' }, // 拖尾渐变色
-          ],
-        },
-      },
-    },
-    {
-      value: 0,
-      handle: 0,
-      untreated: 0,
-      name: '堵塞通道',
-      itemStyle: {
-        color: {
-          type: 'linear',
-          x: 0,
-          y: 0,
-          x2: 1,
-          y2: 0,
-          colorStops: [
-            { offset: 0, color: '#34A853' },
-            { offset: 1, color: 'rgba(52, 168, 83, 0.1)' },
-          ],
-        },
-      },
-    },
-    {
-      value: 0,
-      handle: 0,
-      untreated: 0,
-      name: '超高超量',
-      itemStyle: {
-        color: {
-          type: 'linear',
-          x: 0,
-          y: 0,
-          x2: 1,
-          y2: 0,
-          colorStops: [
-            { offset: 1, color: '#FBBC05' },
-            { offset: 0, color: 'rgba(251, 188, 5, 0.1)' },
-          ],
-        },
-      },
-    },
-    {
-      value: 0,
-      handle: 0,
-      untreated: 0,
-      name: '非法入侵',
-      itemStyle: {
-        color: {
-          type: 'linear',
-          x: 0,
-          y: 0,
-          x2: 1,
-          y2: 0,
-          colorStops: [
-            { offset: 1, color: '#EA4335' },
-            { offset: 0, color: 'rgba(234, 67, 53, 0.1)' },
-          ],
-        },
-      },
-    },
-    {
-      value: 0,
-      handle: 0,
-      untreated: 0,
-      name: '摄像头遮挡偏移',
-      itemStyle: {
-        color: {
-          type: 'linear',
-          x: 0,
-          y: 0,
-          x2: 1,
-          y2: 0,
-          colorStops: [
-            { offset: 1, color: '#F09300' },
-            { offset: 0, color: 'rgba(240, 147, 0, 0.1)' },
-          ],
-        },
-      },
-    },
-    {
-      value: 0,
-      handle: 0,
-      untreated: 0,
-      name: '人员资质证书到期',
-      itemStyle: {
-        color: {
-          type: 'linear',
-          x: 0,
-          y: 0,
-          x2: 1,
-          y2: 0,
-          colorStops: [
-            { offset: 0, color: '#E91E63' },
-            { offset: 1, color: 'rgba(233, 30, 99, 0.1)' },
-          ],
-        },
-      },
-    },
-    {
-      value: 0,
-      handle: 0,
-      untreated: 0,
-      name: '其他',
-      itemStyle: {
-        color: {
-          type: 'linear',
-          x: 0,
-          y: 0,
-          x2: 1,
-          y2: 0,
-          colorStops: [
-            { offset: 0, color: '#9C27B0' },
-            { offset: 1, color: 'rgba(156, 39, 176, 0.1)' },
-          ],
-        },
-      },
-    },
-  ]);
+const WarehouseIds = ref(0)
 
-  // 模拟总报警数和消警率
-  const totalAlarms = ref(0);
-  const clearanceRate = ref(1);
-  const clearanceNum = ref(0);
+function ItemsStyle(ids: Number) {
+  if (ids === WarehouseIds.value) {
+    return {
+      color: "#fff",
+      background: "linear-gradient(180deg, rgba(45, 154, 255, 0) 5%, rgba(45, 139, 255, 0.51) 100%"
+    }
+  } else {
+    return {
+      color: "rgba(216, 233, 240, 0.75)"
+    }
+  }
+}
+
+// 初始化环形图
+const initRingChart = () => {
+  if (!ringChart.value) return;
+
+  // 销毁已有实例
+  if (chartInstance) {
+    chartInstance.dispose();
+  }
+
+  // 创建新实例
+  chartInstance = echarts.init(ringChart.value);
 
   // 图表配置
-  const chartOption = {
+  const option = {
     tooltip: {
-      trigger: 'item',
-    },
-    graphic: {
-      type: 'group', // 使用组包裹多个元素
-      left: 'center',
-      top: 'center',
-      children: [
-        {
-          type: 'image',
-          style: {
-            image: AlarmBg, // 图片路径
-            width: 200,
-            height: 200,
-          },
-          left: 'center',
-          top: 'center',
-        },
-        {
-          type: 'image',
-          style: {
-            image: Drop, // 图片路径
-            width: 115,
-            height: 115,
-          },
-          left: 'center',
-          top: 'center',
-        },
-        {
-          type: 'text',
-          style: {
-            text: totalAlarms.value, // 数值
-            fontSize: 24,
-            fill: '#fff',
-            fontWeight: 'bold',
-          },
-          left: 'center',
-          top: '-20',
-        },
-        {
-          type: 'text',
-          style: {
-            text: '报警数', // 主标题
-            fontSize: 14,
-            fill: '#C1C9D8',
-          },
-          left: 'center',
-          top: '10', // 垂直居中偏上
-        },
-      ],
+      show: false
     },
     series: [
       {
-        name: '报警类型',
         type: 'pie',
-        radius: ['80%', '90%'], // 饼图半径
+        radius: ['70%', '85%'], // 控制环形的粗细
+        center: ['50%', '50%'],
+        startAngle: 90, // 从顶部开始
+        clockWise: false, // 逆时针方向
+        data: [
+          { value: 30, itemStyle: { color: '#36D399' } }, // 绿色部分
+          { value: 20, itemStyle: { color: '#FF9F1C' } }, // 橙色部分
+          { value: 50, itemStyle: { color: '#FF5630' } }  // 红色部分
+        ],
         itemStyle: {
-          borderRadius: '50%',
+          borderWidth: 0
         },
-        padAngle: 5,
-        avoidLabelOverlap: false,
+        // 隐藏标签和连接线
         label: {
-          show: false, // 默认不显示标签
-          position: 'outside',
-          formatter: '{b}: {c} ({d}%)',
-        },
-        emphasis: {
-          label: {
-            show: false, // 悬停时不显示标签
-            fontSize: '12',
-            fontWeight: 'bold',
-          },
+          show: false
         },
         labelLine: {
-          show: false, // 不显示标签引导线
+          show: false
         },
-        data: alarmTypes.value,
-      },
-    ],
-  };
-
-  const selectTab = ref('daily');
-  const statisticsData = ref({});
-
-  watch(
-    alarmTypes,
-    () => {
-      // eslint-disable-next-line no-use-before-define
-      updateChart();
-    },
-    { deep: true }
-  );
-
-  // watch(
-  //   selectTab,
-  //   () => {
-  //     alarmTypes.value = transformData(statisticsData.value);
-  //   },
-  //   { deep: true }
-  // );
-
-  const updateChart = () => {
-    nextTick(() => {
-      alarmChart.value?.setOption({
-        graphic: {
-          type: 'group', // 使用组包裹多个元素
-          left: 'center',
-          top: 'center',
-          children: [
-            {
-              type: 'image',
-              style: {
-                image: AlarmBg, // 图片路径
-                width: 200,
-                height: 200,
-              },
-              left: 'center',
-              top: 'center',
-            },
-            {
-              type: 'image',
-              style: {
-                image: Drop, // 图片路径
-                width: 115,
-                height: 115,
-              },
-              left: 'center',
-              top: 'center',
-            },
-            {
-              type: 'text',
-              style: {
-                text: totalAlarms.value, // 数值
-                fontSize: 24,
-                fill: '#fff',
-                fontWeight: 'bold',
-              },
-              left: 'center',
-              top: '-20',
-            },
-            {
-              type: 'text',
-              style: {
-                text: '报警数', // 主标题
-                fontSize: 14,
-                fill: '#C1C9D8',
-              },
-              left: 'center',
-              top: '10', // 垂直居中偏上
-            },
-          ],
-        },
-        series: [
-          {
-            data: alarmTypes.value,
-          },
-        ],
-      });
-    });
-  };
-
-  const getStatisticsData = async () => {
-    // const res = await getAlarmStatistics();
-    // statisticsData.value = res;
-    // alarmTypes.value = transformData(res);
-  };
-
-  // const transformData = (originalData) => {
-  //   const cy = {
-  //     value: 0,
-  //     handle: 0,
-  //     untreated: 0,
-  //     name: '超员作业',
-  //     itemStyle: { color: '#4285F4' },
-  //   };
-  //   const ds = {
-  //     value: 0,
-  //     handle: 0,
-  //     untreated: 0,
-  //     name: '堵塞通道',
-  //     itemStyle: { color: '#34A853' },
-  //   };
-  //   const cg = {
-  //     value: 0,
-  //     handle: 0,
-  //     untreated: 0,
-  //     name: '超高超量',
-  //     itemStyle: { color: '#FBBC05' },
-  //   };
-  //   const rq = {
-  //     value: 0,
-  //     handle: 0,
-  //     untreated: 0,
-  //     name: '非法入侵',
-  //     itemStyle: { color: '#EA4335' },
-  //   };
-  //   const zd = {
-  //     value: 0,
-  //     handle: 0,
-  //     untreated: 0,
-  //     name: '摄像头遮挡偏移',
-  //     itemStyle: { color: '#F09300' },
-  //   };
-  //   const dq = {
-  //     value: 0,
-  //     handle: 0,
-  //     untreated: 0,
-  //     name: '人员资质证书到期',
-  //     itemStyle: { color: '#E91E63' },
-  //   };
-  //   const qt = {
-  //     value: 0,
-  //     handle: 0,
-  //     untreated: 0,
-  //     name: '其他',
-  //     itemStyle: { color: '#9C27B0' },
-  //   };
-  //   let totalCount = 0;
-  //   // 处理daily数据
-  //   originalData?.[selectTab.value].forEach(
-  //     (item: { type: string; handleType: string; count: number }) => {
-  //       if (item?.type === '超员作业') {
-  //         cy.value += item?.count;
-  //         item.handleType === '未消警'
-  //           ? (cy.untreated = item?.count)
-  //           : (cy.handle = item?.count);
-  //       } else if (item?.type === '堵塞通道') {
-  //         ds.value += item?.count;
-  //         item.handleType === '未消警'
-  //           ? (ds.untreated = item?.count)
-  //           : (ds.handle = item?.count);
-  //       } else if (item?.type === '超高超量') {
-  //         cg.value += item?.count;
-  //         item.handleType === '未消警'
-  //           ? (cg.untreated = item?.count)
-  //           : (cg.handle = item?.count);
-  //       } else if (item?.type === '非法入侵') {
-  //         rq.value += item?.count;
-  //         item.handleType === '未消警'
-  //           ? (rq.untreated = item?.count)
-  //           : (rq.handle = item?.count);
-  //       } else if (item?.type === '摄像头遮挡偏移') {
-  //         zd.value += item?.count;
-  //         item.handleType === '未消警'
-  //           ? (zd.untreated = item?.count)
-  //           : (zd.handle = item?.count);
-  //       } else if (item?.type === '人员资质证书到期') {
-  //         dq.value += item?.count;
-  //         item.handleType === '未消警'
-  //           ? (dq.untreated = item?.count)
-  //           : (dq.handle = item?.count);
-  //       } else {
-  //         qt.value += item?.count;
-  //         item.handleType === '未消警'
-  //           ? (qt.untreated = item?.count)
-  //           : (qt.handle = item?.count);
-  //       }
-  //       totalCount += item?.count;
-  //     }
-  //   );
-  //   nextTick(() => {
-  //     totalAlarms.value = totalCount;
-  //     let handleCount =
-  //       cy.handle + ds.handle + cg.handle + rq.handle + zd.handle + dq.handle;
-  //     clearanceNum.value = handleCount;
-  //     if (totalCount === 0) {
-  //       clearanceRate.value = 100;
-  //     } else {
-  //       clearanceRate.value = Number(
-  //         ((handleCount / totalCount) * 100).toFixed(2)
-  //       );
-  //     }
-  //   });
-
-  //   // 构建结果
-  //   return [cy, ds, cg, rq, zd, dq, qt];
-  // };
-
-  onMounted(() => {
-    // 在 DOM 挂载后初始化 Echarts 实例
-
-    nextTick(() => {
-      if (alarmChartContainer.value) {
-        alarmChart.value = echarts.init(alarmChartContainer.value, '', {
-          width: 170,
-          height: 170,
-        });
-        alarmChart.value.setOption(chartOption);
+        // 添加动画效果
+        animationDuration: 1500,
+        animationEasing: 'cubicOut'
       }
-    });
-    getStatisticsData();
-  });
-
-  onBeforeUnmount(() => {
-    // 在组件销毁前销毁图表实例，防止内存泄漏
-    if (alarmChart.value) {
-      alarmChart.value.dispose();
+    ],
+    // 添加外层虚线圆环
+    graphic: {
+      elements: [
+        {
+          type: 'circle',
+          cx: '20%',
+          cy: '20%',
+          r: '50%', // 稍大于外环
+          fill: 'none',
+          stroke: 'rgba(255, 255, 255, 0.2)',
+          lineWidth: 1,
+          lineDash: [2, 2] // 虚线样式
+        }
+      ]
     }
+  };
+
+  // 设置配置项
+  chartInstance.setOption(option);
+
+  // 响应窗口大小变化
+  const handleResize = () => {
+    chartInstance?.resize();
+  };
+
+  window.addEventListener('resize', handleResize);
+
+  // 组件卸载时移除事件监听
+  onBeforeUnmount(() => {
+    window.removeEventListener('resize', handleResize);
   });
+}
+
+const openDrawer = inject<any>('openDrawer');
+
+// 点击仓库概况
+const handleWarehouseClick = () => {
+  console.log('Left/L2组件：handleWarehouseClick被调用了');
+  console.log('openDrawer是否存在：', !!openDrawer);
+  openDrawer?.(DrawerType.WAREHOUSE, '仓库概况', {
+    name: '1号危化品仓库',
+    code: 'WH2025001',
+    company: '福州市XXXXX公司',
+    type: '危险品仓库',
+    dangerLevel: '01-1.1级库房',
+    capacity: '500吨',
+    manager: '李四',
+    phone: '13800138000',
+    address: '福建省福州市仓山区金山大道XXX号仓储区A区',
+    area: '1200㎡',
+    startDate: '2019-03-15',
+    safetyLevel: 'A级',
+  });
+};
+
+// 组件挂载后初始化图表
+onMounted(() => {
+  nextTick(() => {
+    initRingChart();
+  });
+});
+
+// 组件卸载前销毁图表实例
+onBeforeUnmount(() => {
+  if (chartInstance) {
+    chartInstance.dispose();
+    chartInstance = null;
+  }
+});
+
+// 监听窗口大小变化，重新调整图表尺寸
+watch(
+  () => window.innerWidth,
+  () => {
+    chartInstance?.resize();
+  }
+);
+
 </script>
 
 <style scoped lang="less">
-  .stats-section {
-    background: linear-gradient(90deg, #0c2249 0%, rgb(65 106 146 / 69%) 97%);
-    border-radius: 4px;
-    pointer-events: all;
+.stats-section {
+  background: linear-gradient(90deg, #0c2249 0%, rgb(65 106 146 / 69%) 97%);
+  border-radius: 4px;
+  pointer-events: all;
+  padding-bottom: 20px;
+}
 
-    .overview-section {
+.tabbar-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tabbar {
+  display: flex;
+  align-items: center;
+
+  .items {
+    width: 70px;
+    line-height: 27px;
+    border-image: radial-gradient(50% 50% at 50% 0%, #829CB9 0%, rgba(127, 154, 183, 0) 100%) 1;
+    background: rgba(8, 23, 44, 0.48);
+    font-size: 14px;
+    cursor: pointer;
+  }
+}
+
+// 图表容器样式
+.chart-container {
+  position: relative;
+  margin: 20px 44px 14px 61px;
+  height: 120px;
+  width: 120px;
+}
+
+.ring-chart {
+  width: 120px;
+  height: 120px;
+}
+
+.charts-compons {
+  display: flex;
+  align-items: center;
+
+  .flex-lines-views {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    .views-cop {
+      width: 204px;
       display: flex;
-      gap: 12px;
-      height: 43px;
-      margin: 10px 0;
-      padding: 0 20px;
+      align-items: center;
+      padding: 2.7px 6px;
+      background: rgba(17, 41, 75, 0.23);
 
-      .stat-item {
-        display: flex;
-        padding: 10px 8px;
-        background: rgb(64 83 123 / 23%);
-        border-radius: 4px;
-        opacity: 1;
-
-        .title {
-          position: relative;
-          flex-grow: 3;
-
-          .icon {
-            position: absolute;
-            top: 2px;
-            left: -4;
-            width: 27px;
-            height: 24px;
-            opacity: 1;
-          }
-
-          .label {
-            display: inline-block;
-            padding-left: 30px;
-            color: rgb(193 201 216 / 83%);
-            font-weight: normal;
-            font-size: 14px;
-            font-family: 'PingFang SC';
-            line-height: normal;
-            letter-spacing: 0;
-          }
-        }
-
-        .rlabel {
-          display: inline-block;
-          color: rgb(193 201 216 / 83%);
-          font-weight: normal;
-          font-size: 14px;
-          font-family: 'PingFang SC';
-          line-height: normal;
-          letter-spacing: 0;
-        }
-
-        .rnum {
-          width: calc(100% - 58px);
-          padding-left: 12px;
-        }
-
-        .num {
-          padding-right: 8px;
-          color: #fff;
-          font-weight: 600;
-          font-size: 14px;
-          font-family: 'PingFang SC';
-          line-height: normal;
-          letter-spacing: 0;
-          text-align: right;
-        }
-      }
-    }
-
-    .alarm-distribution {
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 20px 12px 0;
-
-      .alarm-chart-container {
-        width: 170px;
-        height: 170px;
-        background: radial-gradient(
-          88% 88% at 50% 100%,
-          rgb(0 0 0 / 0%) 2%,
-          rgb(22 22 26 / 42%) 100%
-        );
+      .line {
+        width: 5.5px;
+        height: 5.5px;
         border-radius: 50%;
       }
 
-      .alarm-type-list {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        justify-content: center;
-        width: 170px;
-        height: 170px;
+      .title {
+        margin-left: 7px;
+        font-size: 15px;
+        color: #AEC8E1;
+        flex: 1;
 
-        .alarm-legend-item {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          color: rgb(255 255 255 / 80%);
-          font-size: 10px;
-          white-space: nowrap;
+      }
 
-          .title {
-            display: flex;
-            flex-direction: row;
-            gap: 10px;
-            align-items: center;
-            padding: 3px 8px;
-            background: linear-gradient(
-              90deg,
-              #283b54 0%,
-              rgb(40 59 84 / 0%) 100%
-            );
-            border-radius: 4px;
-            opacity: 1;
-
-            .legend-color-block {
-              display: inline-block;
-              width: 5px;
-              height: 5px;
-              margin-right: 4px;
-              border-radius: 50%;
-            }
-
-            .legend-text {
-              overflow: hidden;
-              text-overflow: ellipsis;
-            }
-          }
-        }
+      .text {
+        background: linear-gradient(180deg, #FFFFFF 37%, #94FBFF 69%, #C2DDFF 94%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-fill-color: transparent;
+        font-size: 18px;
       }
     }
   }
+}
+
+.center-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+
+  img {
+    width: 24px;
+    height: 24px;
+  }
+}
 </style>
