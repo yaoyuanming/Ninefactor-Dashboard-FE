@@ -30,25 +30,25 @@ export interface RescueTeamListReqVO {
 
 // 查询救援力量列表
 export function getRescueTeamList(data: RescueTeamListReqVO) {
-  return axios.post('/api/emergency/rescueTeam/list', data);
+  return axios.post('/biz/emergency/rescueTeam/list', data);
 }
 
 // 获得救援力量详情
 export function getRescueTeam(id: number) {
-  return axios.get(`/api/emergency/rescueTeam/${id}`);
+  return axios.get(`/biz/emergency/rescueTeam/${id}`);
 }
 
 // 新增救援力量
 export function createRescueTeam(data: RescueTeamVO) {
-  return axios.post('/api/emergency/rescueTeam', data);
+  return axios.post('/biz/emergency/rescueTeam', data);
 }
 
 // 修改救援力量
 export function updateRescueTeam(data: RescueTeamVO) {
-  return axios.put('/api/emergency/rescueTeam', data);
+  return axios.put('/biz/emergency/rescueTeam', data);
 }
 
 // 删除救援力量
 export function deleteRescueTeam(ids: number[]) {
-  return axios.delete(`/api/emergency/rescueTeam/${ids.join(',')}`);
+  return axios.delete(`/biz/emergency/rescueTeam/${ids.join(',')}`);
 }

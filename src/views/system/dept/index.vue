@@ -104,8 +104,13 @@
   // 表格列配置
   const columns = [
     { title: '部门名称', dataIndex: 'deptName', width: 300 },
-    { title: '部门编号', dataIndex: 'deptId', width: 150, align: 'center' },
-    { title: '操作', slotName: 'action', width: 150, align: 'center' },
+    {
+      title: '部门编号',
+      dataIndex: 'deptId',
+      width: 150,
+      align: 'center' as const,
+    },
+    { title: '操作', slotName: 'action', width: 150, align: 'center' as const },
   ];
 
   // 查询部门列表

@@ -32,25 +32,25 @@ export interface MedicalInstitutionListReqVO {
 
 // 查询医疗机构列表
 export function getMedicalInstitutionList(data: MedicalInstitutionListReqVO) {
-  return axios.post('/api/emergency/medical/list', data);
+  return axios.post('/biz/emergency/medical/list', data);
 }
 
 // 获得医疗机构详情
 export function getMedicalInstitution(id: number) {
-  return axios.get(`/api/emergency/medical/${id}`);
+  return axios.get(`/biz/emergency/medical/${id}`);
 }
 
 // 新增医疗机构
 export function createMedicalInstitution(data: MedicalInstitutionVO) {
-  return axios.post('/api/emergency/medical', data);
+  return axios.post('/biz/emergency/medical', data);
 }
 
 // 修改医疗机构
 export function updateMedicalInstitution(data: MedicalInstitutionVO) {
-  return axios.put('/api/emergency/medical', data);
+  return axios.put('/biz/emergency/medical', data);
 }
 
 // 删除医疗机构
 export function deleteMedicalInstitution(ids: number[]) {
-  return axios.delete(`/api/emergency/medical/${ids.join(',')}`);
+  return axios.delete(`/biz/emergency/medical/${ids.join(',')}`);
 }
