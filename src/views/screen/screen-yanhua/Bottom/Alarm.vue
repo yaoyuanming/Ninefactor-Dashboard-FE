@@ -250,14 +250,18 @@
         alarmStatus: filterForm.alarmStatus,
       };
 
+      console.log(params);
+      
+
       // 处理时间范围
-      if (filterForm.timeRange && filterForm.timeRange.length === 2) {
-        const [beginTime, endTime] = filterForm.timeRange;
-        params.beginTime = beginTime;
-        params.endTime = endTime;
-      }
+      // if (filterForm.timeRange && filterForm.timeRange.length === 2) {
+      //   const [beginTime, endTime] = filterForm.timeRange;
+      //   params.beginTime = beginTime;
+      //   params.endTime = endTime;
+      // }
 
       const response = await getAlarmPage(params);
+      console.log(response)
       const { data } = response;
 
       if (data) {

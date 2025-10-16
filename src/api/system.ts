@@ -20,3 +20,20 @@ export function uploadImage(file: File, uploadDict: string) {
     },
   });
 }
+
+/**
+ * 字典
+ * @param dictType 上传字典类型
+ * @returns 上传结果
+ */
+
+export function DictType(params: string) {
+  return axios.get(`/system/dict/data/type/${params}`);
+}
+
+/**
+ * 获取行业下拉列表
+ */
+export function getIndustrySelect() {
+  return axios.get(`/system/industry/treeselect`);
+}

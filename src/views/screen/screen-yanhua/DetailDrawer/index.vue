@@ -13,8 +13,8 @@
     @cancel="handleClose"
   >
     <div class="drawer-content">
-      <CompanyDetail v-if="type === DrawerType.COMPANY" :data="data" />
-      <WarehouseDetail v-if="type === DrawerType.WAREHOUSE" :data="data" />
+      <CompanyTables v-if="type === DrawerType.COMPANY" :data="data"/>
+      <WarehouseTable v-if="type === DrawerType.WAREHOUSE" :data="data" />
       <CreateRegionalTask
         v-if="type === DrawerType.REGIONAL_TASK"
         @close="handleClose"
@@ -39,8 +39,8 @@
 </template>
 
 <script lang="ts" setup>
-  import CompanyDetail from './CompanyDetail.vue';
-  import WarehouseDetail from './WarehouseDetail.vue';
+  import CompanyTables from './Company/tables.vue';
+  import WarehouseTable from './Warehouse/index.vue';
   import CreateRegionalTask from './statistics/CreateRegionalTask.vue';
   import CreateEnterpriseTask from './statistics/CreateEnterpriseTask.vue';
   import ViewRegionalTask from './statistics/ViewRegionalTask.vue';

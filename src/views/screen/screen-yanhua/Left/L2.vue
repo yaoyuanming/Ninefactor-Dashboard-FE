@@ -3,12 +3,12 @@
     <Title title="仓库概况" :src="TitleImage" :tabs="[]" @imgClick="handleWarehouseClick" />
     <div class="tabbar-flex" style="padding: 12px 24px; text-align: center;">
       <div class="tabbar">
-        <div class="items" :style="ItemsStyle(items.id)" v-for="items in WarehouseItems" :key="items.id">{{ items.label
-          }}</div>
+        <div class="items" :style="ItemsStyle(items.id, 'dataType')" v-for="items in WarehouseItems" :key="items.id"
+          @click="handleTabClick('dataType', items.id)">{{ items.label }}</div>
       </div>
       <div class="tabbar">
-        <div class="items" :style="ItemsStyle(items.id)" v-for="items in ConfigItems" :key="items.id">{{ items.label }}
-        </div>
+        <div class="items" :style="ItemsStyle(items.id, 'dimension')" v-for="items in ConfigItems" :key="items.id"
+          @click="handleTabClick('dimension', items.id)">{{ items.label }}</div>
       </div>
     </div>
 
@@ -18,14 +18,14 @@
         <div ref="ringChart" class="ring-chart"></div>
         <!-- 中心部分 -->
         <div class="center-image">
-          <img src="@/assets/screen/imgs/chatr-center.png" alt="">
+          <img src="@/assets/screen/imgs/chatr-center.png" alt="中心图标">
         </div>
       </div>
       <div class="flex-lines-views">
-        <div class="views-cop" v-for="views in ViewsItems" :key="views.id">
-          <div class="line" :style="{ background: views.background }"></div>
-          <div class="title">{{ views.label }}</div>
-          <div class="text">52</div>
+        <div class="views-cop" v-for="(item, index) in currentData" :key="index">
+          <div class="line" :style="{ background: item.color }"></div>
+          <div class="title">{{ item.label }}</div>
+          <div class="text">{{ item.count }}</div>
         </div>
       </div>
     </div>
@@ -40,6 +40,7 @@ import {
   nextTick,
   watch,
   inject,
+  computed
 } from 'vue';
 // 引入 Echarts
 import * as echarts from 'echarts';
@@ -47,42 +48,90 @@ import type { EChartsType } from 'echarts';
 import { DrawerType } from '../DetailDrawer/types';
 import Title from '../components/Title.vue';
 import TitleImage from '@/assets/screen/lien.png';
+import { getObtainWarehouseInfor } from '@/api/compmonitoring';
 
 // 图表实例
 const ringChart = ref<HTMLDivElement | null>(null);
 let chartInstance: EChartsType | null = null;
 
+// 仓库信息
+const warehouseData = ref<any>(null);
+
+//Tab切换
+const activeTabs = ref({
+  dataType: 0,
+  dimension: 0
+});
+
 // 仓库tabbar
 const WarehouseItems = [
   { id: 0, label: '仓库' },
   { id: 1, label: '库房' },
-]
+];
 
 const ConfigItems = [
   { id: 0, label: '危险等级' },
   { id: 1, label: '核定药量' },
   { id: 2, label: '面积' },
-]
+];
 
-const ViewsItems = [
-  { id: 0, label: '1.1级仓库', background: '#FFA262' },
-  { id: 1, label: '1.3级仓库', background: '#FF595E' },
-  { id: 2, label: '无药仓库', background: '#A4E76C' },
-]
+// 数据项配色方案
+const colorSchemes = [
+  ['#FFA262', '#FF595E', '#A4E76C'], // 危险等级配色
+  ['#36D399', '#FF9F1C', '#FF5630'], // 核定药量配色
+  ['#6366F1', '#8B5CF6', '#EC4899']  // 面积配色
+];
 
-const WarehouseIds = ref(0)
+// 计算属性：根据当前Tab获取对应数据
+const currentData = computed(() => {
+  if (!warehouseData.value) return [];
 
-function ItemsStyle(ids: Number) {
-  if (ids === WarehouseIds.value) {
+  // 1. 确定是仓库还是库房数据
+  const targetSummary = activeTabs.value.dataType === 0
+    ? warehouseData.value.storeSummary
+    : warehouseData.value.roomSummary;
+
+  // 2. 确定是哪个维度的数据
+  let targetData: Array<{ value: string; label: string; count: number }> = [];
+  switch (activeTabs.value.dimension) {
+    case 0:
+      targetData = targetSummary?.riskLevel || [];
+      break;
+    case 1:
+      targetData = targetSummary?.drugCapacity || [];
+      break;
+    case 2:
+      targetData = targetSummary?.areaStandard || [];
+      break;
+  }
+
+  // 3. 为数据项添加颜色
+  return targetData.map((item, index) => ({
+    ...item,
+    color: colorSchemes[activeTabs.value.dimension][index % colorSchemes[activeTabs.value.dimension].length]
+  }));
+});
+
+// Tab样式处理
+function ItemsStyle(ids: number, type: 'dataType' | 'dimension') {
+  if (ids === activeTabs.value[type]) {
     return {
       color: "#fff",
-      background: "linear-gradient(180deg, rgba(45, 154, 255, 0) 5%, rgba(45, 139, 255, 0.51) 100%"
-    }
+      background: "linear-gradient(180deg, rgba(45, 154, 255, 0) 5%, rgba(45, 139, 255, 0.51) 100%)",
+      cursor: 'pointer'
+    };
   } else {
     return {
-      color: "rgba(216, 233, 240, 0.75)"
-    }
+      color: "rgba(216, 233, 240, 0.75)",
+      cursor: 'pointer'
+    };
   }
+}
+
+// Tab切换事件
+function handleTabClick(type: 'dataType' | 'dimension', id: number) {
+  activeTabs.value[type] = id;
+  updateRingChart(); // 切换后更新图表
 }
 
 // 初始化环形图
@@ -97,57 +146,50 @@ const initRingChart = () => {
   // 创建新实例
   chartInstance = echarts.init(ringChart.value);
 
-  // 图表配置
-  const option = {
+  // 设置基础配置
+  const baseOption = {
     tooltip: {
-      show: false
+      trigger: 'item',
+      formatter: '{b}: {c}个'
     },
     series: [
       {
         type: 'pie',
-        radius: ['70%', '85%'], // 控制环形的粗细
+        radius: ['70%', '85%'],
         center: ['50%', '50%'],
-        startAngle: 90, // 从顶部开始
-        clockWise: false, // 逆时针方向
-        data: [
-          { value: 30, itemStyle: { color: '#36D399' } }, // 绿色部分
-          { value: 20, itemStyle: { color: '#FF9F1C' } }, // 橙色部分
-          { value: 50, itemStyle: { color: '#FF5630' } }  // 红色部分
-        ],
+        startAngle: 90,
+        clockWise: false,
+        data: [],
         itemStyle: {
           borderWidth: 0
         },
-        // 隐藏标签和连接线
         label: {
           show: false
         },
         labelLine: {
           show: false
         },
-        // 添加动画效果
         animationDuration: 1500,
         animationEasing: 'cubicOut'
       }
     ],
-    // 添加外层虚线圆环
     graphic: {
       elements: [
         {
           type: 'circle',
-          cx: '20%',
-          cy: '20%',
-          r: '50%', // 稍大于外环
+          cx: '50%',
+          cy: '50%',
+          r: '88%',
           fill: 'none',
           stroke: 'rgba(255, 255, 255, 0.2)',
           lineWidth: 1,
-          lineDash: [2, 2] // 虚线样式
+          lineDash: [2, 2]
         }
       ]
     }
   };
 
-  // 设置配置项
-  chartInstance.setOption(option);
+  chartInstance.setOption(baseOption);
 
   // 响应窗口大小变化
   const handleResize = () => {
@@ -160,14 +202,31 @@ const initRingChart = () => {
   onBeforeUnmount(() => {
     window.removeEventListener('resize', handleResize);
   });
+
+  // 初始化数据
+  updateRingChart();
+}
+
+// 更新环形图数据
+const updateRingChart = () => {
+  if (!chartInstance || !currentData.value.length) return;
+
+  // 转换数据格式为ECharts所需
+  const chartData = currentData.value.map((item: any) => ({
+    name: item.label,
+    value: item.count,
+    itemStyle: { color: item.color }
+  }));
+
+  chartInstance.setOption({
+    series: [{ data: chartData }]
+  });
 }
 
 const openDrawer = inject<any>('openDrawer');
 
 // 点击仓库概况
 const handleWarehouseClick = () => {
-  console.log('Left/L2组件：handleWarehouseClick被调用了');
-  console.log('openDrawer是否存在：', !!openDrawer);
   openDrawer?.(DrawerType.WAREHOUSE, '仓库概况', {
     name: '1号危化品仓库',
     code: 'WH2025001',
@@ -184,11 +243,30 @@ const handleWarehouseClick = () => {
   });
 };
 
+// 获取仓库信息
+const getMontuInfo = async () => {
+  try {
+    const response = await getObtainWarehouseInfor() as any
+    if (response.success) {
+      warehouseData.value = response.data;
+    }
+    console.log('获取到的仓库数据：', warehouseData.value);
+  } catch (error) {
+    console.error('获取仓库信息接口异常：', error);
+  }
+}
+
 // 组件挂载后初始化图表
 onMounted(() => {
-  nextTick(() => {
+  nextTick(async () => {
+    await getMontuInfo();
     initRingChart();
   });
+});
+
+// 监听数据变化，更新图表
+watch(currentData, () => {
+  updateRingChart();
 });
 
 // 组件卸载前销毁图表实例
@@ -206,8 +284,8 @@ watch(
     chartInstance?.resize();
   }
 );
-
 </script>
+
 
 <style scoped lang="less">
 .stats-section {

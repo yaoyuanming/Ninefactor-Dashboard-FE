@@ -8,18 +8,18 @@
         <div class="header-bar-text">企业</div>
       </div>
       <div class="info-layout-row">
-        <!-- 左侧数据区 -->
+        <!-- 左侧数据区：应接入数、接入率 -->
         <div class="left-data-block">
           <div class="data-item-top">
             <div class="data-value-row">
-              <div class="data-number">300</div>
+              <div class="data-number">{{ EnterpriseInformation?.shouldAccessCount || 0 }}</div>
               <div class="arrow-indicator"></div>
             </div>
             <div class="data-label">应接入数</div>
           </div>
           <div class="data-item-bottom">
             <div class="data-value-row">
-              <div class="data-number">99%</div>
+              <div class="data-number">{{ (EnterpriseInformation?.accessRate || 0).toFixed(1) }}%</div>
               <div class="arrow-indicator"></div>
             </div>
             <div class="data-label">接入率</div>
@@ -29,19 +29,18 @@
         <div class="center-bg-block">
           <img src="@/assets/screen/imgs/clre-bg.png" class="center-bg-image" alt="中间装饰背景" />
         </div>
-        <!-- 右侧预留区 -->
         <div class="right-reserve-block">
           <div class="data-item-top">
             <div class="data-value-row">
               <div class="arrow-indicator"></div>
-              <div class="data-number">300</div>
+              <div class="data-number">{{ EnterpriseInformation?.accessedCount || 0 }}</div>
             </div>
             <div class="data-label">已接入数</div>
           </div>
           <div class="data-item-bottom right">
             <div class="data-value-row">
               <div class="arrow-indicator"></div>
-              <div class="data-number">298</div>
+              <div class="data-number">{{ EnterpriseInformation?.onlineCount || 0 }}</div>
             </div>
             <div class="data-label">在线数</div>
           </div>
@@ -53,29 +52,26 @@
         <div class="header-bar-text">视频设备</div>
       </div>
 
-      <!-- 视频设备 -->
       <div class="ment-container ment-top">
         <div class="ment-left">
           <div class="ment-image">
             <img src="@/assets/screen/imgs/ment-cg.png" class="ment-top-image" alt="">
-            <!-- 下层图片 -->
             <img src="@/assets/screen/imgs/ment-top.png" class="ment-bottom-image" alt="">
           </div>
-          <!-- 右边文字 -->
+          <!-- 右边文字：视频设备在线率 -->
           <div class="content-text">
-            <div class="title">100%</div>
+            <div class="title">{{ (EnterpriseInformation?.videoDeviceStatus?.onlineRate || 0).toFixed(1) }}%</div>
             <div class="content">在线率</div>
           </div>
 
-          <!-- 右侧显示 -->
           <div class="ment-content">
             <div class="font-content">
               <div class="title">已接入路数</div>
-              <div class="content">2477</div>
+              <div class="content">{{ EnterpriseInformation?.videoDeviceStatus?.totalAccessed || 0 }}</div>
             </div>
             <div class="font-content">
               <div class="title">在线路数</div>
-              <div class="content">2477</div>
+              <div class="content">{{ EnterpriseInformation?.videoDeviceStatus?.onlineCount || 0 }}</div>
             </div>
           </div>
         </div>
@@ -90,24 +86,23 @@
         <div class="ment-left">
           <div class="ment-image">
             <img src="@/assets/screen/imgs/ment-cg.png" class="ment-top-image" alt="">
-            <!-- 下层图片 -->
             <img src="@/assets/screen/imgs/ment-top.png" class="ment-bottom-image" alt="">
           </div>
-          <!-- 右边文字 -->
+          <!-- 右边文字：温湿度设备在线率 -->
           <div class="content-text">
-            <div class="title">100%</div>
+            <div class="title">{{ (EnterpriseInformation?.tempHumDeviceStatus?.onlineRate || 0).toFixed(1) }}%</div>
             <div class="content">在线率</div>
           </div>
 
-          <!-- 右侧显示 -->
+          <!-- 右侧显示：温湿度设备已接入/在线数 -->
           <div class="ment-content">
             <div class="font-content">
               <div class="title">已接入路数</div>
-              <div class="content">2477</div>
+              <div class="content">{{ EnterpriseInformation?.tempHumDeviceStatus?.totalAccessed || 0 }}</div>
             </div>
             <div class="font-content">
               <div class="title">在线路数</div>
-              <div class="content">2477</div>
+              <div class="content">{{ EnterpriseInformation?.tempHumDeviceStatus?.onlineCount || 0 }}</div>
             </div>
           </div>
         </div>
@@ -121,27 +116,62 @@ import Title from '../components/Title.vue';
 import { DrawerType } from '../DetailDrawer/types';
 import { inject, onMounted, ref } from 'vue';
 import profileTitleIcon from '@/assets/screen/lien.png';
+import { getEnterpriseInformation } from '@/api/compmonitoring';
 
+// 注入抽屉组件
 const openDrawer = inject<any>('openDrawer');
 
+// 企业统计信息：定义接口对应的数据结构
+interface DeviceStatus {
+  totalAccessed?: number; // 已接入总数
+  onlineCount?: number;   // 在线数
+  onlineRate?: number;    // 在线率
+}
+interface EnterpriseInfo {
+  shouldAccessCount?: number;    // 应接入数
+  accessedCount?: number;        // 已接入数
+  accessRate?: number;           // 接入率
+  onlineCount?: number;          // 在线数
+  largeEnterpriseCount?: number; // 规上企业数量
+  mediumEnterpriseCount?: number;// 中等企业数量
+  smallEnterpriseCount?: number; // 小微企业数量
+  notAccessedCount?: number;     // 未接入企业数量
+  videoDeviceStatus?: DeviceStatus; // 视频设备状态
+  tempHumDeviceStatus?: DeviceStatus; // 温湿度设备状态
+}
+const EnterpriseInformation = ref<EnterpriseInfo>({});
 
 // 打开企业概况抽屉
 const openProfileDrawer = () => {
   openDrawer?.(DrawerType.COMPANY, '企业概况', {
-    name: '福州市XXXXX公司',
-    code: '91350100MA2XN7KU4X',
-    type: '有限责任公司',
-    industry: '制造业',
-    scale: '大型',
-    capital: '5000万元',
-    legalPerson: '张三',
-    phone: '0591-88888888',
-    address: '福建省福州市仓山区金山大道XXX号',
-    registerDate: '2018-05-20',
-    businessScope: '化工原料及产品制造、销售；危险化学品经营（凭许可证经营）',
-    staffCount: '320人',
+    shouldAccessCount: EnterpriseInformation.value.shouldAccessCount,
+    accessedCount: EnterpriseInformation.value.accessedCount,
+    notAccessedCount: EnterpriseInformation.value.notAccessedCount,
+    largeEnterpriseCount: EnterpriseInformation.value.largeEnterpriseCount,
+    mediumEnterpriseCount: EnterpriseInformation.value.mediumEnterpriseCount,
+    smallEnterpriseCount: EnterpriseInformation.value.smallEnterpriseCount
   });
 };
+
+// 获取企业统计信息
+const getInfoExtp = async () => {
+  try {
+    const res = await getEnterpriseInformation() as any
+    // 按接口格式，success 为 true 时取 data 数据
+    if (res.success) {
+      EnterpriseInformation.value = res.data;
+    } else {
+      console.error('获取企业信息失败：', res.message);
+    }
+  } catch (error) {
+    console.error('获取企业信息接口异常：', error);
+  }
+};
+
+
+onMounted(() => {
+  getInfoExtp();
+});
 </script>
 <style scoped lang='less'>
 .ment-container {
