@@ -20,7 +20,6 @@
     left: 0;
     width: 100%;
     height: calc(100% - 150px);
-    background: #0c1e35;
     pointer-events: auto;
 
     .content-bottom-main {

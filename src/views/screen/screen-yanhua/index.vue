@@ -2,9 +2,9 @@
   <div class="screen-container">
     <div class="screen-base">
       <div class="screen-base-canvas">
-        <!-- 综合监测显示Map，应急管理显示Map2 -->
-        <Map v-if="operationTab === 0" />
-        <Map2 v-if="operationTab === 1" ref="map2Ref" />
+        <!-- 使用 v-show 避免重复加载，首次加载使用 v-if 延迟初始化 -->
+        <Map v-if="mapLoaded.map1" v-show="operationTab === 0" />
+        <Map2 v-if="mapLoaded.map2" v-show="operationTab === 1" ref="map2Ref" />
         <!-- 其他模式（报警、风险、统计、监控）显示渐变背景 -->
         <div v-if="operationTab >= 2" class="default-background"></div>
       </div>
@@ -54,7 +54,14 @@
 </template>
 
 <script lang="ts" setup>
-  import { onBeforeUnmount, onMounted, ref, provide } from 'vue';
+  import {
+    onBeforeUnmount,
+    onMounted,
+    ref,
+    provide,
+    watch,
+    nextTick,
+  } from 'vue';
   import Top from './Top/index.vue';
   import Map from './Map/index.vue';
   import Map2 from './Map2/index.vue';
@@ -73,6 +80,12 @@
 
   const operationTab = ref(0);
   const map2Ref = ref<any>(null);
+
+  // 控制地图组件的延迟加载
+  const mapLoaded = ref({
+    map1: false, // Map 组件加载状态
+    map2: false, // Map2 组件加载状态
+  });
 
   // 底部抽屉相关
   const drawerVisible = ref(false);
@@ -123,6 +136,24 @@
       map2Ref.value.setFilterTypes(filterTypes);
     }
   };
+
+  // 监听 tab 切换，实现地图组件的按需加载
+  watch(
+    operationTab,
+    async (newVal) => {
+      // 首次切换到综合监测（Map）
+      if (newVal === 0 && !mapLoaded.value.map1) {
+        await nextTick();
+        mapLoaded.value.map1 = true;
+      }
+      // 首次切换到应急管理（Map2）
+      if (newVal === 1 && !mapLoaded.value.map2) {
+        await nextTick();
+        mapLoaded.value.map2 = true;
+      }
+    },
+    { immediate: true }
+  ); // immediate: true 确保初始时加载第一个地图
 
   function adjustScale() {
     const designWidth = 1920;
