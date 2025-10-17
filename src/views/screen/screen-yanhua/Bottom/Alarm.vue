@@ -167,10 +167,15 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, reactive, onMounted } from 'vue';
+  import { ref, reactive, onMounted, inject } from 'vue';
   import { Message } from '@arco-design/web-vue';
   import { getAlarmPage, type AlarmPageParams } from '@/api/alarm';
   import { formatDateTime } from '@/utils/date';
+  import { DrawerType } from '../DetailDrawer/types';
+
+  // 注入打开抽屉的方法
+  const openDrawer =
+    inject<(type: string, title: string, data?: any) => void>('openDrawer');
 
   // 筛选表单
   const filterForm = reactive({
@@ -251,7 +256,6 @@
       };
 
       console.log(params);
-      
 
       // 处理时间范围
       // if (filterForm.timeRange && filterForm.timeRange.length === 2) {
@@ -261,7 +265,7 @@
       // }
 
       const response = await getAlarmPage(params);
-      console.log(response)
+      console.log(response);
       const { data } = response;
 
       if (data) {
@@ -300,8 +304,9 @@
 
   // 查看详情
   const handleView = (record: any) => {
-    // 查看详情: record
-    // TODO: 打开详情弹窗或跳转
+    if (openDrawer) {
+      openDrawer(DrawerType.ALARM_DETAIL, '报警详情', record);
+    }
   };
 
   // 组件挂载时获取数据
