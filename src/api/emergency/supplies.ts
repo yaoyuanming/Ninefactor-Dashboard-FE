@@ -29,30 +29,30 @@ export interface EmergencySuppliesListReqVO {
 
 // 查询应急物资列表
 export function getEmergencySuppliesList(data: EmergencySuppliesListReqVO) {
-  return axios.post('/api/emergency/supplies/list', data);
+  return axios.post('/biz/emergency/supplies/list', data);
 }
 
 // 获得应急物资详情
 export function getEmergencySupplies(id: number) {
-  return axios.get(`/api/emergency/supplies/${id}`);
+  return axios.get(`/biz/emergency/supplies/${id}`);
 }
 
 // 新增应急物资
 export function createEmergencySupplies(data: EmergencySuppliesVO) {
-  return axios.post('/api/emergency/supplies', data);
+  return axios.post('/biz/emergency/supplies', data);
 }
 
 // 修改应急物资
 export function updateEmergencySupplies(data: EmergencySuppliesVO) {
-  return axios.put('/api/emergency/supplies', data);
+  return axios.put('/biz/emergency/supplies', data);
 }
 
 // 删除应急物资
 export function deleteEmergencySupplies(ids: number[]) {
-  return axios.delete(`/api/emergency/supplies/${ids.join(',')}`);
+  return axios.delete(`/biz/emergency/supplies/${ids.join(',')}`);
 }
 
 // 根据物资类型查询物资列表
 export function getEmergencySuppliesByType(suppliesType: number) {
-  return axios.get(`/api/emergency/supplies/type/${suppliesType}`);
+  return axios.get(`/biz/emergency/supplies/type/${suppliesType}`);
 }

@@ -53,14 +53,16 @@
 <style scoped lang="less">
   .search-box-container {
     position: absolute;
-    top: 161px; // Top组件下方
-    left: 580px; // 往左调整位置
+    top: 140px; // 往上调整位置
+    left: 520px; // 往左调整位置
     z-index: 100;
     width: 300px;
     height: 42px;
     pointer-events: auto;
 
     :deep(.arco-input-wrapper) {
+      display: flex;
+      align-items: center; // 垂直居中对齐
       width: 100%;
       height: 100%;
       background: rgb(11 36 62 / 85%);
@@ -73,6 +75,7 @@
         height: 100%;
         color: #fff;
         font-size: 15px;
+        line-height: 40px; // 设置行高使文字垂直居中
         background: transparent;
 
         &::placeholder {
@@ -82,6 +85,8 @@
 
       .arco-input-prefix,
       .arco-input-clear-btn {
+        display: flex;
+        align-items: center; // 图标垂直居中
         color: rgb(255 255 255 / 60%);
       }
 

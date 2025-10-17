@@ -352,9 +352,9 @@
           padding: 10px 20px;
 
           .top-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            display: flex;
             gap: 12px;
+            justify-content: space-between;
             margin-bottom: 20px;
           }
 
@@ -362,9 +362,16 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 12px 8px;
-            background: rgb(10 30 60 / 40%);
-            border: 1px solid rgb(23 150 250 / 20%);
+            justify-content: flex-start; // 改为从顶部开始排列
+            width: 134px;
+            height: 126px;
+            padding: 20px 8px 12px; // 增加顶部内边距
+            background: linear-gradient(
+              0deg,
+              rgb(0 11 47 / 24%) 0%,
+              rgb(1 12 47 / 0%) 94%
+            );
+            border: none; // 移除边框
             border-radius: 6px;
 
             .item-icon {
@@ -383,15 +390,21 @@
               text-align: center;
 
               .item-count {
-                margin-bottom: 4px;
+                margin-bottom: 8px; // 增加数值和标签之间的距离
                 color: #fff;
-                font-weight: bold;
-                font-size: 18px;
+                font-weight: normal; // 设置字重为normal
+                font-size: 24px; // 设置数值字体大小为24px
+                font-family: PangMenZhengDao; // 设置字体族
+                line-height: normal;
+                letter-spacing: 0;
               }
 
               .item-label {
                 color: rgb(255 255 255 / 80%);
-                font-size: 11px;
+                font-weight: normal;
+                font-size: 16px; // 设置标签字体大小为16px
+                line-height: normal;
+                text-align: center;
               }
             }
           }

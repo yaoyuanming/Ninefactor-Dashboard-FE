@@ -67,7 +67,7 @@ export interface InspectionTaskListParams {
 export function getCompanyInspectionTaskList(
   params?: InspectionTaskListParams
 ) {
-  return axios.get('/api/inspection/task/list/company', { params });
+  return axios.get('/biz/inspection/task/list/company', { params });
 }
 
 /**
@@ -75,7 +75,7 @@ export function getCompanyInspectionTaskList(
  * @param params 查询参数
  */
 export function getAreaInspectionTaskList(params?: InspectionTaskListParams) {
-  return axios.get('/api/inspection/task/list/area', { params });
+  return axios.get('/biz/inspection/task/list/area', { params });
 }
 
 // 巡查任务数据传输对象
@@ -102,7 +102,7 @@ export interface InspectionTaskVO {
  * @param data 任务数据
  */
 export function createInspectionTask(data: InspectionTaskVO) {
-  return axios.post('/api/inspection/task', data);
+  return axios.post('/biz/inspection/task', data);
 }
 
 /**
@@ -110,7 +110,7 @@ export function createInspectionTask(data: InspectionTaskVO) {
  * @param data 任务数据
  */
 export function updateInspectionTask(data: InspectionTaskVO) {
-  return axios.put('/api/inspection/task', data);
+  return axios.put('/biz/inspection/task', data);
 }
 
 /**
@@ -118,7 +118,7 @@ export function updateInspectionTask(data: InspectionTaskVO) {
  * @param id 任务ID
  */
 export function deleteInspectionTask(id: number | string) {
-  return axios.delete(`/api/inspection/task/${id}`);
+  return axios.delete(`/biz/inspection/task/${id}`);
 }
 
 /**
@@ -126,5 +126,5 @@ export function deleteInspectionTask(id: number | string) {
  * @param id 任务ID
  */
 export function getInspectionTask(id: number | string) {
-  return axios.get(`/api/inspection/task/${id}`);
+  return axios.get(`/biz/inspection/task/${id}`);
 }

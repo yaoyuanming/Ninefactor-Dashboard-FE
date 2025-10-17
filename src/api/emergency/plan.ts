@@ -55,7 +55,7 @@ export interface EmergencyPlanSaveReqVO {
  * @param data 查询参数
  */
 export function getEmergencyPlanList(data: EmergencyPlanListReqVO) {
-  return axios.post('/api/emergency/plan/list', data);
+  return axios.post('/biz/emergency/plan/list', data);
 }
 
 /**
@@ -63,7 +63,7 @@ export function getEmergencyPlanList(data: EmergencyPlanListReqVO) {
  * @param id 预案ID
  */
 export function getEmergencyPlan(id: number) {
-  return axios.get(`/api/emergency/plan/${id}`);
+  return axios.get(`/biz/emergency/plan/${id}`);
 }
 
 /**
@@ -71,7 +71,7 @@ export function getEmergencyPlan(id: number) {
  * @param data 预案信息
  */
 export function createEmergencyPlan(data: EmergencyPlanSaveReqVO) {
-  return axios.post('/api/emergency/plan', data);
+  return axios.post('/biz/emergency/plan', data);
 }
 
 /**
@@ -79,7 +79,7 @@ export function createEmergencyPlan(data: EmergencyPlanSaveReqVO) {
  * @param data 预案信息
  */
 export function updateEmergencyPlan(data: EmergencyPlanSaveReqVO) {
-  return axios.put('/api/emergency/plan', data);
+  return axios.put('/biz/emergency/plan', data);
 }
 
 /**
@@ -87,7 +87,7 @@ export function updateEmergencyPlan(data: EmergencyPlanSaveReqVO) {
  * @param ids 预案ID数组
  */
 export function deleteEmergencyPlan(ids: number[]) {
-  return axios.delete(`/api/emergency/plan/${ids.join(',')}`);
+  return axios.delete(`/biz/emergency/plan/${ids.join(',')}`);
 }
 
 /**
@@ -95,5 +95,5 @@ export function deleteEmergencyPlan(ids: number[]) {
  * @param planType 预案类型（1政府预案，2企业预案）
  */
 export function getEmergencyPlanByType(planType: number) {
-  return axios.get(`/api/emergency/plan/type/${planType}`);
+  return axios.get(`/biz/emergency/plan/type/${planType}`);
 }

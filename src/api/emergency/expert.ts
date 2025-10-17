@@ -43,25 +43,25 @@ export interface EmergencyExpertListReqVO {
 
 // 查询应急专家列表
 export function getEmergencyExpertList(data: EmergencyExpertListReqVO) {
-  return axios.post('/api/emergency/expert/list', data);
+  return axios.post('/biz/emergency/expert/list', data);
 }
 
 // 获得应急专家详情
 export function getEmergencyExpert(id: number) {
-  return axios.get(`/api/emergency/expert/${id}`);
+  return axios.get(`/biz/emergency/expert/${id}`);
 }
 
 // 新增应急专家
 export function createEmergencyExpert(data: EmergencyExpertVO) {
-  return axios.post('/api/emergency/expert', data);
+  return axios.post('/biz/emergency/expert', data);
 }
 
 // 修改应急专家
 export function updateEmergencyExpert(data: EmergencyExpertVO) {
-  return axios.put('/api/emergency/expert', data);
+  return axios.put('/biz/emergency/expert', data);
 }
 
 // 删除应急专家
 export function deleteEmergencyExpert(ids: number[]) {
-  return axios.delete(`/api/emergency/expert/${ids.join(',')}`);
+  return axios.delete(`/biz/emergency/expert/${ids.join(',')}`);
 }

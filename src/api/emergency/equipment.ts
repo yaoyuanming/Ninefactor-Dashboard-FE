@@ -29,30 +29,30 @@ export interface EmergencyEquipmentListReqVO {
 
 // 查询应急装备列表
 export function getEmergencyEquipmentList(data: EmergencyEquipmentListReqVO) {
-  return axios.post('/api/emergency/equipment/list', data);
+  return axios.post('/biz/emergency/equipment/list', data);
 }
 
 // 获得应急装备详情
 export function getEmergencyEquipment(id: number) {
-  return axios.get(`/api/emergency/equipment/${id}`);
+  return axios.get(`/biz/emergency/equipment/${id}`);
 }
 
 // 新增应急装备
 export function createEmergencyEquipment(data: EmergencyEquipmentVO) {
-  return axios.post('/api/emergency/equipment', data);
+  return axios.post('/biz/emergency/equipment', data);
 }
 
 // 修改应急装备
 export function updateEmergencyEquipment(data: EmergencyEquipmentVO) {
-  return axios.put('/api/emergency/equipment', data);
+  return axios.put('/biz/emergency/equipment', data);
 }
 
 // 删除应急装备
 export function deleteEmergencyEquipment(ids: number[]) {
-  return axios.delete(`/api/emergency/equipment/${ids.join(',')}`);
+  return axios.delete(`/biz/emergency/equipment/${ids.join(',')}`);
 }
 
 // 根据装备类型查询装备列表
 export function getEmergencyEquipmentByType(equipmentType: number) {
-  return axios.get(`/api/emergency/equipment/type/${equipmentType}`);
+  return axios.get(`/biz/emergency/equipment/type/${equipmentType}`);
 }

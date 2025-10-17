@@ -18,8 +18,8 @@
         src="https://i.tianqi.com?c=code&id=53&color=%23ffffff&icon=1&site=12&lang=cn"
       ></iframe>
     </div>
-    <!-- 工作台 -->
-    <a-button class="work-home" @click="openModal('home')">
+    <!-- 系统设置 -->
+    <a-button class="work-home" @click="goToSystem">
       <img class="img" src="@/assets/screen/top/setting.png" />
     </a-button>
 
@@ -43,6 +43,7 @@
 
 <script lang="ts" setup>
   import { onBeforeUnmount, onMounted, ref } from 'vue';
+  import { useRouter } from 'vue-router';
   import dayjs from 'dayjs';
   import { baseConfig } from '../config';
   import zha from '../../../../assets/screen/top/zh-a.png';
@@ -58,6 +59,7 @@
   import spa from '../../../../assets/screen/top/sp-a.png';
   import sp from '../../../../assets/screen/top/sp.png';
 
+  const router = useRouter();
   const timeRef = ref();
   const utcDate = ref(dayjs().format('YYYY-MM-DD'));
   const utcTime = ref(dayjs().format('HH:mm:ss'));
@@ -95,6 +97,11 @@
   const actionChange = (index: number) => {
     currentTab.value = index;
     emit('action', index);
+  };
+
+  // 跳转到系统设置
+  const goToSystem = () => {
+    router.push('/system');
   };
 
   onMounted(async () => {
@@ -174,11 +181,13 @@
       position: absolute;
       top: 0;
       right: 20px;
+      z-index: 10;
       width: 130px;
       height: 40px;
-      background: #0000;
+      background: transparent;
       border: none;
-      pointer-events: fill;
+      cursor: pointer;
+      pointer-events: all;
 
       .img {
         width: 160px;
