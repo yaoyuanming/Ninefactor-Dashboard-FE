@@ -4,9 +4,9 @@
       v-model="searchKeyword"
       placeholder="请输入企业名称搜索"
       allow-clear
-      @input="handleSearch"
+      @input="handleInputChange"
       @clear="handleClearSearch"
-      @press-enter="handleSearch"
+      @press-enter="handleSearchNow"
     >
       <template #prefix>
         <icon-search />
@@ -27,13 +27,39 @@
   // 搜索关键词
   const searchKeyword = ref('');
 
-  // 处理搜索
-  const handleSearch = () => {
+  // 防抖定时器
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // 立即搜索（按回车时）
+  const handleSearchNow = () => {
+    // 清除防抖定时器
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
     emit('search', searchKeyword.value);
+  };
+
+  // 输入变化时（使用防抖）
+  const handleInputChange = () => {
+    // 清除之前的定时器
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+
+    // 设置新的定时器，500ms 后执行搜索
+    debounceTimer = setTimeout(() => {
+      emit('search', searchKeyword.value);
+    }, 1000);
   };
 
   // 清除搜索
   const handleClearSearch = () => {
+    // 清除防抖定时器
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
     searchKeyword.value = '';
     emit('clear');
   };
