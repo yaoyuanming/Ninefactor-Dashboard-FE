@@ -249,7 +249,15 @@
 
       // 回显数据
       formData.teamName = detail.teamName || '';
-      formData.supervisingUnit = detail.supervisingUnit || '';
+      // 主管单位需要转换为数字类型（DeptSelect组件要求）
+      if (detail.supervisingUnit) {
+        formData.supervisingUnit =
+          typeof detail.supervisingUnit === 'number'
+            ? detail.supervisingUnit
+            : Number(detail.supervisingUnit);
+      } else {
+        formData.supervisingUnit = '';
+      }
       formData.teamSize = detail.teamSize;
       formData.teamLeader = detail.teamLeader || '';
       formData.contactPhone = detail.contactPhone || '';

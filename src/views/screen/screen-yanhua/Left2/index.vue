@@ -130,6 +130,7 @@
     getMedicalInstitutionList,
     getEmergencySuppliesList,
     getEmergencyEquipmentList,
+    getEmergencyPlanStatistics,
   } from '@/api/emergency';
   import { baseConfig } from '../config';
   import Title from '../components/Title.vue';
@@ -156,11 +157,11 @@
   // 加载状态
   const loading = ref(false);
 
-  // 统计数据（预留接口）
+  // 统计数据
   const statsData = ref({
-    govtPlanCount: 10, // 预留：政府预案数量
-    entPlanCount: 5, // 预留：企业预案数量
-    expertCount: 10, // 预留：专家数量
+    govtPlanCount: 0, // 政府预案数量
+    entPlanCount: 0, // 企业预案数量
+    expertCount: 0, // 专家数量
   });
 
   // 各类型的数据
@@ -219,7 +220,6 @@
         });
       }
     } catch (error) {
-      console.error(`获取${type}数据失败:`, error);
       // 如果接口失败，显示空数据
       dataMap.value[type] = [];
     } finally {
@@ -227,32 +227,19 @@
     }
   };
 
-  // 获取统计数据（预留接口，暂不调用）
+  // 获取统计数据
   const fetchStatsData = async () => {
-    // TODO: 后续接入统计接口
-    // try {
-    //   const govtPlanRes = await getEmergencyPlanList({
-    //     page: 1,
-    //     size: 1,
-    //     planType: 1,
-    //   });
-    //   statsData.value.govtPlanCount = govtPlanRes.data?.total || 10;
-    //
-    //   const entPlanRes = await getEmergencyPlanList({
-    //     page: 1,
-    //     size: 1,
-    //     planType: 2,
-    //   });
-    //   statsData.value.entPlanCount = entPlanRes.data?.total || 5;
-    //
-    //   const expertRes = await getEmergencyExpertList({
-    //     page: 1,
-    //     size: 1,
-    //   });
-    //   statsData.value.expertCount = expertRes.data?.total || 10;
-    // } catch (error) {
-    //   console.error('获取统计数据失败:', error);
-    // }
+    try {
+      const response = await getEmergencyPlanStatistics();
+      const { data } = response;
+
+      // 更新统计数据
+      statsData.value.govtPlanCount = data.govtPlanCount || 0;
+      statsData.value.entPlanCount = data.corpPlanCount || 0; // 接口返回的是 corpPlanCount
+      statsData.value.expertCount = data.expertCount || 0;
+    } catch (error) {
+      // 失败时保持默认值
+    }
   };
 
   // 获取当前图标
@@ -287,8 +274,8 @@
 
   // 初始化时加载数据
   onMounted(async () => {
-    // 统计数据暂时使用默认值，后续接入接口
-    // await fetchStatsData();
+    // 加载统计数据
+    await fetchStatsData();
 
     // 加载默认tab数据
     await fetchListData(currentTab.value);

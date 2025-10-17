@@ -297,11 +297,13 @@
     // 保存经纬度
     formData.longitude = data.position.lng;
     formData.latitude = data.position.lat;
-    // 如果有地址信息，可以自动填充到存放位置
-    if (data.formattedAddress && !formData.storageLocation) {
+    // 自动填充地址信息到存放位置
+    if (data.formattedAddress) {
       formData.storageLocation = data.formattedAddress;
+      Message.success(`已选择位置：${data.formattedAddress}`);
+    } else {
+      Message.success(`已选择坐标：${data.position.lng}, ${data.position.lat}`);
     }
-    Message.success(`已选择位置：${data.formattedAddress}`);
   };
 
   onMounted(() => {

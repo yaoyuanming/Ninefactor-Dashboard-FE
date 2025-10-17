@@ -4,7 +4,7 @@ import axios from 'axios';
 export interface RescueTeamVO {
   id?: number; // 主键ID
   teamName: string; // 队伍名称 (必需)
-  supervisingUnit?: string; // 主管单位
+  supervisingUnit?: string | number; // 主管单位（部门ID）
   teamSize?: number; // 人员数量
   areaCodes?: string; // 所在区域编码（多个以逗号分隔）
   teamLeader?: string; // 负责人

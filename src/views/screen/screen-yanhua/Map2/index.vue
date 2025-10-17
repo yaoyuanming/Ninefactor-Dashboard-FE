@@ -15,6 +15,8 @@
   import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 
   import mapLoader from '@/utils/aMap';
+  import { Message } from '@arco-design/web-vue';
+  import { getEmergencyMapInfo } from '@/api/emergency';
 
   import drawBoundaryWithCanvas from './boundary';
   import {
@@ -25,6 +27,7 @@
     strokeType,
     mapZoom,
     mapZooms,
+    FILTER_TYPE_TO_INFO_TYPE,
   } from './config';
 
   const map = ref<any>(null);
@@ -45,6 +48,7 @@
     medical: true,
     supplies: false,
     equipment: false,
+    accident: false,
   });
 
   // 搜索关键词（从外部传入）
@@ -190,66 +194,169 @@
     });
   };
 
-  // 显示应急资源信息窗口
-  const showEmergencyInfo = (data: any, marker: any) => {
-    // 关闭之前的信息窗口
-    if (globalInfoWindow.value.instance) {
-      globalInfoWindow.value.instance.close();
+  // 风险等级映射
+  const getRiskLevelText = (riskLevel: string | number): string => {
+    const level = String(riskLevel);
+    const riskLevelMap: Record<string, string> = {
+      '0': '无风险',
+      '2': '低风险',
+      '5': '一般风险',
+      '8': '较大风险',
+      '10': '重大风险',
+    };
+    return riskLevelMap[level] || '未知';
+  };
+
+  // 从接口加载应急资源数据
+  const loadEmergencyData = async () => {
+    try {
+      // 根据筛选条件构建 infoType 参数
+      const infoTypes: number[] = [];
+      Object.keys(currentFilterTypes.value).forEach((key) => {
+        if (currentFilterTypes.value[key]) {
+          const infoType = FILTER_TYPE_TO_INFO_TYPE[key];
+          if (infoType) {
+            infoTypes.push(infoType);
+          }
+        }
+      });
+
+      // 如果没有选中任何类型，返回空数据
+      if (infoTypes.length === 0) {
+        allMarkers.value = [];
+        return;
+      }
+
+      // 调用接口
+      const response = await getEmergencyMapInfo({
+        searchKey: currentSearchKeyword.value,
+        infoType: infoTypes.join(','),
+      });
+
+      const { data } = response;
+      const markers: any[] = [];
+
+      // 处理企业数据
+      if (data.companyData && Array.isArray(data.companyData)) {
+        data.companyData.forEach((item: any) => {
+          if (item.longitude && item.latitude) {
+            markers.push({
+              type: 'govt',
+              name: item.enterpriseName || item.name || '未知企业',
+              position: [item.longitude, item.latitude],
+              riskLevel:
+                item.riskLevel !== undefined
+                  ? getRiskLevelText(item.riskLevel)
+                  : '未知',
+              contact: item.principal || '暂无',
+              address: item.registerAddress || item.productionAddress || '',
+              id: item.id,
+            });
+          }
+        });
+      }
+
+      // 处理救援队数据
+      if (data.rescueTeamData && Array.isArray(data.rescueTeamData)) {
+        data.rescueTeamData.forEach((item: any) => {
+          if (item.longitude && item.latitude) {
+            markers.push({
+              type: 'rescue',
+              name: item.teamName || '未知救援队',
+              position: [item.longitude, item.latitude],
+              personnel: item.teamSize || 0,
+              vehicles: item.vehicles || 0,
+              leader: item.teamLeader,
+              phone: item.contactPhone,
+              id: item.id,
+            });
+          }
+        });
+      }
+
+      // 处理医疗机构数据
+      if (
+        data.medicalInstitutionData &&
+        Array.isArray(data.medicalInstitutionData)
+      ) {
+        data.medicalInstitutionData.forEach((item: any) => {
+          if (item.longitude && item.latitude) {
+            markers.push({
+              type: 'medical',
+              name: item.institutionName || item.name || '未知医疗机构',
+              position: [item.longitude, item.latitude],
+              beds: item.bedCount || 0,
+              emergency: item.hasEmergency || false,
+              phone: item.contactPhone,
+              id: item.id,
+            });
+          }
+        });
+      }
+
+      // 处理应急物资数据
+      if (
+        data.emergencySuppliesData &&
+        Array.isArray(data.emergencySuppliesData)
+      ) {
+        data.emergencySuppliesData.forEach((item: any) => {
+          if (item.longitude && item.latitude) {
+            markers.push({
+              type: 'supplies',
+              name: item.suppliesName || item.name || '未知物资库',
+              position: [item.longitude, item.latitude],
+              category: item.category || '综合物资',
+              capacity: item.storageCapacity || '未知',
+              id: item.id,
+            });
+          }
+        });
+      }
+
+      // 处理应急装备数据
+      if (
+        data.emergencyEquipmentData &&
+        Array.isArray(data.emergencyEquipmentData)
+      ) {
+        data.emergencyEquipmentData.forEach((item: any) => {
+          if (item.longitude && item.latitude) {
+            markers.push({
+              type: 'equipment',
+              name: item.equipmentName || item.name || '未知装备库',
+              position: [item.longitude, item.latitude],
+              equipment: item.equipmentType || '应急装备',
+              quantity: item.quantity || 0,
+              id: item.id,
+            });
+          }
+        });
+      }
+
+      // 处理事故后果数据
+      if (
+        data.accidentConsequenceData &&
+        Array.isArray(data.accidentConsequenceData)
+      ) {
+        data.accidentConsequenceData.forEach((item: any) => {
+          if (item.longitude && item.latitude) {
+            markers.push({
+              type: 'accident',
+              name: item.accidentName || item.name || '未知事故',
+              position: [item.longitude, item.latitude],
+              level: item.accidentLevel || '未知',
+              casualties: item.casualties || 0,
+              description: item.description || '',
+              id: item.id,
+            });
+          }
+        });
+      }
+
+      allMarkers.value = markers;
+    } catch (error: any) {
+      Message.error(error?.message || '加载地图数据失败');
+      allMarkers.value = [];
     }
-
-    let content = `
-      <div style="padding: 10px; min-width: 200px;">
-        <h3 style="margin: 0 0 10px 0; color: #333;">${data.name}</h3>
-    `;
-
-    switch (data.type) {
-      case 'rescue':
-        content += `
-          <p style="margin: 5px 0;"><strong>人员：</strong>${data.personnel}人</p>
-          <p style="margin: 5px 0;"><strong>车辆：</strong>${data.vehicles}辆</p>
-        `;
-        break;
-      case 'medical':
-        content += `
-          <p style="margin: 5px 0;"><strong>床位：</strong>${data.beds}张</p>
-          <p style="margin: 5px 0;"><strong>急诊：</strong>${
-            data.emergency ? '是' : '否'
-          }</p>
-        `;
-        break;
-      case 'supplies':
-        content += `
-          <p style="margin: 5px 0;"><strong>类别：</strong>${data.category}</p>
-          <p style="margin: 5px 0;"><strong>容量：</strong>${data.capacity}</p>
-        `;
-        break;
-      case 'equipment':
-        content += `
-          <p style="margin: 5px 0;"><strong>装备：</strong>${data.equipment}</p>
-          <p style="margin: 5px 0;"><strong>数量：</strong>${data.quantity}</p>
-        `;
-        break;
-      case 'govt':
-        content += `
-          <p style="margin: 5px 0;"><strong>级别：</strong>${data.level}</p>
-          <p style="margin: 5px 0;"><strong>联系：</strong>${data.contact}</p>
-        `;
-        break;
-      default:
-        content += `<p style="margin: 5px 0;">暂无详细信息</p>`;
-        break;
-    }
-
-    content += '</div>';
-
-    globalInfoWindow.value.instance = new aMap.value.InfoWindow({
-      content,
-      offset: new aMap.value.Pixel(0, -30),
-      closeWhenClickMap: true,
-    });
-
-    globalInfoWindow.value.instance.open(map.value, data.position);
-    globalInfoWindow.value.currentMarker = marker;
   };
 
   // 更新标记显示
@@ -301,35 +408,17 @@
         },
       });
 
-      // 添加点击事件
-      labelMarker.on('click', () => {
-        showEmergencyInfo(item, labelMarker);
-      });
+      // 移除点击弹窗事件
+      // labelMarker.on('click', () => {
+      //   showEmergencyInfo(item, labelMarker);
+      // });
 
       labelMarkerLayer.value.add(labelMarker);
     });
   };
 
-  // 设置搜索关键词（供外部调用）
-  const setSearchKeyword = (keyword: string) => {
-    currentSearchKeyword.value = keyword;
-    updateMarkers();
-  };
-
-  // 设置筛选条件（供外部调用）
-  const setFilterTypes = (filterTypes: Record<string, boolean>) => {
-    currentFilterTypes.value = { ...filterTypes };
-    updateMarkers();
-  };
-
-  // 清除搜索（供外部调用）
-  const clearSearch = () => {
-    currentSearchKeyword.value = '';
-    updateMarkers();
-  };
-
   // 初始化应急资源标记点
-  const initEmergencyMarkers = () => {
+  const initEmergencyMarkers = async () => {
     if (!labelMarkerLayer.value) {
       labelMarkerLayer.value = new aMap.value.LabelsLayer({
         collision: false,
@@ -342,90 +431,32 @@
     // 清除旧的标记
     labelMarkerLayer.value.clear();
 
-    // 模拟应急资源数据
-    const mockEmergencyData = [
-      // 救援力量
-      {
-        type: 'rescue',
-        name: '福州市消防救援支队',
-        position: [119.356, 26.061],
-        personnel: 120,
-        vehicles: 15,
-      },
-      {
-        type: 'rescue',
-        name: '鼓楼区应急救援队',
-        position: [119.303, 26.082],
-        personnel: 50,
-        vehicles: 8,
-      },
-      // 医疗机构
-      {
-        type: 'medical',
-        name: '福建省立医院',
-        position: [119.291, 26.099],
-        beds: 2000,
-        emergency: true,
-      },
-      {
-        type: 'medical',
-        name: '福州市第一医院',
-        position: [119.321, 26.047],
-        beds: 1500,
-        emergency: true,
-      },
-      // 应急物资
-      {
-        type: 'supplies',
-        name: '福州市应急物资储备库',
-        position: [119.377, 26.041],
-        category: '综合物资',
-        capacity: '5000吨',
-      },
-      {
-        type: 'supplies',
-        name: '仓山区应急物资仓库',
-        position: [119.273, 26.038],
-        category: '医疗物资',
-        capacity: '1000吨',
-      },
-      // 应急装备
-      {
-        type: 'equipment',
-        name: '福州市应急装备中心',
-        position: [119.415, 26.074],
-        equipment: '重型机械',
-        quantity: 50,
-      },
-      {
-        type: 'equipment',
-        name: '台江区装备储备点',
-        position: [119.309, 26.058],
-        equipment: '通信设备',
-        quantity: 200,
-      },
-      // 政府机构
-      {
-        type: 'govt',
-        name: '福州市应急管理局',
-        position: [119.302, 26.074],
-        level: '市级',
-        contact: '0591-12345',
-      },
-      {
-        type: 'govt',
-        name: '晋安区应急管理局',
-        position: [119.324, 26.082],
-        level: '区级',
-        contact: '0591-67890',
-      },
-    ];
+    // 加载真实数据
+    await loadEmergencyData();
 
-    // 保存所有数据
-    allMarkers.value = mockEmergencyData;
-
-    // 初始化显示标记
+    // 重新添加符合条件的标记
     updateMarkers();
+  };
+
+  // 设置搜索关键词（供外部调用）
+  const setSearchKeyword = async (keyword: string) => {
+    currentSearchKeyword.value = keyword;
+    // 重新加载数据
+    await initEmergencyMarkers();
+  };
+
+  // 设置筛选条件（供外部调用）
+  const setFilterTypes = async (filterTypes: Record<string, boolean>) => {
+    currentFilterTypes.value = { ...filterTypes };
+    // 重新加载数据
+    await initEmergencyMarkers();
+  };
+
+  // 清除搜索（供外部调用）
+  const clearSearch = async () => {
+    currentSearchKeyword.value = '';
+    // 重新加载数据
+    await initEmergencyMarkers();
   };
 
   // 初始化地图
