@@ -10,6 +10,8 @@ export interface RescueTeamVO {
   teamLeader?: string; // 负责人
   contactPhone?: string; // 联系电话
   officeAddress?: string; // 办公地址
+  longitude?: number; // 经度
+  latitude?: number; // 纬度
   images?: string; // 照片URL（多个逗号分隔）
   remark?: string; // 备注
   areaNames?: string; // 区域名称（用于显示）

@@ -84,7 +84,11 @@
             :width="120"
           />
 
-          <a-table-column title="工作单位" data-index="workUnit" :width="160" />
+          <a-table-column title="工作单位" :width="160">
+            <template #cell="{ record }">
+              {{ deptNameMap[record.workUnit] || record.workUnit || '-' }}
+            </template>
+          </a-table-column>
 
           <a-table-column title="照片" :width="120" align="center">
             <template #cell="{ record }">
@@ -160,6 +164,7 @@
     deleteEmergencyExpert,
     type EmergencyExpertVO,
   } from '@/api/emergency/expert';
+  import { getDeptNamesByIds } from '@/utils/deptUtils';
 
   const emit = defineEmits<{
     (e: 'view', data: EmergencyExpertVO): void;
@@ -168,6 +173,8 @@
 
   const loading = ref(false);
   const tableData = ref<EmergencyExpertVO[]>([]);
+  // 部门名称映射
+  const deptNameMap = ref<Record<string | number, string>>({});
 
   // 搜索表单
   const searchForm = reactive({
@@ -215,6 +222,14 @@
       if (response.data) {
         tableData.value = response.data.records || [];
         pagination.total = response.data.total || 0;
+
+        // 批量获取部门名称
+        const deptIds = tableData.value
+          .map((item) => item.workUnit)
+          .filter((id) => id) as (string | number)[];
+        if (deptIds.length > 0) {
+          deptNameMap.value = await getDeptNamesByIds(deptIds);
+        }
       }
     } catch (error: any) {
       Message.error(error?.message || '获取专家列表失败');
