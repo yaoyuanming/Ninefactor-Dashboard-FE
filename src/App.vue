@@ -22,3 +22,9 @@
     }
   });
 </script>
+
+<style>
+  #goog-gt-tt {
+    display: none;
+  }
+</style>
