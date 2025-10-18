@@ -9,15 +9,12 @@
         <!-- 左侧：基本信息 -->
         <div class="left-section">
           <a-card title="基本信息" :bordered="false" class="info-card">
-            <a-descriptions :column="1" bordered>
+            <a-descriptions :column="2">
               <a-descriptions-item label="队伍名称">
                 {{ detailData.teamName || '-' }}
               </a-descriptions-item>
               <a-descriptions-item label="主管单位">
-                {{ detailData.supervisingUnit || '-' }}
-              </a-descriptions-item>
-              <a-descriptions-item label="人员数量">
-                {{ detailData.teamSize ? `${detailData.teamSize} 人` : '-' }}
+                {{ deptName }}
               </a-descriptions-item>
               <a-descriptions-item label="负责人">
                 {{ detailData.teamLeader || '-' }}
@@ -25,10 +22,19 @@
               <a-descriptions-item label="联系电话">
                 {{ detailData.contactPhone || '-' }}
               </a-descriptions-item>
+              <a-descriptions-item label="人员数量">
+                {{ detailData.teamSize ? `${detailData.teamSize} 人` : '-' }}
+              </a-descriptions-item>
               <a-descriptions-item label="所在区域">
                 {{ detailData.areaNames || '-' }}
               </a-descriptions-item>
-              <a-descriptions-item label="位置">
+              <a-descriptions-item label="经度">
+                {{ detailData.longitude || '-' }}
+              </a-descriptions-item>
+              <a-descriptions-item label="纬度">
+                {{ detailData.latitude || '-' }}
+              </a-descriptions-item>
+              <a-descriptions-item label="办公地址">
                 {{ detailData.officeAddress || '-' }}
               </a-descriptions-item>
               <a-descriptions-item v-if="detailData.remark" label="备注">
@@ -61,12 +67,14 @@
   import { ref, onMounted } from 'vue';
   import { Message } from '@arco-design/web-vue';
   import { getRescueTeam, type RescueTeamVO } from '@/api/emergency';
+  import { getDeptNameById } from '@/utils/deptUtils';
 
   const props = defineProps<{ data: RescueTeamVO }>();
   const emit = defineEmits<{ (e: 'back'): void }>();
 
   const detailData = ref<RescueTeamVO>({} as RescueTeamVO);
   const loading = ref(false);
+  const deptName = ref<string>('-');
 
   // 加载详情数据
   const loadDetail = async () => {
@@ -77,6 +85,10 @@
       const res = await getRescueTeam(props.data.id);
       if (res.data) {
         detailData.value = res.data;
+        // 获取部门名称
+        if (res.data.supervisingUnit) {
+          deptName.value = await getDeptNameById(res.data.supervisingUnit);
+        }
       }
     } catch (error) {
       console.error('获取救援力量详情失败:', error);
@@ -103,9 +115,21 @@
       margin-bottom: 24px;
 
       .header-title {
-        color: #fff;
+        flex: 1;
+        color: rgb(255 255 255 / 95%);
         font-weight: 600;
         font-size: 20px;
+      }
+
+      :deep(.arco-btn) {
+        color: rgb(255 255 255 / 85%);
+        background: rgb(255 255 255 / 8%);
+        border-color: rgb(255 255 255 / 15%);
+
+        &:hover {
+          background: rgb(255 255 255 / 12%);
+          border-color: rgb(23 150 250 / 50%);
+        }
       }
     }
 
@@ -127,26 +151,36 @@
         background: transparent;
 
         :deep(.arco-card-header) {
-          color: #fff;
+          padding: 16px 20px;
+          color: #fff !important;
           font-weight: 600;
           font-size: 16px;
           background: linear-gradient(
             90deg,
-            rgb(23 150 250 / 25%),
-            rgb(23 150 250 / 10%)
-          );
-          border-bottom: 1px solid rgb(23 150 250 / 40%);
+            rgb(23 150 250 / 30%),
+            rgb(23 150 250 / 15%)
+          ) !important;
+          border: 1px solid rgb(23 150 250 / 40%);
+          border-bottom: none;
+          border-radius: 4px 4px 0 0;
+
+          .arco-card-header-title {
+            color: #fff !important;
+          }
         }
 
         :deep(.arco-card-body) {
+          padding: 0;
           background: rgb(10 30 60 / 35%);
           border: 1px solid rgb(23 150 250 / 15%);
           border-top: none;
+          border-radius: 0 0 4px 4px;
         }
       }
 
       :deep(.arco-descriptions) {
         background: transparent;
+        border: none !important;
 
         .arco-descriptions-item-label {
           min-width: 120px;
@@ -155,7 +189,8 @@
           font-weight: 500;
           font-size: 14px;
           background: rgb(23 150 250 / 20%);
-          border-color: rgb(23 150 250 / 25%);
+          border-right: 1px solid rgb(23 150 250 / 15%);
+          border-bottom: 1px solid rgb(23 150 250 / 15%);
         }
 
         .arco-descriptions-item-value {
@@ -163,7 +198,26 @@
           color: rgb(255 255 255 / 90%);
           font-size: 14px;
           background: rgb(10 30 60 / 30%);
-          border-color: rgb(23 150 250 / 15%);
+          border-right: 1px solid rgb(23 150 250 / 15%);
+          border-bottom: 1px solid rgb(23 150 250 / 15%);
+        }
+
+        .arco-descriptions-row {
+          &:last-child {
+            .arco-descriptions-item-label,
+            .arco-descriptions-item-value {
+              border-bottom: none;
+            }
+          }
+        }
+
+        .arco-descriptions-item {
+          &:last-child {
+            .arco-descriptions-item-label,
+            .arco-descriptions-item-value {
+              border-right: none;
+            }
+          }
         }
       }
 

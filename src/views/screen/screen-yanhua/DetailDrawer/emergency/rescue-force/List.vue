@@ -46,11 +46,15 @@
 
           <a-table-column title="队伍名称" data-index="teamName" :width="180" />
 
-          <a-table-column
-            title="主管单位"
-            data-index="supervisingUnit"
-            :width="200"
-          />
+          <a-table-column title="主管单位" :width="200">
+            <template #cell="{ record }">
+              {{
+                deptNameMap[record.supervisingUnit] ||
+                record.supervisingUnit ||
+                '-'
+              }}
+            </template>
+          </a-table-column>
 
           <a-table-column
             title="人员数量"
@@ -114,6 +118,7 @@
     type RescueTeamVO,
     type RescueTeamListReqVO,
   } from '@/api/emergency';
+  import { getDeptNamesByIds } from '@/utils/deptUtils';
 
   const emit = defineEmits<{
     (e: 'view', data: RescueTeamVO): void;
@@ -129,6 +134,8 @@
   // 表格数据
   const tableData = ref<RescueTeamVO[]>([]);
   const loading = ref(false);
+  // 部门名称映射
+  const deptNameMap = ref<Record<string | number, string>>({});
 
   // 分页配置
   const pagination = reactive({
@@ -153,6 +160,14 @@
       if (res.data) {
         tableData.value = res.data.records || [];
         pagination.total = res.data.total || 0;
+
+        // 批量获取部门名称
+        const deptIds = tableData.value
+          .map((item) => item.supervisingUnit)
+          .filter((id) => id) as (string | number)[];
+        if (deptIds.length > 0) {
+          deptNameMap.value = await getDeptNamesByIds(deptIds);
+        }
       }
     } catch (error) {
       // console.error('获取救援力量列表失败:', error);

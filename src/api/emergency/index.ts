@@ -5,3 +5,4 @@ export * from './rescueTeam';
 export * from './medicalInstitution';
 export * from './equipment';
 export * from './supplies';
+export * from './indexScreen';

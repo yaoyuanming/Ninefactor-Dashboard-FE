@@ -27,73 +27,123 @@
             :model="formData"
             :rules="rules"
             layout="horizontal"
-            :label-col-props="{ span: 6 }"
-            :wrapper-col-props="{ span: 18 }"
+            :label-col-props="{ span: 7 }"
+            :wrapper-col-props="{ span: 17 }"
           >
-            <a-form-item label="队伍名称" field="teamName" required>
-              <a-input
-                v-model="formData.teamName"
-                placeholder="请输入队伍名称"
-              />
-            </a-form-item>
-            <a-form-item label="主管单位" field="supervisingUnit" required>
-              <DeptSelect
-                v-model="formData.supervisingUnit"
-                placeholder="请选择主管单位"
-                :clearable="true"
-              />
-            </a-form-item>
-            <a-form-item label="人员数量" field="teamSize">
-              <a-input-number
-                v-model="formData.teamSize"
-                :min="0"
-                placeholder="请输入人员数量"
-                style="width: 100%"
-              />
-            </a-form-item>
-            <a-form-item label="负责人" field="teamLeader" required>
-              <a-input
-                v-model="formData.teamLeader"
-                placeholder="请输入负责人"
-              />
-            </a-form-item>
-            <a-form-item label="联系电话" field="contactPhone" required>
-              <a-input
-                v-model="formData.contactPhone"
-                placeholder="请输入联系电话"
-              />
-            </a-form-item>
-            <a-form-item label="所在区域" field="areaCodes" required>
-              <RegionSelect
-                v-model="formData.areaCodes"
-                placeholder="请选择区域"
-                :clearable="true"
-                style="width: 100%"
-              />
-            </a-form-item>
-            <a-form-item label="位置" field="officeAddress">
-              <a-input
-                v-model="formData.officeAddress"
-                placeholder="可自动带出，亦可补充"
-                readonly
-              >
-                <template #append>
-                  <a-button type="primary" @click="openMapPicker">
-                    <icon-location />
-                    地图获取
-                  </a-button>
-                </template>
-              </a-input>
-            </a-form-item>
-            <a-form-item label="备注" field="remark">
-              <a-textarea
-                v-model="formData.remark"
-                :rows="3"
-                placeholder="请输入备注"
-                :max-length="500"
-                show-word-limit
-              />
-            </a-form-item>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="队伍名称" field="teamName" required>
+                  <a-input
+                    v-model="formData.teamName"
+                    placeholder="请输入队伍名称"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="主管单位" field="supervisingUnit" required>
+                  <DeptSelect
+                    v-model="formData.supervisingUnit"
+                    placeholder="请选择主管单位"
+                    :clearable="true"
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="人员数量" field="teamSize">
+                  <a-input-number
+                    v-model="formData.teamSize"
+                    :min="0"
+                    placeholder="请输入人员数量"
+                    style="width: 100%"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="负责人" field="teamLeader" required>
+                  <a-input
+                    v-model="formData.teamLeader"
+                    placeholder="请输入负责人"
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="联系电话" field="contactPhone" required>
+                  <a-input
+                    v-model="formData.contactPhone"
+                    placeholder="请输入联系电话"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="所在区域" field="areaCodes" required>
+                  <RegionSelect
+                    v-model="formData.areaCodes"
+                    placeholder="请选择区域"
+                    :clearable="true"
+                    style="width: 100%"
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="经度" field="longitude">
+                  <a-input
+                    v-model="formData.longitude"
+                    placeholder="请选择"
+                    readonly
+                  >
+                    <template #append>
+                      <a-button type="primary" @click="openMapPicker">
+                        <icon-location />
+                        地图获取
+                      </a-button>
+                    </template>
+                  </a-input>
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="纬度" field="latitude">
+                  <a-input
+                    v-model="formData.latitude"
+                    placeholder="请选择"
+                    readonly
+                  >
+                    <template #append>
+                      <a-button type="primary" @click="openMapPicker">
+                        <icon-location />
+                        地图获取
+                      </a-button>
+                    </template>
+                  </a-input>
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="办公地址" field="officeAddress">
+                  <a-input
+                    v-model="formData.officeAddress"
+                    placeholder="请输入办公地址"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="备注" field="remark">
+                  <a-textarea
+                    v-model="formData.remark"
+                    :rows="3"
+                    placeholder="请输入备注"
+                    :max-length="500"
+                    show-word-limit
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
           </a-form>
         </div>
 
@@ -149,6 +199,8 @@
     teamLeader: '',
     contactPhone: '',
     areaCodes: '',
+    longitude: undefined,
+    latitude: undefined,
     officeAddress: '',
     images: '',
     remark: '',
@@ -180,6 +232,8 @@
         teamLeader: '',
         contactPhone: '',
         areaCodes: '',
+        longitude: undefined,
+        latitude: undefined,
         officeAddress: '',
         images: '',
         remark: '',
@@ -195,11 +249,21 @@
 
       // 回显数据
       formData.teamName = detail.teamName || '';
-      formData.supervisingUnit = detail.supervisingUnit || '';
+      // 主管单位需要转换为数字类型（DeptSelect组件要求）
+      if (detail.supervisingUnit) {
+        formData.supervisingUnit =
+          typeof detail.supervisingUnit === 'number'
+            ? detail.supervisingUnit
+            : Number(detail.supervisingUnit);
+      } else {
+        formData.supervisingUnit = '';
+      }
       formData.teamSize = detail.teamSize;
       formData.teamLeader = detail.teamLeader || '';
       formData.contactPhone = detail.contactPhone || '';
       formData.areaCodes = detail.areaCodes || '';
+      formData.longitude = detail.longitude;
+      formData.latitude = detail.latitude;
       formData.officeAddress = detail.officeAddress || '';
       formData.images = detail.images || '';
       formData.remark = detail.remark || '';
@@ -235,29 +299,26 @@
 
   // 打开地图选择器
   const openMapPicker = () => {
-    // 如果已有地址，尝试从地址中解析经纬度
+    // 如果已有经纬度，传入初始位置
     let initialLocation;
-    if (formData.officeAddress) {
-      // 假设地址格式为 "经度,纬度" 或包含经纬度信息
-      const coords = formData.officeAddress.split(',');
-      if (
-        coords.length === 2 &&
-        !Number.isNaN(Number(coords[0])) &&
-        !Number.isNaN(Number(coords[1]))
-      ) {
-        initialLocation = {
-          lng: Number(coords[0]),
-          lat: Number(coords[1]),
-        };
-      }
+    if (formData.longitude && formData.latitude) {
+      initialLocation = {
+        lng: Number(formData.longitude),
+        lat: Number(formData.latitude),
+      };
     }
     mapPickerRef.value?.open(initialLocation);
   };
 
   // 地图选择确认
   const handleMapConfirm = (data: any) => {
-    // 保存经纬度和地址
-    formData.officeAddress = `${data.position.lng},${data.position.lat}`;
+    // 保存经纬度
+    formData.longitude = data.position.lng;
+    formData.latitude = data.position.lat;
+    // 如果有详细地址也可以保存
+    if (data.formattedAddress) {
+      formData.officeAddress = data.formattedAddress;
+    }
     Message.success(`已选择位置：${data.formattedAddress}`);
   };
 

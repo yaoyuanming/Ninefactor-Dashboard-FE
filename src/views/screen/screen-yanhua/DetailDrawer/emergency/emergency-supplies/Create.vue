@@ -90,8 +90,19 @@
                 <a-form-item label="存放位置" field="storageLocation">
                   <a-input
                     v-model="formData.storageLocation"
-                    placeholder="可自动带出，亦可补充"
-                    readonly
+                    placeholder="请输入存放位置"
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="经度" field="longitude">
+                  <a-input-number
+                    v-model="formData.longitude"
+                    placeholder="可通过地图获取"
+                    :precision="6"
+                    style="width: 100%"
                   >
                     <template #append>
                       <a-button type="primary" @click="openMapPicker">
@@ -99,7 +110,24 @@
                         地图获取
                       </a-button>
                     </template>
-                  </a-input>
+                  </a-input-number>
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="纬度" field="latitude">
+                  <a-input-number
+                    v-model="formData.latitude"
+                    placeholder="可通过地图获取"
+                    :precision="6"
+                    style="width: 100%"
+                  >
+                    <template #append>
+                      <a-button type="primary" @click="openMapPicker">
+                        <icon-location />
+                        地图获取
+                      </a-button>
+                    </template>
+                  </a-input-number>
                 </a-form-item>
               </a-col>
             </a-row>
@@ -170,6 +198,8 @@
     quantity: undefined,
     areaCodes: '',
     storageLocation: '',
+    longitude: undefined,
+    latitude: undefined,
     imageUrls: '',
     remark: '',
   });
@@ -194,6 +224,8 @@
         quantity: undefined,
         areaCodes: '',
         storageLocation: '',
+        longitude: undefined,
+        latitude: undefined,
         imageUrls: '',
         remark: '',
       });
@@ -213,6 +245,8 @@
       formData.quantity = detail.quantity;
       formData.areaCodes = detail.areaCodes || '';
       formData.storageLocation = detail.storageLocation || '';
+      formData.longitude = detail.longitude;
+      formData.latitude = detail.latitude;
       formData.imageUrls = detail.imageUrls || '';
       formData.remark = detail.remark || '';
     } catch (error: any) {
@@ -247,20 +281,13 @@
 
   // 打开地图选择器
   const openMapPicker = () => {
-    // 如果已有位置，尝试从位置中解析经纬度
+    // 如果已有经纬度，传入初始位置
     let initialLocation;
-    if (formData.storageLocation) {
-      const coords = formData.storageLocation.split(',');
-      if (
-        coords.length === 2 &&
-        !Number.isNaN(Number(coords[0])) &&
-        !Number.isNaN(Number(coords[1]))
-      ) {
-        initialLocation = {
-          lng: Number(coords[0]),
-          lat: Number(coords[1]),
-        };
-      }
+    if (formData.longitude && formData.latitude) {
+      initialLocation = {
+        lng: formData.longitude,
+        lat: formData.latitude,
+      };
     }
     mapPickerRef.value?.open(initialLocation);
   };
@@ -268,8 +295,15 @@
   // 地图选择确认
   const handleMapConfirm = (data: any) => {
     // 保存经纬度
-    formData.storageLocation = `${data.position.lng},${data.position.lat}`;
-    Message.success(`已选择位置：${data.formattedAddress}`);
+    formData.longitude = data.position.lng;
+    formData.latitude = data.position.lat;
+    // 自动填充地址信息到存放位置
+    if (data.formattedAddress) {
+      formData.storageLocation = data.formattedAddress;
+      Message.success(`已选择位置：${data.formattedAddress}`);
+    } else {
+      Message.success(`已选择坐标：${data.position.lng}, ${data.position.lat}`);
+    }
   };
 
   onMounted(() => {

@@ -4,12 +4,14 @@ import axios from 'axios';
 export interface RescueTeamVO {
   id?: number; // 主键ID
   teamName: string; // 队伍名称 (必需)
-  supervisingUnit?: string; // 主管单位
+  supervisingUnit?: string | number; // 主管单位（部门ID）
   teamSize?: number; // 人员数量
   areaCodes?: string; // 所在区域编码（多个以逗号分隔）
   teamLeader?: string; // 负责人
   contactPhone?: string; // 联系电话
   officeAddress?: string; // 办公地址
+  longitude?: number; // 经度
+  latitude?: number; // 纬度
   images?: string; // 照片URL（多个逗号分隔）
   remark?: string; // 备注
   areaNames?: string; // 区域名称（用于显示）

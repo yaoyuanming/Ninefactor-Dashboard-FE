@@ -13,7 +13,7 @@
     @cancel="handleClose"
   >
     <div class="drawer-content">
-      <CompanyTables v-if="type === DrawerType.COMPANY" :data="data"/>
+      <CompanyTables v-if="type === DrawerType.COMPANY" :data="data" />
       <WarehouseTable v-if="type === DrawerType.WAREHOUSE" :data="data" />
       <CreateRegionalTask
         v-if="type === DrawerType.REGIONAL_TASK"
@@ -34,6 +34,7 @@
         :task-id="data?.id || data"
       />
       <EmergencyManagement v-if="type === DrawerType.EMERGENCY_MANAGEMENT" />
+      <AlarmDetail v-if="type === DrawerType.ALARM_DETAIL" :data="data" />
     </div>
   </a-drawer>
 </template>
@@ -46,6 +47,7 @@
   import ViewRegionalTask from './statistics/ViewRegionalTask.vue';
   import ViewEnterpriseTask from './statistics/ViewEnterpriseTask.vue';
   import EmergencyManagement from './emergency/index.vue';
+  import AlarmDetail from './alarm/AlarmDetail.vue';
   import { DrawerType, type DrawerTypeValue } from './types';
 
   const props = defineProps<{

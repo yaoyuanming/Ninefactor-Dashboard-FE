@@ -51,6 +51,17 @@
             </span>
           </a-checkbox>
         </div>
+        <div class="filter-item">
+          <a-checkbox
+            v-model="filterTypes.accident"
+            @change="handleFilterChange"
+          >
+            <span class="filter-label">
+              <span>事故后果</span>
+              <img :src="accidentIcon" class="filter-icon" alt="事故后果" />
+            </span>
+          </a-checkbox>
+        </div>
       </div>
     </div>
   </div>
@@ -64,11 +75,10 @@
   import medicalIcon from '@/assets/screen/emergency/icon-medical.png';
   import rescueIcon from '@/assets/screen/emergency/icon-rescue.png';
   import suppliesIcon from '@/assets/screen/emergency/icon-supplies.png';
+  import accidentIcon from '@/assets/screen/emergency/icon-accident.png';
 
   // 定义事件
-  const emit = defineEmits<{
-    filterChange: [filterTypes: Record<string, boolean>];
-  }>();
+  const emit = defineEmits(['filterChange']);
 
   // 筛选类型（默认勾选前三项）
   const filterTypes = ref({
@@ -77,6 +87,7 @@
     medical: true, // 医疗机构 - 默认勾选
     supplies: false, // 应急物资
     equipment: false, // 应急装备
+    accident: false, // 事故后果
   });
 
   // 处理筛选变化

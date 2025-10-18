@@ -9,6 +9,8 @@ export interface EmergencySuppliesVO {
   quantity?: number; // 数量
   areaCodes?: string; // 所属区域编码（多个以逗号分隔）
   storageLocation?: string; // 存放位置
+  longitude?: number; // 经度
+  latitude?: number; // 纬度
   imageUrls?: string; // 图片路径（多个以逗号分隔）
   remark?: string; // 备注
   areaNames?: string; // 区域名称（用于显示）

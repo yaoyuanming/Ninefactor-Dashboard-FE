@@ -4,6 +4,7 @@ import rescueIcon from '@/assets/screen/emergency/rescue-force-marker.png';
 import medicalIcon from '@/assets/screen/emergency/medical-institution-marker.png';
 import suppliesIcon from '@/assets/screen/emergency/emergency-supplies-marker.png';
 import equipmentIcon from '@/assets/screen/emergency/emergency-equipment-marker.png';
+import accidentIcon from '@/assets/screen/emergency/Consequences.png';
 
 // 应急资源图标配置
 export const emergencyIcons: Record<string, any> = {
@@ -29,6 +30,11 @@ export const emergencyIcons: Record<string, any> = {
   },
   equipment: {
     url: equipmentIcon,
+    size: [32, 32],
+    anchor: 'center',
+  },
+  accident: {
+    url: accidentIcon,
     size: [32, 32],
     anchor: 'center',
   },
@@ -82,4 +88,24 @@ export const emergencyTypeNames: Record<string, string> = {
   medical: '医疗机构',
   supplies: '应急物资',
   equipment: '应急装备',
+};
+
+// infoType 类型映射（对应后端枚举）
+export const INFO_TYPE_MAP = {
+  company: 1, // 企业
+  rescue: 2, // 救援队
+  medical: 3, // 医疗机构
+  supplies: 4, // 应急物资
+  equipment: 5, // 应急装备
+  accident: 6, // 事故后果
+};
+
+// 前端筛选类型 -> 后端 infoType 映射
+export const FILTER_TYPE_TO_INFO_TYPE: Record<string, number> = {
+  govt: INFO_TYPE_MAP.company,
+  rescue: INFO_TYPE_MAP.rescue,
+  medical: INFO_TYPE_MAP.medical,
+  supplies: INFO_TYPE_MAP.supplies,
+  equipment: INFO_TYPE_MAP.equipment,
+  accident: INFO_TYPE_MAP.accident,
 };

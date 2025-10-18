@@ -16,8 +16,10 @@ export enum DrawerType {
   // 应急管理
   EMERGENCY_MANAGEMENT = 'emergency-management',
 
+  // 报警监控
+  ALARM_DETAIL = 'alarm-detail',
+
   // 可以继续添加其他类型...
-  // ALARM_DETAIL = 'alarm-detail',
   // RISK_DETAIL = 'risk-detail',
 }
 
