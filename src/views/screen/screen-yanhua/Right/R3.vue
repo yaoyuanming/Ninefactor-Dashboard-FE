@@ -73,6 +73,7 @@
           type: getAlarmTypeName(item.alarmType),
           location: item.alarmPosition || '未知位置',
           time: formatDateTime(item.warningDate),
+          originalData: item, // 保存原始数据用于详情展示
         }));
       }
     } catch (error) {

@@ -6,7 +6,7 @@
     <div class="content-right-main">
       <R1 @handel-click="handelTitleClick" />
       <R2 @handel-click="handelTitleClick" />
-      <R3 />
+      <R3 @handel-click="handelTitleClick" />
       <!-- <Info @clickAction="(type) => openModal('company', type)" />
           <Info2 @click="openModal('level')" /> -->
     </div>

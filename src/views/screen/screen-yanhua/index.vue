@@ -10,12 +10,12 @@
       </div>
     </div>
     <div id="max-screen-content" class="screen-content">
-      <Top @action="(index) => (operationTab = index)" ref="topTabs"/>
+      <Top ref="topTabs" @action="(index) => (operationTab = index)" />
 
       <!-- 左右面板布局（综合、应急） -->
       <Left v-if="operationTab === 0" />
       <Left2 v-if="operationTab === 1" />
-      <Right v-if="operationTab === 0" @handelTabs="handelTabsFast"/>
+      <Right v-if="operationTab === 0" @handelTabs="handelTabsFast" />
       <!-- 应急管理模式下的搜索和筛选 -->
       <SearchBox
         v-if="operationTab === 1"
@@ -93,7 +93,7 @@
   const drawerType = ref<DrawerTypeValue>(DrawerType.COMPANY);
   const drawerData = ref<any>(null);
 
-  const topTabs = ref(null)
+  const topTabs = ref(null);
 
   // 提供给子组件调用的方法
   const openDrawer = (type: DrawerTypeValue, title: string, data?: any) => {
@@ -185,12 +185,24 @@
     }
   }
 
-
   // 切换导航
-  function handelTabsFast(rows:any){
-    nextTick(()=>{
-      topTabs.value.actionChange(rows.tabsIndex)
-    })
+  function handelTabsFast(rows: any) {
+    // 先切换到报警监控页面
+    nextTick(() => {
+      topTabs.value.actionChange(rows.tabsIndex);
+
+      // 如果有报警数据，再打开抽屉
+      if (rows.item && rows.item.originalData) {
+        // 等待页面切换完成后再打开抽屉
+        setTimeout(() => {
+          openDrawer(
+            DrawerType.ALARM_DETAIL,
+            '报警详情',
+            rows.item.originalData
+          );
+        }, 300);
+      }
+    });
   }
   onMounted(async () => {
     adjustScale();
