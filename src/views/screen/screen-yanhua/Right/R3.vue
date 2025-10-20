@@ -11,7 +11,7 @@
             <div class="alarm-location">位置: {{ item.location }}</div>
             <div class="alarm-action">
               <button class="handle-btn" @click="handleProcess(item)"
-                >立即处理</button
+                >查看</button
               >
             </div>
           </div>
@@ -30,66 +30,64 @@
 
 <script setup lang="ts">
   import { ref, onMounted, onBeforeUnmount } from 'vue';
-  import { useRouter } from 'vue-router';
+  import { getAlarmPage, type AlarmPageParams } from '@/api/alarm';
+  import { formatDateTime } from '@/utils/date';
   import Title from '../components/Title.vue';
-  // import {
-  //   getAlarmRecordPage,
-  //   type AlarmRecordPageReqVO,
-  //   getUnhandleAlarmCount,
-  // } from '@/api/monitoring/record/alarmrecord/index';
-  // import { formatDate } from '@/utils/formatTime';
-
-  const router = useRouter();
 
   // 报警列表数据
-  const alarmList = ref<any[]>([
-    {
-      location: '测试企业 南2仓库',
-      type: '超员作业',
-      time: '2025-09-17 10:22:00',
-    },
-    {
-      location: '测试企业 南1仓库',
-      type: '超员作业',
-      time: '2025-09-17 10:24:00',
-    },
-  ]);
+  const alarmList = ref<any[]>([]);
 
   // 获取报警数量
   const fetchAlarmCount = async () => {
-    // try {
-    //   const count = await getUnhandleAlarmCount();
-    //   alarmCount.value = count || 0;
-    // } catch (error) {
-    //   console.error('获取报警数量失败', error);
-    // }
+    // 这里可以添加获取报警数量的逻辑
+    // 暂时不需要实现
+  };
+
+  // 获取报警类型名称
+  const getAlarmTypeName = (alarmType: number): string => {
+    const typeMap: Record<number, string> = {
+      1: '超员作业',
+      2: '堵塞通道',
+      3: '超高超量',
+      4: '非法入侵',
+      5: '摄像头遮挡偏移',
+      6: '证书过期',
+    };
+    return typeMap[alarmType] || '未知类型';
   };
 
   // 获取报警列表
   const fetchAlarmList = async () => {
     try {
-      // const params: AlarmRecordPageReqVO = {
-      //   pageNum: 1,
-      //   pageSize: 5,
-      //   handleStat: 0,
-      // };
-      // const res = await getAlarmRecordPage(params);
-      // if (res && res.pageData) {
-      //   alarmList.value = res.pageData.map((item) => ({
-      //     id: item.id,
-      //     type: item.alarmTypeName || '未知类型',
-      //     location: item.alarmPosition || '未知位置',
-      //     time: item.warningDate ? formatDate(item.warningDate) : '未知时间',
-      //   }));
-      // }
+      const params: AlarmPageParams = {
+        pageNo: 1,
+        pageSize: 4,
+      };
+
+      const response = await getAlarmPage(params);
+      const { data } = response;
+
+      if (data && data.records) {
+        alarmList.value = data.records.map((item: any) => ({
+          id: item.id,
+          type: getAlarmTypeName(item.alarmType),
+          location: item.alarmPosition || '未知位置',
+          time: formatDateTime(item.warningDate),
+        }));
+      }
     } catch (error) {
-      console.error('获取报警列表失败', error);
+      // 获取报警列表失败
     }
   };
 
-  // 处理按钮点击
+  // 定义事件
+  const emits = defineEmits(['handelClick']);
+
+  // 处理按钮点击 - 跳转到报警监控页面
   const handleProcess = (item: any) => {
-    router.push({ path: `/monitoring/record/process/${item.id}` });
+    // 查看报警详情
+    // 触发父组件事件，切换到报警监控页面
+    emits('handelClick', { tabsIndex: 2, item });
   };
 
   // 定时刷新数据
@@ -118,9 +116,9 @@
 <style scoped lang="less">
   .stats-section {
     display: flex;
+    flex: 1;
     flex-direction: column;
-    height: 57%;
-    max-height: 470px;
+    min-height: 0;
     margin-bottom: 16px;
     background: linear-gradient(90deg, rgb(65 106 146 / 69%) 0%, #0c2249 97%);
     // background-color: #040e21;
@@ -129,14 +127,16 @@
   }
 
   .alarm-list-wrapper {
+    display: flex;
     flex: 1;
+    flex-direction: column;
     padding: 20px;
     overflow: hidden;
   }
 
   .alarm-list {
-    height: 100%;
-    max-height: calc(100% - 20px); /* 确保列表不会太长 */
+    flex: 1;
+    min-height: 0;
     padding-right: 4px;
     overflow-y: auto;
 
