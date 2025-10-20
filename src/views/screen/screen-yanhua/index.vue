@@ -219,7 +219,6 @@
     width: 100%;
     height: 100vh;
     overflow: hidden;
-    overflow-y: auto;
     background: #061834 !important;
     user-select: none;
   }
