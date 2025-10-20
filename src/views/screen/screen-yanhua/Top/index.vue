@@ -95,6 +95,8 @@
   ]);
 
   const actionChange = (index: number) => {
+    console.log(index);
+    
     currentTab.value = index;
     emit('action', index);
   };
@@ -113,6 +115,8 @@
   onBeforeUnmount(() => {
     clearInterval(timeRef.value);
   });
+
+  defineExpose({actionChange})
 </script>
 
 <style lang="less" scoped>

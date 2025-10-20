@@ -4,32 +4,32 @@
         <a-row :gutter="16">
             <a-col :span="4">
                 <a-card title="企业总数" :bordered="false">
-                    <div class="card-value">{{ props.data.shouldAccessCount }}</div>
+                    <div class="card-value">{{ props.data?.shouldAccessCount }}</div>
                 </a-card>
             </a-col>
             <a-col :span="4">
                 <a-card title="已上报企业数" :bordered="false">
-                    <div class="card-value">{{ props.data.accessedCount }}</div>
+                    <div class="card-value">{{ props.data?.accessedCount }}</div>
                 </a-card>
             </a-col>
             <a-col :span="4">
                 <a-card title="未上报企业数" :bordered="false">
-                    <div class="card-value">{{ props.data.notAccessedCount }}</div>
+                    <div class="card-value">{{ props.data?.notAccessedCount }}</div>
                 </a-card>
             </a-col>
             <a-col :span="4">
                 <a-card title="规上企业" :bordered="false">
-                    <div class="card-value">{{ props.data.largeEnterpriseCount }}</div>
+                    <div class="card-value">{{ props.data?.largeEnterpriseCount }}</div>
                 </a-card>
             </a-col>
             <a-col :span="4">
                 <a-card title="中等企业" :bordered="false">
-                    <div class="card-value">{{ props.data.mediumEnterpriseCount }}</div>
+                    <div class="card-value">{{ props.data?.mediumEnterpriseCount }}</div>
                 </a-card>
             </a-col>
             <a-col :span="4">
                 <a-card title="小微企业" :bordered="false">
-                    <div class="card-value">{{ props.data.smallEnterpriseCount }}</div>
+                    <div class="card-value">{{ props.data?.smallEnterpriseCount }}</div>
                 </a-card>
             </a-col>
         </a-row>
@@ -228,10 +228,10 @@ function handelChange(num: number) {
 
 
 // 搜索
-function searchData(keyword) {
-    const loop = (data) => {
-        const result = [];
-        data.forEach(item => {
+function searchData(keyword:any) {
+    const loop = (data:any) => {
+        const result = [] as any
+        data.forEach((item:any) => {
             if (item.label.toLowerCase().indexOf(keyword.toLowerCase()) > -1) {
                 result.push({ ...item });
             } else if (item.children) {
@@ -250,7 +250,7 @@ function searchData(keyword) {
     return loop(IndustryList.value);
 }
 
-const onSearch = (searchKey) => {
+const onSearch = (searchKey:any) => {
     loading.value = true;
     setTimeout(() => {
         loading.value = false;
@@ -263,6 +263,9 @@ onMounted(async () => {
     await IndustrySelect()
     await getList()
 })
+
+
+defineExpose({handleEnterpriseInfo})
 </script>
 
 <style scoped lang="less">

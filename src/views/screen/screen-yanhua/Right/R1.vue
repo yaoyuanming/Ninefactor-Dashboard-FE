@@ -1,9 +1,6 @@
 <template>
   <div class="stats-section alarm-stats-section">
-    <Title title="报警统计" :src="TitleImage" :tabs="[]" @tabChange="
-      (value) => {
-        selectTab = value;
-      }
+    <Title title="报警统计" :src="TitleImage" :tabs="[]" @img-click="handelImageClick 
     " />
     <div class="overview-section">
       <div :style="{ flexGrow: 100 }" class="stat-item">
@@ -52,6 +49,9 @@ import TitleImage from '@/assets/screen/lien.png';
 // 图表容器和实例
 const alarmChartContainer = ref<HTMLElement | null>(null);
 const alarmChart = ref<EChartsType | null>(null);
+
+
+const emits = defineEmits(['handelClick'])
 
 // 报警类型颜色配置
 const alarmTypes = ref([
@@ -203,6 +203,12 @@ const calculateClearanceRate = computed(() => {
   return total === 0 ? 0 : Math.round((resolved / total) * 100);
 });
 
+
+// 头部点击
+function handelImageClick(){
+   emits('handelClick',{tabsIndex:2})
+}
+
 // 图表配置
 const getChartOption = computed(() => {
   const chartData = (statisticsData.value?.alarmEvents || []).map((item, index) => ({
@@ -310,6 +316,7 @@ onBeforeUnmount(() => {
     alarmChart.value.dispose();
   }
 });
+
 </script>
 
 <style scoped>

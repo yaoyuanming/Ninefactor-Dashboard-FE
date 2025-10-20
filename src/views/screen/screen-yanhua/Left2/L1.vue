@@ -1,6 +1,6 @@
 <template>
   <div class="stats-section alarm-stats-section">
-    <Title title="报警统计" :src="TitleImage" :tabs="[]" @tabChange="
+    <Title title="报警统计66" :src="TitleImage" :tabs="[]" @tabChange="
       (value) => {
         selectTab = value;
       }

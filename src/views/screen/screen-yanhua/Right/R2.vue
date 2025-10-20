@@ -1,7 +1,7 @@
 <template>
   <div class="stats-section alarm-stats-section">
     <!-- 标题组件 -->
-    <Title title="预警统计" :src="TitleImage" :tabs="[]" @tabChange="(value) => (selectTab = value)" />
+    <Title title="预警统计" :src="TitleImage" :tabs="[]" @img-click="handelImageClick" />
 
     <!-- 预警级别卡片区域 -->
     <div style="padding-left: 20px">
@@ -50,6 +50,8 @@ import TitleImage from '@/assets/screen/lien.png';
 // 接口返回的统计数据
 const statisticsData = ref<AlarmStatisticsVo>({});
 
+const emits = defineEmits(['handelClick'])
+
 // 预警级别数据（图标、数量、名称、背景渐变）
 const alarmLevels = ref([
   {
@@ -77,6 +79,12 @@ const alarmLevels = ref([
     background: 'linear-gradient(180deg, rgba(0, 168, 255, 0.66) 0%, rgba(0, 168, 255, 0.19) 97%)',
   },
 ]);
+
+
+// 头部点击
+function handelImageClick() {
+  emits('handelClick', { tabsIndex: 3 })
+}
 
 // 计算消警率百分比（用于进度条）
 const clearancePercent = computed(() => {

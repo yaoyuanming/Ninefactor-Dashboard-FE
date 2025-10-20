@@ -3,7 +3,7 @@
     <!-- 左侧：详情信息 -->
     <div class="left-column">
       <a-page-header :style="{ background: 'var(--color-bg-2)' }" title="返回" subtitle="企业基本信息"
-        @back="handelBack"></a-page-header>
+        @back="handelBack" v-if="TitleShow"></a-page-header>
 
       <!-- 企业核心信息 -->
       <div class="core-info">
@@ -185,6 +185,7 @@ const warehouseData = ref([]); // 仓库数据
 const storehouseData = ref([]); // 库房数据
 const personnelData = ref([]); // 人员数据
 const vehicleData = ref([]); // 车辆数据
+const TitleShow = ref(true)
 
 // ---------------------- 基本信息 ----------------------
 const basicInfo = computed(() => {
@@ -452,7 +453,8 @@ const handleTableChange = (pagination, type) => {
 
 // ---------------------- 企业详情获取+表格初始化 ----------------------
 // 获取企业详情后，自动初始化所有表格的第一页数据
-function getRecord(ids) {
+function getRecord(ids,showTitle) {
+  TitleShow.value = showTitle
   getEnterpriseInfor(ids).then((res) => {
     if (res.success) {
       config.value = res.data;
