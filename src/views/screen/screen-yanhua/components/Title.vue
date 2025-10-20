@@ -191,9 +191,20 @@
           gap: 8px;
           align-items: center;
           height: 35px;
-          color: #fff;
           font-weight: bold;
+          font-size: 26px;
+          font-family: YouSheBiaoTiHei, 'PingFang SC', sans-serif;
           line-height: 35px;
+          letter-spacing: 0.05em;
+          background: linear-gradient(
+            180deg,
+            #f8fcff 52%,
+            rgb(255 255 255 / 66%) 100%
+          );
+          background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          font-variation-settings: 'opsz' auto;
 
           .img-wrapper {
             position: relative;

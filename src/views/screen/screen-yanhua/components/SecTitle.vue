@@ -35,12 +35,14 @@
     .label {
       display: inline-block;
       padding-left: 34px;
-      color: rgb(193 201 216 / 83%);
-      font-weight: normal;
-      font-size: 14px;
-      font-family: 'PingFang SC';
+      color: #e7f0ff;
+      font-weight: bold;
+      font-size: 16px;
+      font-family: AlibabaPuHuiTi, 'PingFang SC', sans-serif;
       line-height: normal;
       letter-spacing: 0;
+      font-variation-settings: 'opsz' auto;
+      font-feature-settings: 'kern' on;
     }
   }
 </style>

@@ -29,14 +29,14 @@
 
     <!-- 未消警/已消警进度条区域 -->
     <div style="padding-left: 20px">
-      <SecTitle title="处理进度" :src="titleImg" />
+      <SecTitle title="预警数量" :src="titleImg" />
     </div>
     <div class="alarm-clearance">
       <div class="clearance-item">
-        <div class="clearance-label">未消警</div>
         <div class="clearance-num">{{
           statisticsData?.unresolvedNum || 0
         }}</div>
+        <div class="clearance-label">未消警</div>
       </div>
       <div class="clearance-progress">
         <a-progress
@@ -48,8 +48,8 @@
         ></a-progress>
       </div>
       <div class="clearance-item">
-        <div class="clearance-label">已消警</div>
         <div class="clearance-num">{{ statisticsData?.resolvedNum || 0 }}</div>
+        <div class="clearance-label">已消警</div>
       </div>
     </div>
   </div>
@@ -62,7 +62,10 @@
   import TitleImage from '@/assets/screen/jump.png';
   import Title from '../components/Title.vue';
   import SecTitle from '../components/SecTitle.vue';
-  import zd from '../../../../assets/screen/imgs/danger.png';
+  import riskSevere from '../../../../assets/screen/r3/risk-severe.png'; // 重大
+  import riskMajor from '../../../../assets/screen/r3/risk-major.png'; // 较大
+  import riskGeneral from '../../../../assets/screen/r3/risk-general.png'; // 一般
+  import riskMinor from '../../../../assets/screen/r3/risk-minor.png'; // 低
   // 接口返回的统计数据
   const statisticsData = ref<AlarmStatisticsVo>({});
 
@@ -73,28 +76,28 @@
     {
       name: '重大',
       num: 0, // 初始值设为0，后续会从接口数据更新
-      icon: zd,
+      icon: riskSevere,
       background:
         'linear-gradient(180deg, rgba(255, 72, 77, 0.48) 2%, rgba(255, 58, 64, 0.13) 97%)',
     },
     {
       name: '较大',
       num: 0,
-      icon: zd,
+      icon: riskMajor,
       background:
         'linear-gradient(180deg, rgba(255, 156, 88, 0.47) 9%, rgba(255, 116, 20, 0.13) 95%)',
     },
     {
       name: '一般',
       num: 0,
-      icon: zd,
+      icon: riskGeneral,
       background:
         'linear-gradient(180deg, rgba(255, 224, 139, 0.53) 7%, rgba(255, 222, 130, 0.21) 90%)',
     },
     {
       name: '低',
       num: 0,
-      icon: zd,
+      icon: riskMinor,
       background:
         'linear-gradient(180deg, rgba(0, 168, 255, 0.66) 0%, rgba(0, 168, 255, 0.19) 97%)',
     },
@@ -210,18 +213,31 @@
       .clearance-item {
         display: flex;
         flex-direction: column;
+        gap: 8px;
         align-items: center;
 
-        .clearance-label {
-          color: rgb(255 255 255 / 80%);
-          font-size: 14px;
+        .clearance-num {
+          font-weight: 500;
+          font-size: 20px;
+          font-family: 'PingFang SC', sans-serif;
+          line-height: 1.2;
+          letter-spacing: 2.22px;
+          text-align: center;
+          background: linear-gradient(180deg, #fff 0%, #fdd85e 98%);
+          background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          font-variation-settings: 'opsz' auto;
         }
 
-        .clearance-num {
-          margin-top: 4px;
+        .clearance-label {
           color: #fff;
-          font-weight: 600;
-          font-size: 18px;
+          font-weight: 500;
+          font-size: 15px;
+          font-family: '思源黑体', 'Source Han Sans', 'PingFang SC', sans-serif;
+          line-height: 1.2;
+          letter-spacing: 1.67px;
+          text-align: center;
         }
       }
 

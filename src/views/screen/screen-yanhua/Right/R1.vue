@@ -7,20 +7,19 @@
       @img-click="handelImageClick"
     />
     <div class="overview-section">
-      <div :style="{ flexGrow: 100 }" class="stat-item">
-        <div class="title">
-          <img class="icon" src="@/assets/screen/imgs/second-title.png" />
-          <div class="label">消警数</div>
-        </div>
+      <div class="stat-item">
+        <SecTitle title="消警数" />
         <div class="num">{{ statisticsData?.resolvedNum || 0 }}</div>
       </div>
-      <div :style="{ flexGrow: 315 }" class="stat-item">
-        <div class="rlabel">消警率</div>
+      <div class="stat-item progress-item">
+        <div class="label">消警率</div>
         <a-progress
-          class="rnum"
+          class="progress-bar"
           :percent="calculateClearanceRate"
+          :show-text="false"
           :status="calculateClearanceRate === 100 ? 'success' : undefined"
         />
+        <div class="percent-text">{{ calculateClearanceRate }}%</div>
       </div>
     </div>
     <!-- 报警类型分布（图表和列表） -->
@@ -68,6 +67,7 @@
   import { getAlarmStatistics } from '@/api/compmonitoring';
   import TitleImage from '@/assets/screen/jump.png';
   import Title from '../components/Title.vue';
+  import SecTitle from '../components/SecTitle.vue';
   import AlarmBg from '../../../../assets/screen/imgs/alarm-bg.png';
   import Drop from '../../../../assets/screen/imgs/drop.png';
   // 图表容器和实例
@@ -363,66 +363,85 @@
     .overview-section {
       display: flex;
       gap: 12px;
-      height: 43px;
       margin: 10px 0;
       padding: 0 20px;
 
       .stat-item {
         display: flex;
-        padding: 10px 8px;
-        background: rgb(64 83 123 / 23%);
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        background: rgb(7 27 55 / 30%);
         border-radius: 4px;
         opacity: 1;
 
-        .title {
-          position: relative;
-          flex-grow: 3;
-
-          .icon {
-            position: absolute;
-            top: 2px;
-            left: -4;
-            width: 27px;
-            height: 24px;
-            opacity: 1;
-          }
-
-          .label {
-            display: inline-block;
-            padding-left: 30px;
-            color: rgb(193 201 216 / 83%);
-            font-weight: normal;
-            font-size: 14px;
-            font-family: 'PingFang SC';
-            line-height: normal;
-            letter-spacing: 0;
-          }
+        // 覆盖 SecTitle 的 margin-top，确保水平对齐
+        :deep(.sec-title) {
+          margin-top: 0;
         }
 
-        .rlabel {
-          display: inline-block;
-          color: rgb(193 201 216 / 83%);
-          font-weight: normal;
-          font-size: 14px;
+        &:first-child {
+          flex: 0 0 auto;
+          min-width: 120px;
+        }
+
+        &.progress-item {
+          flex: 1;
+          gap: 12px;
+        }
+
+        .label {
+          flex-shrink: 0;
+          color: #e7f0ff;
+          font-weight: bold;
+          font-size: 16px;
+          font-family: AlibabaPuHuiTi, 'PingFang SC', sans-serif;
+          white-space: nowrap;
+        }
+
+        .progress-bar {
+          flex: 1;
+          min-width: 100px;
+        }
+
+        .percent-text {
+          flex-shrink: 0;
+          min-width: 45px;
+          font-weight: 600;
+          font-size: 16px;
           font-family: 'PingFang SC';
-          line-height: normal;
-          letter-spacing: 0;
-        }
-
-        .rnum {
-          width: calc(100% - 58px);
-          padding-left: 12px;
+          white-space: nowrap;
+          text-align: right;
+          background: linear-gradient(
+            180deg,
+            #fff 37%,
+            #94fbff 69%,
+            #c2ddff 94%
+          );
+          background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          font-variation-settings: 'opsz' auto;
         }
 
         .num {
-          padding-right: 8px;
-          color: #fff;
+          margin-left: auto;
+          padding-left: 12px;
           font-weight: 600;
-          font-size: 14px;
+          font-size: 20px;
           font-family: 'PingFang SC';
           line-height: normal;
           letter-spacing: 0;
-          text-align: right;
+          background: linear-gradient(
+            180deg,
+            #fff 37%,
+            #94fbff 69%,
+            #c2ddff 94%
+          );
+          background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          font-variation-settings: 'opsz' auto;
         }
       }
     }
