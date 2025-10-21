@@ -107,8 +107,8 @@
 <style scoped lang="less">
   .right2-container {
     position: absolute;
-    top: 45%; // 往上移动一点 (从50%改为45%)
-    right: 120px; // 往中间移动一点 (从50px改为120px)
+    top: 38%; // 再往上移动一点 (从45%改为40%)
+    right: 100px; // 往中间移动一点 (从50px改为120px)
     z-index: 100;
     transform: translateY(-50%);
     pointer-events: auto;
