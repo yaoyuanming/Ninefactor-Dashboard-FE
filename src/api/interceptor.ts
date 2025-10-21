@@ -12,6 +12,9 @@ export interface HttpResponse<T = unknown> {
   data: T;
 }
 
+// 标志位：防止重复跳转登录页
+let isRedirectingToLogin = false;
+
 // 配置基础URL
 if (import.meta.env.VITE_API_BASE_URL) {
   axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -40,17 +43,30 @@ axios.interceptors.response.use(
 
     // 后端返回的 success 为 false 时（业务错误），视为错误
     if (!res.success) {
+      // 处理 token 失效的情况（errorCode 为 11011）
+      if (res.errorCode === '11011' || res.message?.includes('token')) {
+        if (!isRedirectingToLogin) {
+          isRedirectingToLogin = true;
+          clearToken(); // 清除无效token
+          // 显示一次提示
+          Message.error({
+            content: '登录已过期，请重新登录',
+            duration: 2000,
+          });
+          // 延迟跳转，让用户看到提示
+          setTimeout(() => {
+            window.location.href = `${window.location.origin}/#/login`;
+          }, 500);
+        }
+        return Promise.reject(new Error('Token失效'));
+      }
+
+      // 其他业务错误才显示提示
       Message.error({
         content: res.message || '操作失败',
         duration: 5 * 1000,
       });
-      if (res.errorCode === '11011') {
-        clearToken(); // 清除无效token
-        // 避免重复跳转登录页
-        if (!window.location.href.includes('/#/login')) {
-          window.open(`${window.location.origin}/#/login`, '_self');
-        }
-      }
+
       // 抛出错误，让调用方进入 catch 逻辑
       return Promise.reject(new Error(res.message || '业务错误'));
     }
@@ -59,20 +75,22 @@ axios.interceptors.response.use(
     return res;
   },
   (error: any) => {
+    // 处理 401 未授权或 token 失效
     if (error.response?.status === 401 || error.errorCode === '11012') {
-      clearToken(); // 清除无效token
-      // 避免重复跳转登录页
-      if (!window.location.href.includes('/#/index')) {
-        Modal.error({
-          title: '登录过期',
+      if (!isRedirectingToLogin) {
+        isRedirectingToLogin = true;
+        clearToken(); // 清除无效token
+        // 显示一次提示
+        Message.error({
           content: '登录已过期，请重新登录',
-          okText: '确定',
-          onOk: () => {
-            window.open(`${window.location.origin}/#/index`, '_self');
-          },
+          duration: 2000,
         });
+        // 延迟跳转，让用户看到提示
+        setTimeout(() => {
+          window.location.href = `${window.location.origin}/#/login`;
+        }, 500);
       }
-      return Promise.reject(error); // 标记为错误
+      return Promise.reject(error);
     }
 
     // 2. 处理额度不足（402状态码）

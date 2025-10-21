@@ -78,6 +78,7 @@
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
   import { Message } from '@arco-design/web-vue';
+  import { clearToken } from '@/utils/auth';
   import DeptManagement from './dept/index.vue';
   import RegionManagement from './region/index.vue';
   import AccountManagement from './account/index.vue';
@@ -99,6 +100,8 @@
 
   // 退出登录
   const handleLogout = () => {
+    // 清除 token 和登录信息
+    clearToken();
     Message.success('退出成功');
     router.push('/login');
   };

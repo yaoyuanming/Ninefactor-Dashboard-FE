@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import NProgress from 'nprogress'; // progress bar
+import { getToken } from '@/utils/auth';
 
 NProgress.configure({ showSpinner: false }); // NProgress Configuration
 
@@ -34,7 +35,7 @@ const router = createRouter({
           meta: {
             locale: '主页',
             icon: 'icon-home',
-            requiresAuth: false,
+            requiresAuth: true,
             roles: ['*'],
             isPhone: true,
           },
@@ -71,6 +72,41 @@ const router = createRouter({
   scrollBehavior() {
     return { top: 0 };
   },
+});
+
+// 全局前置守卫：检查登录状态
+router.beforeEach((to, from, next) => {
+  NProgress.start();
+
+  const token = getToken();
+  const requiresAuth = to.meta.requiresAuth !== false; // 默认需要认证
+
+  // 如果访问登录页
+  if (to.path === '/login') {
+    // 如果已登录，跳转到首页
+    if (token) {
+      next({ path: '/index' });
+    } else {
+      next();
+    }
+    NProgress.done();
+    return;
+  }
+
+  // 如果需要认证但没有 token
+  if (requiresAuth && !token) {
+    next({ path: '/login' });
+    NProgress.done();
+    return;
+  }
+
+  // 其他情况正常放行
+  next();
+});
+
+// 全局后置钩子
+router.afterEach(() => {
+  NProgress.done();
 });
 
 export default router;
