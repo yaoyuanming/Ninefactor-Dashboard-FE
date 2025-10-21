@@ -1,108 +1,159 @@
 <template>
   <div class="company-profile-module">
-    <Title title="企业概况" :src="profileTitleIcon" :tabs="[]" @imgClick="openProfileDrawer" />
+    <Title
+      title="企业概况"
+      :src="profileTitleIcon"
+      :tabs="[]"
+      @img-click="openProfileDrawer"
+    />
     <!-- 核心信息区域 -->
     <div class="profile-info-container">
-      <div class="profile-header-bar">
-        <img src="@/assets/screen/imgs/Company-Profile.png" alt="企业标识" />
-        <div class="header-bar-text">企业</div>
-      </div>
-      <div class="info-layout-row">
-        <!-- 左侧数据区：应接入数、接入率 -->
-        <div class="left-data-block">
-          <div class="data-item-top">
-            <div class="data-value-row">
-              <div class="data-number">{{ EnterpriseInformation?.shouldAccessCount || 0 }}</div>
-              <div class="arrow-indicator"></div>
-            </div>
+      <SecTitle title="企业" />
+      <div class="enterprise-data-layout">
+        <div class="data-container">
+          <!-- 四角框背景图 -->
+          <img
+            src="@/assets/screen/left/corner-frame.png"
+            class="corner-frame-image"
+            alt="四角框"
+          />
+
+          <!-- 中心圆图片 -->
+          <img
+            src="@/assets/screen/left/center-circle-bg.png"
+            class="center-circle-image"
+            alt="中心圆"
+          />
+
+          <!-- 中心在线率 -->
+          <div class="center-data">
+            <div class="center-rate"
+              >{{ (EnterpriseInformation?.accessRate || 0).toFixed(1) }}%</div
+            >
+            <div class="center-label">在线率</div>
+          </div>
+
+          <!-- 左上角：应接入数 -->
+          <div class="corner-data top-left">
+            <div class="data-number">{{
+              EnterpriseInformation?.shouldAccessCount || 0
+            }}</div>
             <div class="data-label">应接入数</div>
           </div>
-          <div class="data-item-bottom">
-            <div class="data-value-row">
-              <div class="data-number">{{ (EnterpriseInformation?.accessRate || 0).toFixed(1) }}%</div>
-              <div class="arrow-indicator"></div>
-            </div>
+
+          <!-- 左下角：接入率 -->
+          <div class="corner-data bottom-left">
+            <div class="data-number"
+              >{{ (EnterpriseInformation?.accessRate || 0).toFixed(1) }}%</div
+            >
             <div class="data-label">接入率</div>
           </div>
-        </div>
-        <!-- 中间背景区 -->
-        <div class="center-bg-block">
-          <img src="@/assets/screen/imgs/clre-bg.png" class="center-bg-image" alt="中间装饰背景" />
-        </div>
-        <div class="right-reserve-block">
-          <div class="data-item-top">
-            <div class="data-value-row">
-              <div class="arrow-indicator"></div>
-              <div class="data-number">{{ EnterpriseInformation?.accessedCount || 0 }}</div>
-            </div>
+
+          <!-- 右上角：已接入数 -->
+          <div class="corner-data top-right">
+            <div class="data-number">{{
+              EnterpriseInformation?.accessedCount || 0
+            }}</div>
             <div class="data-label">已接入数</div>
           </div>
-          <div class="data-item-bottom right">
-            <div class="data-value-row">
-              <div class="arrow-indicator"></div>
-              <div class="data-number">{{ EnterpriseInformation?.onlineCount || 0 }}</div>
-            </div>
+
+          <!-- 右下角：在线数 -->
+          <div class="corner-data bottom-right">
+            <div class="data-number">{{
+              EnterpriseInformation?.onlineCount || 0
+            }}</div>
             <div class="data-label">在线数</div>
           </div>
         </div>
       </div>
 
-      <div class="profile-header-bar ment">
-        <img src="@/assets/screen/imgs/Company-Profile.png" alt="企业标识" />
-        <div class="header-bar-text">视频设备</div>
-      </div>
+      <SecTitle title="视频设备" />
 
-      <div class="ment-container ment-top">
-        <div class="ment-left">
-          <div class="ment-image">
-            <img src="@/assets/screen/imgs/ment-cg.png" class="ment-top-image" alt="">
-            <img src="@/assets/screen/imgs/ment-top.png" class="ment-bottom-image" alt="">
+      <div class="equipment-container">
+        <!-- 左侧：在线率 -->
+        <div class="equipment-left">
+          <img
+            src="@/assets/screen/left/equipment-left-bg.png"
+            class="equipment-left-bg"
+            alt="设备背景"
+          />
+          <div class="equipment-rate">
+            <div class="rate-value"
+              >{{
+                (
+                  EnterpriseInformation?.videoDeviceStatus?.onlineRate || 0
+                ).toFixed(1)
+              }}%</div
+            >
+            <div class="rate-label">在线率</div>
           </div>
-          <!-- 右边文字：视频设备在线率 -->
-          <div class="content-text">
-            <div class="title">{{ (EnterpriseInformation?.videoDeviceStatus?.onlineRate || 0).toFixed(1) }}%</div>
-            <div class="content">在线率</div>
-          </div>
+        </div>
 
-          <div class="ment-content">
-            <div class="font-content">
-              <div class="title">已接入路数</div>
-              <div class="content">{{ EnterpriseInformation?.videoDeviceStatus?.totalAccessed || 0 }}</div>
+        <!-- 右侧：数据区域 -->
+        <div class="equipment-right">
+          <img
+            src="@/assets/screen/left/equipment-right-bg.png"
+            class="equipment-right-bg"
+            alt="数据背景"
+          />
+          <div class="data-content">
+            <div class="data-item">
+              <div class="data-label">已接入路数</div>
+              <div class="data-value">{{
+                EnterpriseInformation?.videoDeviceStatus?.totalAccessed || 0
+              }}</div>
             </div>
-            <div class="font-content">
-              <div class="title">在线路数</div>
-              <div class="content">{{ EnterpriseInformation?.videoDeviceStatus?.onlineCount || 0 }}</div>
+            <div class="data-item">
+              <div class="data-label">在线路数</div>
+              <div class="data-value">{{
+                EnterpriseInformation?.videoDeviceStatus?.onlineCount || 0
+              }}</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="profile-header-bar compment">
-        <img src="@/assets/screen/imgs/Company-Profile.png" alt="企业标识" />
-        <div class="header-bar-text">温湿度设备</div>
-      </div>
+      <SecTitle title="温湿度设备" />
 
-      <div class="ment-container ment-bottom">
-        <div class="ment-left">
-          <div class="ment-image">
-            <img src="@/assets/screen/imgs/ment-cg.png" class="ment-top-image" alt="">
-            <img src="@/assets/screen/imgs/ment-top.png" class="ment-bottom-image" alt="">
+      <div class="equipment-container">
+        <!-- 左侧：在线率 -->
+        <div class="equipment-left">
+          <img
+            src="@/assets/screen/left/equipment-left-bg.png"
+            class="equipment-left-bg"
+            alt="设备背景"
+          />
+          <div class="equipment-rate">
+            <div class="rate-value"
+              >{{
+                (
+                  EnterpriseInformation?.tempHumDeviceStatus?.onlineRate || 0
+                ).toFixed(1)
+              }}%</div
+            >
+            <div class="rate-label">在线率</div>
           </div>
-          <!-- 右边文字：温湿度设备在线率 -->
-          <div class="content-text">
-            <div class="title">{{ (EnterpriseInformation?.tempHumDeviceStatus?.onlineRate || 0).toFixed(1) }}%</div>
-            <div class="content">在线率</div>
-          </div>
+        </div>
 
-          <!-- 右侧显示：温湿度设备已接入/在线数 -->
-          <div class="ment-content">
-            <div class="font-content">
-              <div class="title">已接入路数</div>
-              <div class="content">{{ EnterpriseInformation?.tempHumDeviceStatus?.totalAccessed || 0 }}</div>
+        <!-- 右侧：数据区域 -->
+        <div class="equipment-right">
+          <img
+            src="@/assets/screen/left/equipment-right-bg.png"
+            class="equipment-right-bg"
+            alt="数据背景"
+          />
+          <div class="data-content">
+            <div class="data-item">
+              <div class="data-label">已接入路数</div>
+              <div class="data-value">{{
+                EnterpriseInformation?.tempHumDeviceStatus?.totalAccessed || 0
+              }}</div>
             </div>
-            <div class="font-content">
-              <div class="title">在线路数</div>
-              <div class="content">{{ EnterpriseInformation?.tempHumDeviceStatus?.onlineCount || 0 }}</div>
+            <div class="data-item">
+              <div class="data-label">在线路数</div>
+              <div class="data-value">{{
+                EnterpriseInformation?.tempHumDeviceStatus?.onlineCount || 0
+              }}</div>
             </div>
           </div>
         </div>
@@ -111,334 +162,415 @@
   </div>
 </template>
 
-<script lang='ts' setup>
-import Title from '../components/Title.vue';
-import { DrawerType } from '../DetailDrawer/types';
-import { inject, onMounted, ref } from 'vue';
-import profileTitleIcon from '@/assets/screen/lien.png';
-import { getEnterpriseInformation } from '@/api/compmonitoring';
+<script lang="ts" setup>
+  import { inject, onMounted, ref } from 'vue';
+  import profileTitleIcon from '@/assets/screen/lien.png';
+  import { getEnterpriseInformation } from '@/api/compmonitoring';
+  import Title from '../components/Title.vue';
+  import SecTitle from '../components/SecTitle.vue';
+  import { DrawerType } from '../DetailDrawer/types';
 
-// 注入抽屉组件
-const openDrawer = inject<any>('openDrawer');
+  // 注入抽屉组件
+  const openDrawer = inject<any>('openDrawer');
 
-// 企业统计信息：定义接口对应的数据结构
-interface DeviceStatus {
-  totalAccessed?: number; // 已接入总数
-  onlineCount?: number;   // 在线数
-  onlineRate?: number;    // 在线率
-}
-interface EnterpriseInfo {
-  shouldAccessCount?: number;    // 应接入数
-  accessedCount?: number;        // 已接入数
-  accessRate?: number;           // 接入率
-  onlineCount?: number;          // 在线数
-  largeEnterpriseCount?: number; // 规上企业数量
-  mediumEnterpriseCount?: number;// 中等企业数量
-  smallEnterpriseCount?: number; // 小微企业数量
-  notAccessedCount?: number;     // 未接入企业数量
-  videoDeviceStatus?: DeviceStatus; // 视频设备状态
-  tempHumDeviceStatus?: DeviceStatus; // 温湿度设备状态
-}
-const EnterpriseInformation = ref<EnterpriseInfo>({});
-
-// 打开企业概况抽屉
-const openProfileDrawer = () => {
-  openDrawer?.(DrawerType.COMPANY, '企业概况', {
-    shouldAccessCount: EnterpriseInformation.value.shouldAccessCount,
-    accessedCount: EnterpriseInformation.value.accessedCount,
-    notAccessedCount: EnterpriseInformation.value.notAccessedCount,
-    largeEnterpriseCount: EnterpriseInformation.value.largeEnterpriseCount,
-    mediumEnterpriseCount: EnterpriseInformation.value.mediumEnterpriseCount,
-    smallEnterpriseCount: EnterpriseInformation.value.smallEnterpriseCount
-  });
-};
-
-// 获取企业统计信息
-const getInfoExtp = async () => {
-  try {
-    const res = await getEnterpriseInformation() as any
-    // 按接口格式，success 为 true 时取 data 数据
-    if (res.success) {
-      EnterpriseInformation.value = res.data;
-    } else {
-      console.error('获取企业信息失败：', res.message);
-    }
-  } catch (error) {
-    console.error('获取企业信息接口异常：', error);
+  // 企业统计信息：定义接口对应的数据结构
+  interface DeviceStatus {
+    totalAccessed?: number; // 已接入总数
+    onlineCount?: number; // 在线数
+    onlineRate?: number; // 在线率
   }
-};
+  interface EnterpriseInfo {
+    shouldAccessCount?: number; // 应接入数
+    accessedCount?: number; // 已接入数
+    accessRate?: number; // 接入率
+    onlineCount?: number; // 在线数
+    largeEnterpriseCount?: number; // 规上企业数量
+    mediumEnterpriseCount?: number; // 中等企业数量
+    smallEnterpriseCount?: number; // 小微企业数量
+    notAccessedCount?: number; // 未接入企业数量
+    videoDeviceStatus?: DeviceStatus; // 视频设备状态
+    tempHumDeviceStatus?: DeviceStatus; // 温湿度设备状态
+  }
+  const EnterpriseInformation = ref<EnterpriseInfo>({});
 
+  // 打开企业概况抽屉
+  const openProfileDrawer = () => {
+    openDrawer?.(DrawerType.COMPANY, '企业概况', {
+      shouldAccessCount: EnterpriseInformation.value.shouldAccessCount,
+      accessedCount: EnterpriseInformation.value.accessedCount,
+      notAccessedCount: EnterpriseInformation.value.notAccessedCount,
+      largeEnterpriseCount: EnterpriseInformation.value.largeEnterpriseCount,
+      mediumEnterpriseCount: EnterpriseInformation.value.mediumEnterpriseCount,
+      smallEnterpriseCount: EnterpriseInformation.value.smallEnterpriseCount,
+    });
+  };
 
-onMounted(() => {
-  getInfoExtp();
-});
+  // 获取企业统计信息
+  const getInfoExtp = async () => {
+    try {
+      const res = (await getEnterpriseInformation()) as any;
+      // 按接口格式，success 为 true 时取 data 数据
+      if (res.success) {
+        EnterpriseInformation.value = res.data;
+      } else {
+        // console.error('获取企业信息失败：', res.message);
+      }
+    } catch (error) {
+      // console.error('获取企业信息接口异常：', error);
+    }
+  };
+
+  onMounted(() => {
+    getInfoExtp();
+  });
 </script>
-<style scoped lang='less'>
-.ment-container {
-  display: flex;
-  align-items: center;
-  padding-left: 8px;
 
-  .ment-left {
-    position: relative;
+<style scoped lang="less">
+  .ment-container {
     display: flex;
     align-items: center;
-    width: 100%;
+    padding-left: 8px;
 
-    .ment-image {
+    .ment-left {
       position: relative;
-      width: 105px;
-      height: 77px;
-
-      .ment-top-image,
-      .ment-bottom-image {
-        width: 100%;
-        height: 100%;
-      }
-
-      .ment-bottom-image {
-        width: 30px;
-        height: 25px;
-        position: absolute;
-        top: 40%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-      }
-    }
-
-    .content-text {
-      background: linear-gradient(270deg, rgba(99, 140, 212, 0) 10%, rgba(41, 84, 159, 0.37) 55%, rgba(99, 140, 212, 0) 94%);
-      box-sizing: border-box;
-      border: 0.84px solid;
-      border-image: linear-gradient(270deg, rgba(41, 84, 159, 0) 0%, rgba(69, 106, 170, 0.44) 50%, rgba(42, 79, 143, 0) 100%) 0.84;
-      width: 108px;
-      text-align: center;
-      padding: 8px 0;
-
-      .title {
-        color: #90AEE5;
-        font-size: 20px;
-        font-weight: bold;
-      }
-
-      .content {
-        color: #fff;
-        margin-top: 2px;
-      }
-    }
-
-    .ment-content {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 20px;
-      margin-left: 20px;
-      flex: 1;
-      height: 64px;
-      border-radius: 56px;
-      opacity: 1;
+      width: 100%;
 
-      background: linear-gradient(180deg, rgba(24, 56, 115, 0) 0%, rgba(27, 56, 111, 0.48) 100%);
+      .ment-image {
+        position: relative;
+        width: 105px;
+        height: 77px;
 
-      box-sizing: border-box;
-      border: 2px solid;
-      border-image: conic-gradient(from 180deg at 50% 50%, rgba(22, 51, 103, 0.913) -55deg, #2E497B 10deg, rgba(24, 52, 103, 0.7813) 98deg, rgba(164, 179, 206, 0.65) 105deg, rgba(25, 48, 90, 0.6762) 125deg, rgba(22, 51, 103, 0.913) 305deg, #2E497B 370deg);
+        .ment-top-image,
+        .ment-bottom-image {
+          width: 100%;
+          height: 100%;
+        }
 
-      .font-content {
+        .ment-bottom-image {
+          position: absolute;
+          top: 40%;
+          left: 50%;
+          width: 30px;
+          height: 25px;
+          transform: translate(-50%, -50%);
+        }
+      }
+
+      .content-text {
+        box-sizing: border-box;
+        width: 108px;
+        padding: 8px 0;
         text-align: center;
+        background: linear-gradient(
+          270deg,
+          rgb(99 140 212 / 0%) 10%,
+          rgb(41 84 159 / 37%) 55%,
+          rgb(99 140 212 / 0%) 94%
+        );
+        border: 0.84px solid;
+        border-image: linear-gradient(
+            270deg,
+            rgb(41 84 159 / 0%) 0%,
+            rgb(69 106 170 / 44%) 50%,
+            rgb(42 79 143 / 0%) 100%
+          )
+          0.84;
 
         .title {
-          font-size: 14px;
-          color: #B0CDFF;
+          color: #90aee5;
+          font-weight: bold;
+          font-size: 20px;
         }
 
         .content {
-          font-size: 18px;
-          background: linear-gradient(180deg, #FFFFFF 36%, #90AEE5 76%);
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-          font-weight: bold;
-          margin-top: 5px;
+          margin-top: 2px;
+          color: #fff;
+        }
+      }
+
+      .ment-content {
+        display: flex;
+        flex: 1;
+        gap: 20px;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        height: 64px;
+        margin-left: 20px;
+        background: linear-gradient(
+          180deg,
+          rgb(24 56 115 / 0%) 0%,
+          rgb(27 56 111 / 48%) 100%
+        );
+        border: 2px solid;
+        border-radius: 56px;
+        border-image: conic-gradient(
+          from 180deg at 50% 50%,
+          rgb(22 51 103 / 91.3%) -55deg,
+          #2e497b 10deg,
+          rgb(24 52 103 / 78.1%) 98deg,
+          rgb(164 179 206 / 65%) 105deg,
+          rgb(25 48 90 / 67.6%) 125deg,
+          rgb(22 51 103 / 91.3%) 305deg,
+          #2e497b 370deg
+        );
+        opacity: 1;
+
+        .font-content {
+          text-align: center;
+
+          .title {
+            color: #b0cdff;
+            font-size: 14px;
+          }
+
+          .content {
+            margin-top: 5px;
+            color: transparent;
+            font-weight: bold;
+            font-size: 18px;
+            background: linear-gradient(180deg, #fff 36%, #90aee5 76%);
+            background-clip: text;
+          }
         }
       }
     }
   }
-}
 
-.ment-bottom {
-  margin-top: 14px;
-}
-
-// 标题栏公共样式
-.profile-header-bar {
-  display: flex;
-  align-items: center;
-
-  img {
-    width: 29px;
-    height: 27px;
+  .ment-bottom {
+    margin-top: 14px;
   }
 
-  .header-bar-text {
-    margin-left: 8px;
-    color: #fff;
-  }
-}
+  .company-profile-module {
+    background: linear-gradient(90deg, #0c2249 0%, rgb(65 106 146 / 69%) 97%);
+    border-radius: 4px;
+    pointer-events: all;
 
-// 标题栏特有样式
-.ment {
-  margin-top: 7px;
-}
+    .profile-info-container {
+      padding: 8px 16px 5px 13px;
 
-.compment {
-  margin-top: 8px;
-}
+      .enterprise-data-layout {
+        margin-top: 10px;
 
-.company-profile-module {
-  background: linear-gradient(90deg,
-      #0c2249 0%,
-      rgb(65 106 146 / 69%) 97%);
-  border-radius: 4px;
-  pointer-events: all;
+        .data-container {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 169px;
+          padding-top: 20px;
+          background: linear-gradient(
+            180deg,
+            rgb(8 32 64 / 21%) 0%,
+            rgb(8 32 64 / 0%) 100%
+          );
 
-  .profile-info-container {
-    padding: 8px 16px 18px 13px;
+          // 四角框图片 - 响应式宽度，占据容器大部分空间
+          .corner-frame-image {
+            position: absolute;
+            z-index: 1;
+            width: 95%;
+            height: auto;
+            object-fit: contain;
+          }
 
-    .info-layout-row {
+          // 中心圆图片 - 根据容器调整大小，契合外边框四角
+          .center-circle-image {
+            position: absolute;
+            z-index: 2;
+            width: 50%;
+            max-width: 200px;
+            height: auto;
+            object-fit: contain;
+            aspect-ratio: 1;
+          }
+
+          // 中心数据
+          .center-data {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 3;
+            text-align: center;
+            transform: translate(-50%, -50%);
+
+            .center-rate {
+              margin-top: 25px;
+              color: #90aee5;
+              font-weight: bold;
+              font-size: 26px;
+              line-height: 1.2;
+            }
+
+            .center-label {
+              margin-top: 18px;
+              color: #fff;
+              font-size: 14px;
+            }
+          }
+
+          // 四角数据
+          .corner-data {
+            position: absolute;
+            z-index: 4;
+            text-align: center;
+
+            .data-number {
+              color: #fff;
+              font-weight: 600;
+              font-size: 20px;
+              line-height: 1.2;
+            }
+
+            .data-label {
+              margin-top: 4px;
+              color: #b0cdff;
+              font-size: 14px;
+              white-space: nowrap;
+            }
+
+            // 左上角
+            &.top-left {
+              top: 15px;
+              left: 40px;
+
+              .data-number {
+                color: #fff;
+              }
+            }
+
+            // 左下角
+            &.bottom-left {
+              bottom: 15px;
+              left: 40px;
+
+              .data-number {
+                color: #abea75;
+              }
+            }
+
+            // 右上角
+            &.top-right {
+              top: 15px;
+              right: 40px;
+
+              .data-number {
+                color: #3ebaff;
+              }
+            }
+
+            // 右下角
+            &.bottom-right {
+              right: 40px;
+              bottom: 15px;
+
+              .data-number {
+                color: #ccddf3;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .company-overview-wrapper {
+      padding: 20px 24px;
+      cursor: pointer;
+      transition: all 0.3s;
+
+      &:hover {
+        transform: scale(1.02);
+        filter: brightness(1.1);
+      }
+    }
+
+    // 设备容器
+    .equipment-container {
       display: flex;
       align-items: center;
-    }
+      padding: 10px 16px 0;
 
-    .left-data-block {
-      margin-top: 10px;
-      padding-left: 8px;
+      // 左侧：在线率
+      .equipment-left {
+        position: relative;
+        flex-shrink: 0;
+        width: 203px;
+        height: 77px;
 
-      .data-value-row {
-        display: flex;
-        align-items: center;
-        padding-left: 17px;
-
-        .data-number {
-          color: #ffffff;
-          font-size: 18px;
+        .equipment-left-bg {
+          display: block;
+          width: 100%;
+          height: 100%;
         }
 
-        .arrow-indicator {
-          width: 0;
-          height: 0;
-          border-top: 6.5px solid transparent;
-          border-right: 5px solid #fff;
-          border-bottom: 5px solid transparent;
-          margin-left: 21px;
-        }
-      }
+        .equipment-rate {
+          position: absolute;
+          top: 50%;
+          right: 40px;
+          text-align: center;
+          transform: translateY(-50%);
 
-      .data-label {
-        background: url('@/assets/screen/imgs/Rectangle-bg.png');
-        width: 110px;
-        height: 36px;
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
-        padding-left: 13px;
-        text-align: center;
-        color: #ffffff;
-        font-size: 14px;
-        line-height: 36px;
-      }
+          .rate-value {
+            color: #90aee5;
+            font-weight: bold;
+            font-size: 18px;
+            line-height: 1.2;
+          }
 
-      .data-item-bottom {
-        margin-top: 14px;
-
-        .data-number {
-          color: #abea75;
-        }
-
-        .arrow-indicator {
-          border-right-color: #abea75;
-        }
-      }
-    }
-
-    .right-reserve-block {
-      margin-top: 4px;
-      padding-right: 8px;
-
-      .data-item-top .arrow-indicator {
-        width: 0;
-        height: 0;
-        border-top: 6.5px solid transparent;
-        border-left: 5px solid #3EBAFF;
-        border-bottom: 5px solid transparent;
-      }
-
-      .data-value-row {
-        display: flex;
-        align-items: center;
-        padding-left: 37px;
-
-        .data-number {
-          color: #3EBAFF;
-          font-size: 18px;
-          margin-left: 21px;
+          .rate-label {
+            margin-top: 2px;
+            color: #fff;
+            font-size: 12px;
+          }
         }
       }
 
-      .data-label {
-        background: url('@/assets/screen/imgs/Rectangle-bg.png');
-        width: 100px;
-        height: 36px;
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
-        padding-left: 13px;
-        text-align: center;
-        color: #ffffff;
-        font-size: 14px;
-        line-height: 36px;
-      }
+      // 右侧：数据区域
+      .equipment-right {
+        position: relative;
+        flex-shrink: 0;
+        width: 216px;
+        height: 64px;
 
-      .right {
-        margin-top: 14px;
-
-        .data-number {
-          color: #CCDDF3;
+        .equipment-right-bg {
+          display: block;
+          width: 100%;
+          height: 100%;
         }
 
-        .arrow-indicator {
-          border-left-color: #CCDDF3;
+        .data-content {
+          position: absolute;
+          top: 0;
+          left: 0;
+          display: flex;
+          gap: 60px;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
+
+          .data-item {
+            text-align: center;
+
+            .data-label {
+              margin-bottom: 4px;
+              color: #b0cdff;
+              font-size: 12px;
+              line-height: 1.2;
+            }
+
+            .data-value {
+              color: #fff;
+              font-weight: 600;
+              font-size: 18px;
+              line-height: 1.2;
+            }
+          }
         }
-      }
-    }
-
-    .center-bg-block {
-      position: relative;
-      width: 107px;
-      flex: 1;
-      height: 147px;
-
-      .center-bg-image {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 147px;
-        z-index: 1;
-        /* 背景图层级低于粒子 */
       }
     }
   }
-
-  .company-overview-wrapper {
-    padding: 20px 24px;
-    cursor: pointer;
-    transition: all 0.3s;
-
-    &:hover {
-      transform: scale(1.02);
-      filter: brightness(1.1);
-    }
-  }
-}
 </style>
