@@ -3,7 +3,7 @@
     <div class="screen-base">
       <div class="screen-base-canvas">
         <!-- 使用 v-show 避免重复加载，首次加载使用 v-if 延迟初始化 -->
-        <Map v-if="mapLoaded.map1" v-show="operationTab === 0" />
+        <Map v-if="mapLoaded.map1" v-show="operationTab === 0" ref="mapRef" />
         <Map2 v-if="mapLoaded.map2" v-show="operationTab === 1" ref="map2Ref" />
         <!-- 其他模式（报警、风险、统计、监控）显示渐变背景 -->
         <div v-if="operationTab >= 2" class="default-background"></div>
@@ -15,10 +15,11 @@
       <!-- 左右面板布局（综合、应急） -->
       <Left v-if="operationTab === 0" />
       <Left2 v-if="operationTab === 1" />
-      <Right v-if="operationTab === 0" @handelTabs="handelTabsFast" />
-      <!-- 应急管理模式下的搜索和筛选 -->
+      <Right v-if="operationTab === 0" @handel-tabs="handelTabsFast" />
+      <!-- 综合监测和应急管理模式下的搜索 -->
       <SearchBox
-        v-if="operationTab === 1"
+        v-if="operationTab === 0 || operationTab === 1"
+        ref="searchBoxRef"
         @search="handleSearch"
         @clear="handleClearSearch"
       />
@@ -79,7 +80,9 @@
   import { type DrawerTypeValue, DrawerType } from './DetailDrawer/types';
 
   const operationTab = ref(0);
+  const mapRef = ref<any>(null);
   const map2Ref = ref<any>(null);
+  const searchBoxRef = ref<any>(null);
 
   // 控制地图组件的延迟加载
   const mapLoaded = ref({
@@ -120,14 +123,24 @@
 
   // 处理搜索
   const handleSearch = (keyword: string) => {
-    if (map2Ref.value) {
+    // 根据当前 tab 调用对应地图的搜索方法
+    if (operationTab.value === 0 && mapRef.value) {
+      // 综合监测模式 - Map
+      mapRef.value.setSearchKeyword(keyword);
+    } else if (operationTab.value === 1 && map2Ref.value) {
+      // 应急管理模式 - Map2
       map2Ref.value.setSearchKeyword(keyword);
     }
   };
 
   // 处理清除搜索
   const handleClearSearch = () => {
-    if (map2Ref.value) {
+    // 根据当前 tab 调用对应地图的清除搜索方法
+    if (operationTab.value === 0 && mapRef.value) {
+      // 综合监测模式 - Map
+      mapRef.value.clearSearch();
+    } else if (operationTab.value === 1 && map2Ref.value) {
+      // 应急管理模式 - Map2
       map2Ref.value.clearSearch();
     }
   };
@@ -142,7 +155,22 @@
   // 监听 tab 切换，实现地图组件的按需加载
   watch(
     operationTab,
-    async (newVal) => {
+    async (newVal, oldVal) => {
+      // 切换 tab 时清空搜索
+      if (oldVal !== undefined && newVal !== oldVal) {
+        // 清空搜索框
+        if (searchBoxRef.value) {
+          searchBoxRef.value.clearSearch();
+        }
+        // 清空对应地图的搜索状态
+        await nextTick();
+        if (newVal === 0 && mapRef.value) {
+          mapRef.value.clearSearch();
+        } else if (newVal === 1 && map2Ref.value) {
+          map2Ref.value.clearSearch();
+        }
+      }
+
       // 首次切换到综合监测（Map）
       if (newVal === 0 && !mapLoaded.value.map1) {
         await nextTick();

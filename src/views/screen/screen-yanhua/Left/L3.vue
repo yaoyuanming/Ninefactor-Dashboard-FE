@@ -195,14 +195,7 @@
 
   // 打开企业概况抽屉
   const openProfileDrawer = () => {
-    openDrawer?.(DrawerType.COMPANY, '企业概况', {
-      shouldAccessCount: EnterpriseInformation.value.shouldAccessCount,
-      accessedCount: EnterpriseInformation.value.accessedCount,
-      notAccessedCount: EnterpriseInformation.value.notAccessedCount,
-      largeEnterpriseCount: EnterpriseInformation.value.largeEnterpriseCount,
-      mediumEnterpriseCount: EnterpriseInformation.value.mediumEnterpriseCount,
-      smallEnterpriseCount: EnterpriseInformation.value.smallEnterpriseCount,
-    });
+    openDrawer?.(DrawerType.COMPANY, '企业概况');
   };
 
   // 获取企业统计信息

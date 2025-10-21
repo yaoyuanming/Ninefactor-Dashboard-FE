@@ -225,7 +225,7 @@
 </template>
 
 <script setup>
-  import { computed, defineExpose, ref } from 'vue';
+  import { computed, defineExpose, ref, watch } from 'vue';
   import {
     getEnterpriseInfor,
     getObtainWarehouseInforList,
@@ -702,16 +702,41 @@
 
   // ...
 
-  // 企业详情获取+表格初始化
+  // 记录已加载的 tabs
+  const loadedTabs = ref(new Set(['warehouse'])); // 默认仓库已加载
+
+  // 监听 tab 切换，懒加载数据
+  watch(activeTabKey, (newTab) => {
+    if (!loadedTabs.value.has(newTab) && config.value?.id) {
+      loadedTabs.value.add(newTab);
+      switch (newTab) {
+        case 'storehouse':
+          getStorehouseData(1, 10);
+          break;
+        case 'personnel':
+          getPersonnelData(1, 10);
+          break;
+        case 'vehicle':
+          getVehicleData(1, 10);
+          break;
+        default:
+          // 默认情况，无需处理
+          break;
+      }
+    }
+  });
+
+  // 企业详情获取+初始化仓库数据
   function getRecord(ids, showTitle = true) {
     TitleShow.value = showTitle;
+    // 重置已加载的 tabs
+    loadedTabs.value = new Set(['warehouse']);
+
     getEnterpriseInfor(ids).then((res) => {
       if (res.success) {
         config.value = res.data;
-        getWarehouseData();
-        getStorehouseData();
-        getPersonnelData();
-        getVehicleData();
+        // 只加载默认显示的仓库数据
+        getWarehouseData(1, 10);
       }
     });
   }
@@ -727,7 +752,7 @@
 <style scoped lang="less">
   .company-detail-container {
     display: flex;
-    gap: 20px;
+    gap: 14px;
     padding: 16px;
     color: #fff;
     background: transparent;
@@ -740,7 +765,7 @@
     .left-column {
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 14px;
     }
 
     .right-column {
@@ -753,7 +778,7 @@
 
   // 页面头部样式
   ::v-deep(.arco-page-header) {
-    margin-bottom: 16px;
+    margin-bottom: 5px;
     background: rgb(10 30 60 / 30%) !important;
     border: 1px solid rgb(23 150 250 / 20%);
     border-radius: 8px;
@@ -851,14 +876,14 @@
   }
 
   .detail-section {
-    padding: 24px;
+    padding: 20px;
     background: rgb(10 30 60 / 30%);
     border: 1px solid rgb(23 150 250 / 20%);
     border-radius: 8px;
     backdrop-filter: blur(8px);
 
     .section-header {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
 
       .section-title {
         margin: 0;

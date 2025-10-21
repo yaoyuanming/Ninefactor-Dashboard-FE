@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, watch, defineEmits, onMounted } from 'vue';
+  import { ref, watch, defineEmits } from 'vue';
 
   // 定义组件参数
   const props = defineProps({
@@ -92,46 +92,8 @@
 
   // 图片点击处理函数
   const handleImgClick = () => {
-    console.log('Title组件：图片被点击了');
-    console.log('src prop值：', props.src);
     emit('imgClick');
   };
-
-  // 组件挂载后检查
-  onMounted(() => {
-    console.log(`Title组件已挂载 - ${props.title}`);
-    console.log('props.src:', props.src);
-    console.log('src是否存在:', !!props.src);
-
-    // 添加调试：检查图片元素
-    setTimeout(() => {
-      // 查找所有的标题文本元素
-      const allTexts = document.querySelectorAll('.text');
-      let targetElement = null;
-
-      allTexts.forEach((el) => {
-        if (el.textContent?.trim().includes(props.title)) {
-          targetElement = el;
-        }
-      });
-
-      if (targetElement) {
-        const imgWrapper = targetElement.querySelector('.img-wrapper');
-        const img = targetElement.querySelector('.border-line');
-        console.log(`${props.title} - 找到目标元素`);
-        console.log(`${props.title} - imgWrapper元素:`, imgWrapper);
-        console.log(`${props.title} - img元素:`, img);
-        if (img) {
-          console.log(
-            `${props.title} - img的src属性:`,
-            (img as HTMLImageElement).src
-          );
-        }
-      } else {
-        console.log(`${props.title} - 未找到目标元素`);
-      }
-    }, 500);
-  });
 
   // 提供可选的函数接口用于外部切换当前标签
   const setActiveTab = (tab: string) => {
@@ -201,7 +163,6 @@
             #f8fcff 52%,
             rgb(255 255 255 / 66%) 100%
           );
-          background-clip: text;
           background-clip: text;
           -webkit-text-fill-color: transparent;
           font-variation-settings: 'opsz' auto;

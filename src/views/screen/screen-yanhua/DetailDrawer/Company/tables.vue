@@ -4,32 +4,38 @@
     <a-row :gutter="16">
       <a-col :span="4">
         <a-card title="企业总数" :bordered="false">
-          <div class="card-value">{{ props.data?.shouldAccessCount }}</div>
+          <div class="card-value">{{ statisticsData.shouldAccessCount }}</div>
         </a-card>
       </a-col>
       <a-col :span="4">
         <a-card title="已上报企业数" :bordered="false">
-          <div class="card-value">{{ props.data?.accessedCount }}</div>
+          <div class="card-value">{{ statisticsData.accessedCount }}</div>
         </a-card>
       </a-col>
       <a-col :span="4">
         <a-card title="未上报企业数" :bordered="false">
-          <div class="card-value">{{ props.data?.notAccessedCount }}</div>
+          <div class="card-value">{{ statisticsData.notAccessedCount }}</div>
         </a-card>
       </a-col>
       <a-col :span="4">
         <a-card title="规上企业" :bordered="false">
-          <div class="card-value">{{ props.data?.largeEnterpriseCount }}</div>
+          <div class="card-value">{{
+            statisticsData.largeEnterpriseCount
+          }}</div>
         </a-card>
       </a-col>
       <a-col :span="4">
         <a-card title="中等企业" :bordered="false">
-          <div class="card-value">{{ props.data?.mediumEnterpriseCount }}</div>
+          <div class="card-value">{{
+            statisticsData.mediumEnterpriseCount
+          }}</div>
         </a-card>
       </a-col>
       <a-col :span="4">
         <a-card title="小微企业" :bordered="false">
-          <div class="card-value">{{ props.data?.smallEnterpriseCount }}</div>
+          <div class="card-value">{{
+            statisticsData.smallEnterpriseCount
+          }}</div>
         </a-card>
       </a-col>
     </a-row>
@@ -133,14 +139,27 @@
 <script setup lang="ts">
   import { ref, onMounted, nextTick } from 'vue';
   import { IconSearch, IconRefresh } from '@arco-design/web-vue/es/icon';
-  import { getEnterPageList } from '@/api/compmonitoring';
+  import {
+    getEnterPageList,
+    getEnterpriseInformation,
+  } from '@/api/compmonitoring';
   import { DictType, getIndustrySelect } from '@/api/system';
   import RegionSelect from '../../components/RegionSelect/index.vue';
   import CompanyDetail from './CompanyDetail.vue';
 
-  const props = defineProps<{
+  defineProps<{
     data?: any;
   }>();
+
+  // 统计数据
+  const statisticsData = ref({
+    shouldAccessCount: 0,
+    accessedCount: 0,
+    notAccessedCount: 0,
+    largeEnterpriseCount: 0,
+    mediumEnterpriseCount: 0,
+    smallEnterpriseCount: 0,
+  });
 
   const LeveList = ref([]);
   const IndustryList = ref([]);
@@ -258,6 +277,15 @@
     }
   };
 
+  // 直接跳转到企业详情（供外部调用）
+  const goToEnterpriseDetail = async (enterpriseId: string) => {
+    showInfo.value = false;
+    await nextTick();
+    if (CompanyDetailForm.value) {
+      CompanyDetailForm.value.getRecord(enterpriseId);
+    }
+  };
+
   // 获取字典
   async function dictDetaile() {
     const res = (await DictType('risk_level')) as any;
@@ -311,13 +339,26 @@
     }, 200);
   };
 
+  // 获取企业统计信息
+  const getStatistics = async () => {
+    try {
+      const res = await getEnterpriseInformation();
+      if (res.success) {
+        statisticsData.value = res.data;
+      }
+    } catch (error) {
+      // console.error('获取企业统计信息失败:', error);
+    }
+  };
+
   onMounted(async () => {
+    await getStatistics();
     await dictDetaile();
     await IndustrySelect();
     await getList();
   });
 
-  defineExpose({ handleEnterpriseInfo });
+  defineExpose({ handleEnterpriseInfo, goToEnterpriseDetail });
 </script>
 
 <style scoped lang="less">

@@ -199,7 +199,7 @@ export function getEarlyWarningStatistics(): Promise<
 export function getRepositoryList(data: PageList) {
   return axios.get<BaseResponse<WarehouseStatisticsData>>(
     '/mws/warehouse/page',
-    data
+    { params: data }
   );
 }
 
@@ -209,6 +209,6 @@ export function getRepositoryList(data: PageList) {
 export function getWarehouseList(data: PageList) {
   return axios.get<BaseResponse<WarehouseStatisticsData>>(
     '/mws/storeroom/page',
-    data
+    { params: data }
   );
 }
