@@ -255,20 +255,7 @@
 
   // 点击仓库概况
   const handleWarehouseClick = () => {
-    openDrawer?.(DrawerType.WAREHOUSE, '仓库概况', {
-      name: '1号危化品仓库',
-      code: 'WH2025001',
-      company: '福州市XXXXX公司',
-      type: '危险品仓库',
-      dangerLevel: '01-1.1级库房',
-      capacity: '500吨',
-      manager: '李四',
-      phone: '13800138000',
-      address: '福建省福州市仓山区金山大道XXX号仓储区A区',
-      area: '1200㎡',
-      startDate: '2019-03-15',
-      safetyLevel: 'A级',
-    });
+    openDrawer?.(DrawerType.WAREHOUSE, '仓库概况');
   };
 
   // 获取仓库信息

@@ -39,7 +39,6 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
   (response: AxiosResponse<HttpResponse>) => {
     const res = response.data as any;
-    console.log(res);
 
     // 后端返回的 success 为 false 时（业务错误），视为错误
     if (!res.success) {

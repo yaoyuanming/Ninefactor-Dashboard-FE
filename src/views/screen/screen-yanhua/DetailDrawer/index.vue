@@ -18,7 +18,7 @@
         ref="CompanyTable"
         :data="data"
       />
-      <WarehouseTable v-if="type === DrawerType.WAREHOUSE" :data="data" />
+      <WarehouseTable v-if="type === DrawerType.WAREHOUSE" />
       <CreateRegionalTask
         v-if="type === DrawerType.REGIONAL_TASK"
         @close="handleClose"

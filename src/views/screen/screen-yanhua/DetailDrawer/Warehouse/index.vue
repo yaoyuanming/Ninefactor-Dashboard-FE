@@ -6,7 +6,7 @@
         <!-- 搜索区域 -->
         <div class="search-area">
           <a-input
-            v-model:value="searchValue"
+            v-model="searchValue"
             placeholder="请输入仓库名称或仓库编号"
             style="width: 200px; margin-right: 8px"
           />
@@ -23,7 +23,6 @@
           :data="tableData"
           bordered
           :pagination="false"
-          @page-change="handlePageChange"
         >
           <template #empty>
             <div>暂无数据</div>
@@ -44,7 +43,7 @@
         <!-- 搜索区域（与仓库标签页共用搜索值） -->
         <div class="search-area">
           <a-input
-            v-model:value="searchValue"
+            v-model="searchValue"
             placeholder="请输入库房名称或库房编号"
             style="width: 200px; margin-right: 8px"
           />
@@ -61,7 +60,6 @@
           :data="tableData"
           bordered
           :pagination="false"
-          @page-change="handlePageChange"
         >
           <template #empty>
             <div>暂无数据</div>
@@ -83,8 +81,9 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, computed } from 'vue';
-  import { getRepositoryList, getWarehouseList } from '@/api/compmonitoring';
+  import { ref, onMounted, computed, watch } from 'vue';
+  import { getWarehousePage, getStoreroomPage } from '@/api/company';
+  import type { WarehousePageParams, StoreroomPageParams } from '@/api/company';
 
   // 激活的标签页key
   const activeKey = ref('warehouse');
@@ -184,38 +183,58 @@
   });
 
   // 搜索方法
-  const handleSearch = () => {
+  const handleSearch = async () => {
     loading.value = true;
-    const requestParams = {
-      ...(searchValue.value ? { keyword: searchValue.value } : {}),
-      pageNo: pagination.value.current,
-      pageSize: pagination.value.pageSize,
-    };
 
-    if (activeKey.value === 'warehouse') {
-      getRepositoryList(requestParams)
-        .then((res) => {
-          tableData.value = res.data.records;
-          pagination.value.total = res.total;
-        })
-        .finally(() => {
-          loading.value = false;
-        });
-    } else {
-      getWarehouseList(requestParams)
-        .then((res) => {
-          tableData.value = res.data.records;
-          pagination.value.total = res.total;
-        })
-        .finally(() => {
-          loading.value = false;
-        });
+    try {
+      let res;
+      if (activeKey.value === 'warehouse') {
+        // 仓库列表参数
+        const warehouseParams: WarehousePageParams = {
+          pageNo: pagination.value.current,
+          pageSize: pagination.value.pageSize,
+        };
+
+        // 如果有搜索值，添加 keyword 参数
+        if (searchValue.value && searchValue.value.trim()) {
+          warehouseParams.keyword = searchValue.value.trim();
+        }
+
+        res = await getWarehousePage(warehouseParams);
+      } else {
+        // 库房列表参数
+        const storeroomParams: StoreroomPageParams = {
+          pageNo: pagination.value.current,
+          pageSize: pagination.value.pageSize,
+        };
+
+        // 如果有搜索值，添加 keyword 参数
+        if (searchValue.value && searchValue.value.trim()) {
+          storeroomParams.keyword = searchValue.value.trim();
+        }
+
+        res = await getStoreroomPage(storeroomParams);
+      }
+
+      if (res.data) {
+        tableData.value = res.data.records || [];
+        pagination.value.total = res.data.total || 0;
+      } else {
+        tableData.value = [];
+        pagination.value.total = 0;
+      }
+    } catch (error) {
+      tableData.value = [];
+      pagination.value.total = 0;
+    } finally {
+      loading.value = false;
     }
   };
 
   // 重置方法
   const handleReset = () => {
     searchValue.value = '';
+    pagination.value.current = 1; // 重置分页到第一页
     handleSearch();
   };
 
@@ -224,6 +243,14 @@
     pagination.value.current = current;
     handleSearch();
   };
+
+  // 监听标签页切换
+  watch(activeKey, () => {
+    // 重置分页到第一页
+    pagination.value.current = 1;
+    // 重新搜索数据
+    handleSearch();
+  });
 
   onMounted(() => {
     handleSearch();
