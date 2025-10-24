@@ -241,6 +241,58 @@
       tooltip: {
         trigger: 'item',
         formatter: '{b}: {c}次',
+        position: (point: any, params: any, dom: any, rect: any, size: any) => {
+          // 获取tooltip的尺寸
+          const tooltipWidth = size.contentSize[0];
+          const tooltipHeight = size.contentSize[1];
+
+          // 获取图表容器的位置和尺寸
+          const chartRect = alarmChartContainer.value?.getBoundingClientRect();
+          if (!chartRect) return [point[0] + 20, point[1]];
+
+          // 默认位置：鼠标右边20px
+          let x = point[0] + 20;
+          let y = point[1];
+
+          // 如果tooltip会超出右边界，则显示在鼠标左边
+          if (x + tooltipWidth > chartRect.width) {
+            x = point[0] - tooltipWidth - 20;
+          }
+
+          // 如果tooltip会超出左边界，则显示在鼠标右边（强制显示）
+          if (x < 0) {
+            x = point[0] + 20;
+          }
+
+          // 垂直居中调整
+          y = point[1] - tooltipHeight / 2;
+
+          // 如果tooltip会超出上边界，则向下调整
+          if (y < 0) {
+            y = 10;
+          }
+
+          // 如果tooltip会超出下边界，则向上调整
+          if (y + tooltipHeight > chartRect.height) {
+            y = chartRect.height - tooltipHeight - 10;
+          }
+
+          return [x, y];
+        },
+        backgroundColor: '#ffffff',
+        borderColor: 'rgba(0, 0, 0, 0.1)',
+        borderWidth: 1,
+        borderRadius: 6,
+        padding: [8, 12],
+        textStyle: {
+          color: '#333333',
+          fontSize: 13,
+          fontWeight: 500,
+        },
+        extraCssText: `
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+          border-radius: 6px;
+        `,
       },
       graphic: {
         type: 'group',
@@ -419,7 +471,6 @@
             #c2ddff 94%
           );
           background-clip: text;
-          background-clip: text;
           -webkit-text-fill-color: transparent;
           font-variation-settings: 'opsz' auto;
         }
@@ -438,7 +489,6 @@
             #94fbff 69%,
             #c2ddff 94%
           );
-          background-clip: text;
           background-clip: text;
           -webkit-text-fill-color: transparent;
           font-variation-settings: 'opsz' auto;
