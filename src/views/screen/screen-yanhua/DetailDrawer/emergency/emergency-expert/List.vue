@@ -54,6 +54,7 @@
         :data="tableData"
         :loading="loading"
         :pagination="pagination"
+        :scroll="{ y: 'calc(70vh - 340px)' }"
         @page-change="handlePageChange"
         @page-size-change="handlePageSizeChange"
       >
@@ -92,9 +93,9 @@
 
           <a-table-column title="照片" :width="120" align="center">
             <template #cell="{ record }">
-              <div v-if="record.photoUrl" class="photo-cell">
+              <div v-if="record.tempPhotoUrls" class="photo-cell">
                 <a-image
-                  :src="record.photoUrl"
+                  :src="getFirstImage(record.tempPhotoUrls)"
                   width="64"
                   height="40"
                   fit="cover"
@@ -206,6 +207,16 @@
   const getSpecialtyFieldText = (field: number) => {
     const option = specialtyFieldOptions.find((item) => item.value === field);
     return option ? option.label : '—';
+  };
+
+  // 获取第一张图片
+  const getFirstImage = (imageUrls: string | string[]) => {
+    if (!imageUrls) return '';
+    if (typeof imageUrls === 'string') return imageUrls;
+    if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+      return imageUrls[0];
+    }
+    return '';
   };
 
   // 获取列表数据
@@ -387,12 +398,12 @@
       flex: 1;
       flex-direction: column;
       min-height: 0;
-      overflow: hidden;
 
       :deep(.arco-table-container) {
         display: flex;
         flex-direction: column;
         height: 100%;
+        overflow: hidden;
         background: rgb(10 30 60 / 30%) !important;
         border: 1px solid rgb(23 150 250 / 10%);
         border-radius: 4px;
@@ -475,9 +486,27 @@
         }
 
         .arco-table-body {
-          flex: 1;
-          overflow: hidden !important;
           background: transparent !important;
+
+          // 自定义滚动条样式
+          &::-webkit-scrollbar {
+            width: 6px;
+          }
+
+          &::-webkit-scrollbar-track {
+            background: rgb(23 150 250 / 5%);
+            border-radius: 3px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background: rgb(23 150 250 / 30%);
+            border-radius: 3px;
+            transition: all 0.3s;
+
+            &:hover {
+              background: rgb(23 150 250 / 50%);
+            }
+          }
         }
 
         .arco-empty {
@@ -528,12 +557,15 @@
       :deep(.arco-pagination) {
         flex-shrink: 0;
         justify-content: flex-end;
-        padding: 16px 20px;
+        min-height: 40px;
+        margin-top: 12px;
+        padding: 8px 20px;
         background: transparent;
 
         .arco-pagination-item,
         .arco-pagination-item-previous,
         .arco-pagination-item-next {
+          margin: 0 4px;
           color: rgb(255 255 255 / 85%);
           background: rgb(255 255 255 / 8%);
           border: 1px solid rgb(255 255 255 / 15%);

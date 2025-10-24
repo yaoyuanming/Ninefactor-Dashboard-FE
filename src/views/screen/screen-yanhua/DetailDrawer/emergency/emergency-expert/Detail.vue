@@ -51,8 +51,8 @@
           <a-card title="专家照片" :bordered="false" class="info-card">
             <div class="image-container">
               <a-image
-                v-if="data.photoUrl"
-                :src="data.photoUrl"
+                v-if="data.tempPhotoUrls"
+                :src="getFirstImage(data.tempPhotoUrls)"
                 fit="cover"
                 :preview="true"
               />
@@ -101,6 +101,16 @@
     if (!field) return '—';
     const option = specialtyFieldOptions.find((item) => item.value === field);
     return option ? option.label : '—';
+  };
+
+  // 获取第一张图片
+  const getFirstImage = (imageUrls: string | string[]) => {
+    if (!imageUrls) return '';
+    if (typeof imageUrls === 'string') return imageUrls;
+    if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+      return imageUrls[0];
+    }
+    return '';
   };
 
   const handleBack = () => {

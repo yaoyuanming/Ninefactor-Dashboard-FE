@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, computed, watch } from 'vue';
+  import { ref, watch } from 'vue';
   import { Message } from '@arco-design/web-vue';
   import { uploadImage } from '@/api/system';
 
@@ -91,7 +91,7 @@
     (newVal) => {
       if (newVal) {
         fileUrl.value = newVal;
-        // 如果是完整的 URL，直接用于展示
+        // 直接使用新的值更新显示
         imageUrl.value = newVal;
       } else {
         fileUrl.value = '';
@@ -129,7 +129,6 @@
 
       // 调用上传接口，uploadDict 固定为 'cover'
       const response: any = await uploadImage(fileItem.file, 'cover');
-
       if (response.success && response.data) {
         const uploadData: UploadResponse['data'] = response.data;
 

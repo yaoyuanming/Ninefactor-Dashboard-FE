@@ -106,7 +106,9 @@
   const formRef = ref();
 
   // 表单数据
-  const formData = reactive<Partial<EmergencyPlanVO>>({
+  const formData = reactive<
+    Partial<EmergencyPlanVO> & { orgId?: string | string[] | null }
+  >({
     planName: '',
     planType: 2, // 企业预案
     orgType: 2, // 企业
@@ -124,7 +126,10 @@
   };
 
   // 处理企业选择变化
-  const handleCompanyChange = (value: number, companyNames?: string) => {
+  const handleCompanyChange = (
+    value: string | string[] | null,
+    companyNames?: string
+  ) => {
     formData.orgId = value;
     formData.orgName = companyNames || '';
   };
@@ -141,7 +146,7 @@
         formData.planName = detail.planName || '';
         formData.planType = detail.planType || 2;
         formData.orgType = detail.orgType || 2;
-        formData.orgId = detail.orgId ? Number(detail.orgId) : undefined;
+        formData.orgId = detail.orgId ? String(detail.orgId) : undefined;
         formData.orgName = detail.orgName || '';
         formData.planContent = detail.planContent || '';
         formData.expireTime = detail.expireTime || '';

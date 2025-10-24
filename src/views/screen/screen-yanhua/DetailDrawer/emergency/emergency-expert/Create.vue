@@ -89,9 +89,10 @@
         <div class="upload-section">
           <div class="section-title">专家照片</div>
           <ImageUpload
-            v-model="formData.photoUrl"
+            v-model="formData.tempPhotoUrls"
             upload-text="上传照片"
             :max-size="5"
+            @change="handleImageChange"
           />
           <div class="upload-tip">
             建议尺寸：200x200像素，支持 jpg、png 格式，大小不超过 5MB
@@ -132,13 +133,16 @@
   const isEdit = computed(() => !!props.data?.id);
 
   // 表单数据
-  const formData = reactive<Partial<EmergencyExpertVO>>({
+  const formData = reactive<
+    Partial<EmergencyExpertVO> & { tempPhotoUrls?: string }
+  >({
     expertName: '',
     specialtyField: 1,
     technicalTitle: '',
     workUnit: '',
     contactPhone: '',
-    photoUrl: '',
+    photoUrl: '', // 用于提交的永久URL
+    tempPhotoUrls: '', // 用于显示的临时URL
     remark: '',
   });
 
@@ -168,6 +172,12 @@
     ],
   };
 
+  // 处理图片变化
+  const handleImageChange = (fileUrl: string, fileTemporaryUrl: string) => {
+    formData.photoUrl = fileUrl; // 永久URL用于提交
+    formData.tempPhotoUrls = fileTemporaryUrl; // 临时URL用于显示
+  };
+
   // 加载详情数据
   const loadDetail = async () => {
     if (!props.data?.id) {
@@ -179,6 +189,7 @@
         workUnit: '',
         contactPhone: '',
         photoUrl: '',
+        tempPhotoUrls: '',
         remark: '',
       });
       return;
@@ -196,7 +207,8 @@
       formData.technicalTitle = detail.technicalTitle || '';
       formData.workUnit = detail.workUnit || '';
       formData.contactPhone = detail.contactPhone || '';
-      formData.photoUrl = detail.photoUrl || '';
+      formData.photoUrl = detail.photoUrl || ''; // 永久URL用于提交
+      formData.tempPhotoUrls = detail.tempPhotoUrls || ''; // 临时URL用于显示
       formData.remark = detail.remark || '';
     } catch (error: any) {
       Message.error(error?.message || '加载专家详情失败');
@@ -227,7 +239,7 @@
         technicalTitle: formData.technicalTitle,
         workUnit: formData.workUnit,
         contactPhone: formData.contactPhone,
-        photoUrl: formData.photoUrl,
+        photoUrl: formData.photoUrl, // 只提交photoUrl字段
         remark: formData.remark,
       };
 
