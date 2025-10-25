@@ -10,6 +10,16 @@
             placeholder="请输入仓库名称或仓库编号"
             style="width: 200px; margin-right: 8px"
           />
+          <a-select
+            v-model="dangerLevelFilter"
+            placeholder="请选择危险等级"
+            style="width: 150px; margin-right: 8px"
+            allow-clear
+          >
+            <a-option value="1">1.1级库房</a-option>
+            <a-option value="2">1.3级库房</a-option>
+            <a-option value="3">无药库房</a-option>
+          </a-select>
           <a-button type="primary" @click="handleSearch">搜索</a-button>
           <a-button style="margin-left: 8px" @click="handleReset"
             >重置</a-button
@@ -47,6 +57,16 @@
             placeholder="请输入库房名称或库房编号"
             style="width: 200px; margin-right: 8px"
           />
+          <a-select
+            v-model="dangerLevelFilter"
+            placeholder="请选择危险等级"
+            style="width: 150px; margin-right: 8px"
+            allow-clear
+          >
+            <a-option value="1">1.1级库房</a-option>
+            <a-option value="2">1.3级库房</a-option>
+            <a-option value="3">无药库房</a-option>
+          </a-select>
           <a-button type="primary" @click="handleSearch">搜索</a-button>
           <a-button style="margin-left: 8px" @click="handleReset"
             >重置</a-button
@@ -81,14 +101,17 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, computed, watch } from 'vue';
+  import { ref, onMounted, computed, watch, h } from 'vue';
   import { getWarehousePage, getStoreroomPage } from '@/api/company';
   import type { WarehousePageParams, StoreroomPageParams } from '@/api/company';
+  import { formatDate } from '@/utils/date';
 
   // 激活的标签页key
   const activeKey = ref('warehouse');
   // 搜索值
   const searchValue = ref('');
+  // 危险等级筛选
+  const dangerLevelFilter = ref<string>();
   // 表格加载状态
   const loading = ref(false);
   // 表格数据
@@ -103,39 +126,54 @@
     showQuickJumper: true,
   });
 
+  // 危险等级格式化函数
+  const formatDangerLevel = (level: number | string) => {
+    const levelMap: Record<string, string> = {
+      '1': '1.1级库房',
+      '2': '1.3级库房',
+      '3': '无药库房',
+    };
+    return levelMap[String(level)] || '-';
+  };
+
   // 仓库表格列配置
   const warehouseColumns = [
     {
       title: '仓库名称',
-      dataIndex: 'warehouseName',
+      dataIndex: 'storeName',
+      align: 'center',
     },
     {
       title: '仓库编号',
-      dataIndex: 'warehouseNum',
+      dataIndex: 'storeNum',
+      align: 'center',
     },
     {
       title: '面积(m²)',
       dataIndex: 'acreage',
+      align: 'center',
     },
     {
       title: '危险等级',
       dataIndex: 'dangerLevel',
+      align: 'center',
+      render: ({ record }: any) => formatDangerLevel(record.dangerLevel),
     },
     {
       title: '剂量(千克)',
       dataIndex: 'dosage',
-    },
-    {
-      title: '位置',
-      dataIndex: 'location',
+      align: 'center',
     },
     {
       title: '人员限制',
       dataIndex: 'personLimit',
+      align: 'center',
     },
     {
       title: '创建时间',
       dataIndex: 'createDate',
+      align: 'center',
+      render: ({ record }: any) => formatDate(record.createDate),
     },
   ];
 
@@ -144,34 +182,39 @@
     {
       title: '库房名称',
       dataIndex: 'roomName',
+      align: 'center',
     },
     {
       title: '库房编号',
       dataIndex: 'roomNum',
+      align: 'center',
     },
     {
       title: '面积(m²)',
       dataIndex: 'acreage',
+      align: 'center',
     },
     {
       title: '危险等级',
       dataIndex: 'dangerLevel',
+      align: 'center',
+      render: ({ record }: any) => formatDangerLevel(record.dangerLevel),
     },
     {
       title: '剂量(千克)',
       dataIndex: 'dosage',
+      align: 'center',
     },
     {
       title: '人员限制',
       dataIndex: 'personLimit',
-    },
-    {
-      title: '创建人',
-      dataIndex: 'createBy',
+      align: 'center',
     },
     {
       title: '创建日期',
       dataIndex: 'createDate',
+      align: 'center',
+      render: ({ record }: any) => formatDate(record.createDate),
     },
   ];
 
@@ -200,6 +243,11 @@
           warehouseParams.keyword = searchValue.value.trim();
         }
 
+        // 如果有危险等级筛选，添加 dangerLevel 参数
+        if (dangerLevelFilter.value) {
+          warehouseParams.dangerLevel = dangerLevelFilter.value;
+        }
+
         res = await getWarehousePage(warehouseParams);
       } else {
         // 库房列表参数
@@ -211,6 +259,11 @@
         // 如果有搜索值，添加 keyword 参数
         if (searchValue.value && searchValue.value.trim()) {
           storeroomParams.keyword = searchValue.value.trim();
+        }
+
+        // 如果有危险等级筛选，添加 dangerLevel 参数
+        if (dangerLevelFilter.value) {
+          storeroomParams.dangerLevel = dangerLevelFilter.value;
         }
 
         res = await getStoreroomPage(storeroomParams);
@@ -234,6 +287,7 @@
   // 重置方法
   const handleReset = () => {
     searchValue.value = '';
+    dangerLevelFilter.value = undefined;
     pagination.value.current = 1; // 重置分页到第一页
     handleSearch();
   };
@@ -246,6 +300,9 @@
 
   // 监听标签页切换
   watch(activeKey, () => {
+    // 重置搜索条件
+    searchValue.value = '';
+    dangerLevelFilter.value = undefined;
     // 重置分页到第一页
     pagination.value.current = 1;
     // 重新搜索数据
@@ -261,6 +318,27 @@
   .warehouse-overview {
     color: #fff;
     background: transparent;
+  }
+
+  // 下拉框弹出层样式
+  ::v-deep(.arco-select-dropdown) {
+    background: rgb(10 30 60 / 95%);
+    border: 1px solid rgb(23 150 250 / 30%);
+    backdrop-filter: blur(10px);
+
+    .arco-select-option {
+      color: rgb(255 255 255 / 85%);
+
+      &:hover {
+        color: #fff;
+        background: rgb(23 150 250 / 15%);
+      }
+
+      &.arco-select-option-selected {
+        color: #1796fa;
+        background: rgb(23 150 250 / 25%);
+      }
+    }
   }
 
   // 标签页样式 - 参考企业页面
@@ -321,7 +399,8 @@
     border: 1px solid rgb(23 150 250 / 20%);
     border-radius: 8px;
 
-    :deep(.arco-input-wrapper) {
+    :deep(.arco-input-wrapper),
+    :deep(.arco-select-view-single) {
       color: rgb(255 255 255 / 85%);
       background: rgb(10 30 60 / 50%);
       border-color: rgb(23 150 250 / 30%);
@@ -334,7 +413,8 @@
         border-color: rgb(23 150 250 / 70%);
       }
 
-      input {
+      input,
+      .arco-select-view-value {
         color: rgb(255 255 255 / 85%);
         background: transparent;
 
@@ -346,6 +426,19 @@
       .arco-input {
         background: transparent;
       }
+
+      .arco-select-view-placeholder {
+        color: rgb(255 255 255 / 40%);
+      }
+
+      .arco-select-view-suffix {
+        color: rgb(255 255 255 / 60%);
+      }
+    }
+
+    :deep(.arco-select-view-single) {
+      background: rgb(10 30 60 / 50%);
+      border-color: rgb(23 150 250 / 30%);
     }
 
     :deep(.arco-btn-primary) {

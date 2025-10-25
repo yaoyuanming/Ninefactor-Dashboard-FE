@@ -144,6 +144,7 @@
     getEnterpriseInformation,
   } from '@/api/compmonitoring';
   import { DictType, getIndustrySelect } from '@/api/system';
+  import { formatDate } from '@/utils/date';
   import RegionSelect from '../../components/RegionSelect/index.vue';
   import CompanyDetail from './CompanyDetail.vue';
 
@@ -179,48 +180,83 @@
   const showInfo = ref(true);
   const CompanyDetailForm = ref(null) as any;
 
+  // 格式化函数
+  const formatRiskLevel = (level: number) => {
+    const levelMap = {
+      0: '无风险',
+      2: '低风险',
+      5: '一般风险',
+      8: '较大风险',
+      10: '重大风险',
+    };
+    return levelMap[level] || '-';
+  };
+
+  const formatEnterpriseScale = (scale: any) => {
+    const scaleMap = {
+      '1': '规上',
+      '2': '中等',
+      '3': '小微',
+    };
+    return scaleMap[String(scale)] || scale || '-';
+  };
+
   // 表格列配置
   const columns = [
     {
       title: '企业名称',
       dataIndex: 'enterpriseName',
+      align: 'center',
     },
     {
       title: '统一信用代码',
       dataIndex: 'creditCode',
+      align: 'center',
     },
     {
       title: '区域',
       dataIndex: 'areaCode',
+      align: 'center',
     },
     {
       title: '国民经济类型',
       dataIndex: 'industryCode',
+      align: 'center',
     },
     {
       title: '整体风险等级',
       dataIndex: 'riskLevel',
+      align: 'center',
+      render: ({ record }: any) => formatRiskLevel(record.riskLevel),
     },
     {
       title: '主要负责人',
       dataIndex: 'principal',
+      align: 'center',
     },
     {
       title: '企业规模',
       dataIndex: 'enterpriseScale',
+      align: 'center',
+      render: ({ record }: any) =>
+        formatEnterpriseScale(record.enterpriseScale),
     },
     {
       title: '最近填报时间',
       dataIndex: 'lastReportTime',
+      align: 'center',
+      render: ({ record }: any) => formatDate(record.lastReportTime),
     },
     {
       title: '企业状态',
       dataIndex: 'status',
       slotName: 'status',
+      align: 'center',
     },
     {
       title: '操作',
       slotName: 'operation',
+      align: 'center',
     },
   ];
 
@@ -230,23 +266,21 @@
   // 获取分页列表数据
   const getList = async () => {
     try {
+      loading.value = true;
       const statusMap = { 0: '关闭', 1: '正常', 2: '锁定' };
       const res = (await getEnterPageList(searchForm.value)) as any;
-      loading.value = true;
       if (res.success) {
         total.value = res.data.total;
         enterpriseData.value = res.data.records.map((val) => {
           return {
             ...val,
             status: statusMap[val.status],
-            riskLevel: LeveList.value.find(
-              (news: any) => news.dictValue === val.riskLevel
-            )?.dictLabel,
           };
         });
-        loading.value = false;
       }
     } catch {
+      // 错误处理
+    } finally {
       loading.value = false;
     }
   };

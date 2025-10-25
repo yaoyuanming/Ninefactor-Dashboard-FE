@@ -190,30 +190,24 @@
               <template #vehicleDocumentUrls="{ record }">
                 <div class="vehicle-doc-list">
                   <div
-                    v-for="(docUrl, idx) in record.vehicleDocumentUrls
-                      ? record.vehicleDocumentUrls.split(',')
-                      : []"
-                    :key="idx"
+                    v-if="
+                      record.vehicleDocumentUrls &&
+                      record.vehicleDocumentUrls.trim() !== ''
+                    "
                     class="vehicle-doc-item"
-                    @click="viewImage(docUrl.trim())"
+                    @click="
+                      viewImage(record.vehicleDocumentUrls.split(',')[0].trim())
+                    "
                   >
                     <a-image
-                      :src="docUrl.trim()"
+                      :src="record.vehicleDocumentUrls.split(',')[0].trim()"
                       :width="60"
                       :height="40"
                       fit="cover"
                       class="doc-img"
                     />
                   </div>
-                  <div
-                    v-if="
-                      !record.vehicleDocumentUrls ||
-                      record.vehicleDocumentUrls.trim() === ''
-                    "
-                    class="no-doc"
-                  >
-                    ---
-                  </div>
+                  <div v-else class="no-doc"> --- </div>
                 </div>
               </template>
             </a-table>
@@ -232,10 +226,43 @@
     getWarehouseList,
   } from '@/api/compmonitoring';
   import { getPersonPage, getCarPage } from '@/api/company';
+  import { formatDate } from '@/utils/date';
 
   const config = ref({});
   const emits = defineEmits(['back']);
   const activeTabKey = ref('warehouse');
+
+  // 危险等级格式化函数
+  const formatDangerLevel = (level) => {
+    const levelMap = {
+      1: '1.1级库房',
+      2: '1.3级库房',
+      3: '无药库房',
+    };
+    return levelMap[String(level)] || '-';
+  };
+
+  // 车辆类型格式化函数
+  const formatVehicleType = (type) => {
+    const typeMap = {
+      0: '未识别',
+      1: '小型汽车',
+      2: '大型汽车',
+      3: '使馆汽车',
+      4: '领馆汽车',
+      5: '境外汽车',
+      6: '外籍汽车',
+      10: '教练车',
+      11: '临时行驶车',
+      12: '警用汽车',
+      13: '应急汽车',
+      14: '武警汽车',
+      15: '军用汽车',
+      16: '民航汽车',
+      17: '新能源汽车',
+    };
+    return typeMap[String(type)] || '-';
+  };
 
   // ---------------------- 分页配置 ----------------------
   // 仓库分页
@@ -427,22 +454,17 @@
   const warehouseColumns = ref([
     {
       title: '仓库编号',
-      dataIndex: 'warehouseNum',
-      key: 'warehouseNum',
+      dataIndex: 'storeNum',
+      key: 'storeNum',
       align: 'center',
     },
     {
       title: '仓库名称',
-      dataIndex: 'warehouseName',
-      key: 'warehouseName',
+      dataIndex: 'storeName',
+      key: 'storeName',
       align: 'center',
     },
-    {
-      title: '仓库地址',
-      dataIndex: 'location',
-      key: 'location',
-      align: 'center',
-    },
+
     {
       title: '仓库面积(㎡)',
       dataIndex: 'acreage',
@@ -454,6 +476,7 @@
       dataIndex: 'dangerLevel',
       key: 'dangerLevel',
       align: 'center',
+      render: ({ record }) => formatDangerLevel(record.dangerLevel),
     },
     { title: '剂量', dataIndex: 'dosage', key: 'dosage', align: 'center' },
     {
@@ -467,6 +490,7 @@
       dataIndex: 'updateDate',
       key: 'updateDate',
       align: 'center',
+      render: ({ record }) => formatDate(record.updateDate),
     },
   ]);
 
@@ -489,6 +513,7 @@
       dataIndex: 'dangerLevel',
       key: 'dangerLevel',
       align: 'center',
+      render: ({ record }) => formatDangerLevel(record.dangerLevel),
     },
     { title: '剂量', dataIndex: 'dosage', key: 'dosage', align: 'center' },
     {
@@ -502,30 +527,15 @@
       dataIndex: 'updateDate',
       key: 'updateDate',
       align: 'center',
+      render: ({ record }) => formatDate(record.updateDate),
     },
   ]);
 
   const personnelColumns = ref([
     {
-      title: '公司编号',
-      dataIndex: 'companyCode',
-      key: 'companyCode',
-      align: 'center',
-    },
-    {
       title: '人员姓名',
       dataIndex: 'personname',
       key: 'personname',
-      align: 'center',
-    },
-    { title: '身份证号', dataIndex: 'idcard', key: 'idcard', align: 'center' },
-    { title: '工号', dataIndex: 'workNo', key: 'workNo', align: 'center' },
-    { title: '职位', dataIndex: 'position', key: 'position', align: 'center' },
-    { title: '手机号', dataIndex: 'mb', key: 'mb', align: 'center' },
-    {
-      title: '更新日期',
-      dataIndex: 'updateDate',
-      key: 'updateDate',
       align: 'center',
     },
     {
@@ -535,6 +545,16 @@
       align: 'center',
     },
     { title: '头像', slotName: 'avatar', key: 'mb', align: 'center' },
+    { title: '工号', dataIndex: 'workNo', key: 'workNo', align: 'center' },
+
+    { title: '手机号', dataIndex: 'mb', key: 'mb', align: 'center' },
+    {
+      title: '更新日期',
+      dataIndex: 'updateDate',
+      key: 'updateDate',
+      align: 'center',
+      render: ({ record }) => formatDate(record.updateDate),
+    },
   ]);
 
   const vehicleColumns = ref([
@@ -549,6 +569,7 @@
       dataIndex: 'vehicleType',
       key: 'vehicleType',
       align: 'center',
+      render: ({ record }) => formatVehicleType(record.vehicleType),
     },
     { title: '备注', dataIndex: 'remarks', key: 'remarks', align: 'center' },
     {
@@ -574,6 +595,7 @@
       dataIndex: 'updateTime',
       key: 'updateTime',
       align: 'center',
+      render: ({ record }) => formatDate(record.updateTime),
     },
   ]);
 
@@ -729,6 +751,22 @@
   // 企业详情获取+初始化仓库数据
   function getRecord(ids, showTitle = true) {
     TitleShow.value = showTitle;
+
+    // 重置到仓库 tab
+    activeTabKey.value = 'warehouse';
+
+    // 清空所有表格数据
+    warehouseData.value = [];
+    storehouseData.value = [];
+    personnelData.value = [];
+    vehicleData.value = [];
+
+    // 重置分页
+    warehousePagination.value.current = 1;
+    storehousePagination.value.current = 1;
+    personnelPagination.value.current = 1;
+    vehiclePagination.value.current = 1;
+
     // 重置已加载的 tabs
     loadedTabs.value = new Set(['warehouse']);
 
@@ -834,7 +872,7 @@
     }
 
     .arco-page-header-wrapper {
-      padding: 16px 20px !important;
+      padding: 2px 1px !important;
     }
   }
 
