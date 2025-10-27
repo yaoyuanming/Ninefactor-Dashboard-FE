@@ -3,8 +3,9 @@
     :visible="dialogVisible"
     :title="dialogTitle"
     :width="720"
+    :ok-loading="formLoading"
     @ok="submitForm"
-    @cancel="() => (dialogVisible = false)"
+    @cancel="handleCancel"
   >
     <a-form
       ref="formRef"
@@ -14,12 +15,12 @@
     >
       <a-row :gutter="16">
         <a-col :span="12">
-          <a-form-item field="nickname" label="姓名">
+          <a-form-item field="nickname" label="姓名" validate-trigger="blur">
             <a-input v-model="formData.nickname" placeholder="请输入姓名" />
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item field="deptId" label="部门">
+          <a-form-item field="deptId" label="部门" validate-trigger="change">
             <a-tree-select
               v-model="formData.deptId"
               :data="deptTree"
@@ -37,16 +38,20 @@
       </a-row>
       <a-row :gutter="16">
         <a-col :span="12">
-          <a-form-item field="phoneNumber" label="手机号">
+          <a-form-item
+            field="phoneNumber"
+            label="手机号"
+            validate-trigger="blur"
+          >
             <a-input
               v-model="formData.phoneNumber"
-              placeholder="请输入手机号"
+              placeholder="请输入11位手机号"
               :max-length="11"
             />
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item field="email" label="邮箱">
+          <a-form-item field="email" label="邮箱" validate-trigger="blur">
             <a-input
               v-model="formData.email"
               placeholder="请输入邮箱"
@@ -61,6 +66,7 @@
             v-if="formType === 'create'"
             field="userName"
             label="用户名称"
+            validate-trigger="blur"
           >
             <a-input v-model="formData.userName" placeholder="请输入用户名称" />
           </a-form-item>
@@ -70,10 +76,11 @@
             v-if="formType === 'create'"
             field="password"
             label="用户密码"
+            validate-trigger="blur"
           >
             <a-input-password
               v-model="formData.password"
-              placeholder="请输入用户密码"
+              placeholder="请输入用户密码(5-20位)"
             />
           </a-form-item>
         </a-col>
@@ -148,39 +155,61 @@
 
   const formRules = {
     userName: [
-      { required: true, message: '用户账号不能为空', trigger: 'blur' },
+      { required: true, message: '用户账号不能为空' },
       {
         min: 1,
         max: 30,
         message: '用户账号长度不能超过30个字符',
-        trigger: 'blur',
       },
     ],
-    nickname: [{ required: true, message: '姓名不能为空', trigger: 'blur' }],
-    deptId: [{ required: true, message: '部门不能为空', trigger: 'change' }],
+    nickname: [{ required: true, message: '姓名不能为空' }],
+    deptId: [{ required: true, message: '部门不能为空' }],
     password: [
-      { required: true, message: '用户密码不能为空', trigger: 'blur' },
-      { min: 5, max: 20, message: '密码长度为5-20个字符', trigger: 'blur' },
+      { required: true, message: '用户密码不能为空' },
+      {
+        validator: (value: any, callback: any) => {
+          if (!value) {
+            callback();
+            return;
+          }
+          if (value.length < 5) {
+            callback('密码长度不能少于5个字符');
+          } else if (value.length > 20) {
+            callback('密码长度不能超过20个字符');
+          } else {
+            callback();
+          }
+        },
+      },
     ],
     email: [
       {
         type: 'email',
         message: '请输入正确的邮箱地址',
-        trigger: ['blur', 'change'],
       },
-      { max: 50, message: '邮箱长度不能超过50个字符', trigger: 'blur' },
+      { max: 50, message: '邮箱长度不能超过50个字符' },
     ],
     phoneNumber: [
       {
         required: true,
-        pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/,
-        message: '请输入正确的手机号',
-        trigger: 'blur',
+        message: '手机号不能为空',
+      },
+      {
+        validator: (value: any, callback: any) => {
+          if (!value) {
+            callback();
+            return;
+          }
+          const phoneReg = /^1[3456789]\d{9}$/;
+          if (!phoneReg.test(value)) {
+            callback('请输入正确的11位手机号码');
+          } else {
+            callback();
+          }
+        },
       },
     ],
-    remark: [
-      { max: 500, message: '备注长度不能超过500个字符', trigger: 'blur' },
-    ],
+    remark: [{ max: 500, message: '备注长度不能超过500个字符' }],
   };
 
   // 重置表单
@@ -284,19 +313,43 @@
     }
   };
 
+  // 取消操作
+  const handleCancel = () => {
+    dialogVisible.value = false;
+    resetForm();
+  };
+
   // 提供 open 方法
   defineExpose({ open });
 
   // 提交表单
   const submitForm = async () => {
-    // validate() 返回 undefined 表示验证通过，返回错误对象表示验证失败
+    // 验证表单
+    if (!formRef.value) {
+      Message.warning('表单未初始化');
+      return false;
+    }
+
+    // 先验证表单
     try {
-      const errors = await formRef.value?.validate();
-      if (errors) {
-        return;
+      const validateResult = await formRef.value.validate();
+
+      // validate() 返回 undefined 表示成功，返回对象表示有错误
+      if (validateResult) {
+        // 找出第一个错误并显示
+        const firstErrorField = Object.keys(validateResult)[0];
+        const firstError = validateResult[firstErrorField];
+
+        if (firstError && firstError.message) {
+          Message.warning(firstError.message);
+        } else {
+          Message.warning('请检查表单填写是否正确');
+        }
+        return false;
       }
     } catch (error) {
-      return;
+      Message.warning('请完善必填信息');
+      return false;
     }
 
     formLoading.value = true;
@@ -345,11 +398,12 @@
       setTimeout(() => {
         emit('success');
       }, 500);
+      return true;
     } catch (error: any) {
       const errorMsg =
         error?.response?.data?.message || error?.message || '操作失败';
       Message.error(errorMsg);
-      // console.error('提交失败:', error);
+      return false;
     } finally {
       formLoading.value = false;
     }

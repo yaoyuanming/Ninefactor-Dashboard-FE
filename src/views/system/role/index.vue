@@ -77,9 +77,6 @@
         @page-change="handlePageChange"
         @page-size-change="handlePageSizeChange"
       >
-        <template #roleSort="{ record }">
-          <span>{{ record.roleSort }}</span>
-        </template>
         <template #status="{ record }">
           <a-switch
             v-model="record.status"
@@ -156,8 +153,8 @@
   import RoleDetail from './components/RoleDetail.vue';
   // import RolePermission from './components/RolePermission.vue';
 
-  // 搜索表单
-  const searchForm = reactive<RoleListReqVO>({
+  // 搜索表单（添加 createTime 用于日期选择器绑定，但不传给后端）
+  const searchForm = reactive<RoleListReqVO & { createTime?: any }>({
     roleName: '',
     roleKey: '',
     status: undefined,
@@ -165,6 +162,7 @@
     params_endTime: undefined,
     pageNum: 1,
     pageSize: 10,
+    createTime: undefined,
   });
 
   // 表格相关
@@ -176,12 +174,6 @@
     { title: '角色编号', dataIndex: 'id', width: 100 },
     { title: '角色名称', dataIndex: 'roleName', width: 150 },
     { title: '角色标识', dataIndex: 'roleKey', width: 150 },
-    {
-      title: '显示顺序',
-      dataIndex: 'roleSort',
-      slotName: 'roleSort',
-      width: 100,
-    },
     { title: '备注', dataIndex: 'remark', ellipsis: true, width: 200 },
     { title: '状态', dataIndex: 'status', slotName: 'status', width: 100 },
     {
@@ -242,7 +234,11 @@
     loading.value = true;
     try {
       const params = {
-        ...searchForm,
+        roleName: searchForm.roleName,
+        roleKey: searchForm.roleKey,
+        status: searchForm.status,
+        params_beginTime: searchForm.params_beginTime,
+        params_endTime: searchForm.params_endTime,
         pageNum: pagination.current,
         pageSize: pagination.pageSize,
       };
@@ -270,7 +266,7 @@
     searchForm.status = undefined;
     searchForm.params_beginTime = undefined;
     searchForm.params_endTime = undefined;
-    // searchForm.createTime = undefined;
+    searchForm.createTime = undefined;
     pagination.current = 1;
     getList();
   };

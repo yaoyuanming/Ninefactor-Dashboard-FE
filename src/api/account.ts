@@ -166,7 +166,7 @@ export function updateUserStatus(id: number, status: number) {
     id,
     status,
   };
-  return axios.put('/system/user/update-status', data);
+  return axios.put('/system/user/changeStatus', data);
 }
 
 /**

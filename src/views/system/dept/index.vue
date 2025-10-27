@@ -163,12 +163,11 @@
   // 删除按钮操作
   const handleDelete = async (id: number) => {
     try {
-      await Message.warning('确定要删除该部门吗？');
       await DeptApi.deleteDept(id);
       Message.success('删除成功');
       await getList();
-    } catch {
-      // 用户取消或删除失败
+    } catch (error: any) {
+      Message.error(error?.message || '删除失败');
     }
   };
 

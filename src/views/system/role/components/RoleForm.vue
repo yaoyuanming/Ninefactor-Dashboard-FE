@@ -30,15 +30,6 @@
           show-word-limit
         />
       </a-form-item>
-      <a-form-item label="显示顺序" field="roleSort">
-        <a-input-number
-          v-model="formData.roleSort"
-          placeholder="请输入显示顺序"
-          :min="0"
-          mode="button"
-          style="width: 100%"
-        />
-      </a-form-item>
       <a-form-item label="状态" field="status">
         <a-radio-group v-model="formData.status">
           <a-radio value="0">正常</a-radio>
@@ -96,7 +87,6 @@
     id: undefined,
     roleName: '',
     roleKey: '',
-    roleSort: 0,
     status: '0',
     remark: '',
   });
@@ -114,7 +104,6 @@
         message: '角色标识必须以字母开头，只能包含字母、数字和下划线',
       },
     ],
-    roleSort: [{ required: true, message: '请输入显示顺序' }],
     status: [{ required: true, message: '请选择状态' }],
   };
 
@@ -133,7 +122,6 @@
               id: data.id,
               roleName: data.roleName,
               roleKey: data.roleKey,
-              roleSort: data.roleSort || 0,
               status: data.status,
               remark: data.remark || '',
             };
@@ -148,7 +136,6 @@
             id: undefined,
             roleName: '',
             roleKey: '',
-            roleSort: 0,
             status: '0',
             remark: '',
           };
