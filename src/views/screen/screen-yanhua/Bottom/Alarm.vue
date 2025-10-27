@@ -65,10 +65,12 @@
         :data="tableData"
         :loading="loading"
         :pagination="pagination"
+        :scroll="{ y: 'calc(100vh - 400px)' }"
         row-key="id"
         :stripe="false"
         :bordered="false"
         @page-change="handlePageChange"
+        @page-size-change="handlePageSizeChange"
       >
         <template #alarmType="{ record }">
           {{
@@ -241,6 +243,7 @@
     total: 0,
     showTotal: true,
     showPageSize: true,
+    pageSizeOptions: [10, 20, 50, 100],
   });
 
   // 获取报警列表数据
@@ -255,17 +258,35 @@
         alarmStatus: filterForm.alarmStatus,
       };
 
-      console.log(params);
-
       // 处理时间范围
-      // if (filterForm.timeRange && filterForm.timeRange.length === 2) {
-      //   const [beginTime, endTime] = filterForm.timeRange;
-      //   params.beginTime = beginTime;
-      //   params.endTime = endTime;
-      // }
+      if (filterForm.timeRange && filterForm.timeRange.length === 2) {
+        const [beginTime, endTime] = filterForm.timeRange;
+        // 格式化时间为字符串格式 YYYY-MM-DD HH:mm:ss（本地时间）
+        if (beginTime) {
+          const date = new Date(beginTime);
+          params.beginTime = `${date.getFullYear()}-${String(
+            date.getMonth() + 1
+          ).padStart(2, '0')}-${String(date.getDate()).padStart(
+            2,
+            '0'
+          )} ${String(date.getHours()).padStart(2, '0')}:${String(
+            date.getMinutes()
+          ).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+        }
+        if (endTime) {
+          const date = new Date(endTime);
+          params.endTime = `${date.getFullYear()}-${String(
+            date.getMonth() + 1
+          ).padStart(2, '0')}-${String(date.getDate()).padStart(
+            2,
+            '0'
+          )} ${String(date.getHours()).padStart(2, '0')}:${String(
+            date.getMinutes()
+          ).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+        }
+      }
 
       const response = await getAlarmPage(params);
-      console.log(response);
       const { data } = response;
 
       if (data) {
@@ -299,6 +320,13 @@
   // 分页切换
   const handlePageChange = (page: number) => {
     pagination.current = page;
+    fetchData();
+  };
+
+  // 每页条数切换
+  const handlePageSizeChange = (pageSize: number) => {
+    pagination.pageSize = pageSize;
+    pagination.current = 1;
     fetchData();
   };
 
@@ -556,8 +584,23 @@
 
         .arco-table-body {
           flex: 1;
-          overflow: hidden !important;
           background: transparent !important;
+
+          // 自定义滚动条样式
+          :deep(.arco-scrollbar) {
+            .arco-scrollbar-thumb-bar {
+              background: rgb(23 150 250 / 40%) !important;
+              border-radius: 4px;
+
+              &:hover {
+                background: rgb(23 150 250 / 60%) !important;
+              }
+            }
+
+            .arco-scrollbar-track {
+              background: rgb(255 255 255 / 5%) !important;
+            }
+          }
         }
 
         // 移除所有边框
@@ -568,8 +611,7 @@
 
         // 空状态和加载状态
         .arco-empty,
-        .arco-spin,
-        .arco-scrollbar {
+        .arco-spin {
           background: transparent !important;
         }
 
