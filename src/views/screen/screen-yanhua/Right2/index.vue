@@ -144,8 +144,6 @@
           .arco-checkbox-icon {
             width: 20px; // 增大复选框尺寸
             height: 20px; // 增大复选框尺寸
-            background: transparent !important;
-            border-color: rgb(155 204 255 / 50%);
             border-radius: 2px;
 
             &::before {

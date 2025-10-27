@@ -57,8 +57,8 @@
           <a-card title="机构图片" :bordered="false" class="info-card">
             <div class="image-container">
               <a-image
-                v-if="detailData.images"
-                :src="detailData.images"
+                v-if="detailData.tempImages"
+                :src="detailData.tempImages"
                 fit="cover"
                 :preview="true"
               />
@@ -114,9 +114,8 @@
       if (res.data) {
         detailData.value = res.data;
       }
-    } catch (error) {
-      console.error('获取医疗机构详情失败:', error);
-      Message.error('获取详情失败');
+    } catch (error: any) {
+      Message.error(error?.message || '获取详情失败');
     } finally {
       loading.value = false;
     }
@@ -169,6 +168,10 @@
 
       .right-section {
         overflow-y: auto;
+
+        .info-card {
+          height: fit-content;
+        }
       }
 
       .info-card {
@@ -253,16 +256,22 @@
 
       .image-container {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
-        min-height: 300px;
+        min-height: 120px;
+        max-height: 220px;
+        padding: 16px;
 
         :deep(.arco-image) {
           width: 100%;
           max-width: 100%;
+          height: auto;
 
           img {
             width: 100%;
+            height: auto;
+            max-height: 188px;
+            object-fit: contain;
             border-radius: 4px;
           }
         }

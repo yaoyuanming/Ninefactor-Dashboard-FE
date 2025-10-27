@@ -151,9 +151,10 @@
         <div class="upload-section">
           <div class="section-title">队伍图片</div>
           <ImageUpload
-            v-model="formData.images"
+            v-model="formData.tempImages"
             upload-text="上传图片"
             :max-size="5"
+            @change="handleImageChange"
           />
           <div class="upload-tip">
             建议尺寸：800x600像素，支持 jpg、png 格式，大小不超过 5MB
@@ -192,7 +193,7 @@
   const submitLoading = ref(false);
   const mapPickerRef = ref();
 
-  const formData = reactive<RescueTeamVO>({
+  const formData = reactive<RescueTeamVO & { tempImages?: string }>({
     teamName: '',
     supervisingUnit: '',
     teamSize: undefined,
@@ -202,7 +203,8 @@
     longitude: undefined,
     latitude: undefined,
     officeAddress: '',
-    images: '',
+    images: '', // 用于提交的永久URL
+    tempImages: '', // 用于显示的临时URL
     remark: '',
   });
 
@@ -236,6 +238,7 @@
         latitude: undefined,
         officeAddress: '',
         images: '',
+        tempImages: '',
         remark: '',
       });
       return;
@@ -265,7 +268,8 @@
       formData.longitude = detail.longitude;
       formData.latitude = detail.latitude;
       formData.officeAddress = detail.officeAddress || '';
-      formData.images = detail.images || '';
+      formData.images = detail.images || ''; // 永久URL用于提交
+      formData.tempImages = detail.tempImages || ''; // 临时URL用于显示
       formData.remark = detail.remark || '';
     } catch (error: any) {
       Message.error(error?.message || '加载救援队伍详情失败');
@@ -281,11 +285,26 @@
 
     submitLoading.value = true;
     try {
+      // 准备提交数据，排除tempImageUrls字段
+      const submitData: RescueTeamVO = {
+        teamName: formData.teamName,
+        supervisingUnit: formData.supervisingUnit,
+        teamSize: formData.teamSize,
+        teamLeader: formData.teamLeader,
+        contactPhone: formData.contactPhone,
+        areaCodes: formData.areaCodes,
+        longitude: formData.longitude,
+        latitude: formData.latitude,
+        officeAddress: formData.officeAddress,
+        images: formData.images, // 只提交images字段
+        remark: formData.remark,
+      };
+
       if (props.editData?.id) {
-        await updateRescueTeam({ ...formData, id: props.editData.id });
+        await updateRescueTeam({ ...submitData, id: props.editData.id });
         Message.success('更新成功');
       } else {
-        await createRescueTeam(formData);
+        await createRescueTeam(submitData);
         Message.success('保存成功');
       }
       emit('success');
@@ -320,6 +339,12 @@
       formData.officeAddress = data.formattedAddress;
     }
     Message.success(`已选择位置：${data.formattedAddress}`);
+  };
+
+  // 处理图片变化
+  const handleImageChange = (fileUrl: string, fileTemporaryUrl: string) => {
+    formData.images = fileUrl; // 永久URL用于提交
+    formData.tempImages = fileTemporaryUrl; // 临时URL用于显示
   };
 
   onMounted(() => {

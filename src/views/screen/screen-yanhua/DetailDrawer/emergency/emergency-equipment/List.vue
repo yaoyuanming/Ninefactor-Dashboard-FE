@@ -111,9 +111,9 @@
 
           <a-table-column title="图片" :width="120" align="center">
             <template #cell="{ record }">
-              <div v-if="record.imageUrls" class="photo-cell">
+              <div v-if="record.tempImageUrls" class="photo-cell">
                 <a-image
-                  :src="getFirstImage(record.imageUrls)"
+                  :src="getFirstImage(record.tempImageUrls)"
                   width="64"
                   height="40"
                   fit="cover"

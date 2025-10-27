@@ -151,9 +151,10 @@
         <div class="upload-section">
           <div class="section-title">物资图片</div>
           <ImageUpload
-            v-model="formData.imageUrls"
+            v-model="formData.tempImageUrls"
             upload-text="上传图片"
             :max-size="5"
+            @change="handleImageChange"
           />
           <div class="upload-tip">
             建议尺寸：800x600像素，支持 jpg、png 格式，大小不超过 5MB
@@ -191,7 +192,7 @@
   const submitLoading = ref(false);
   const mapPickerRef = ref();
 
-  const formData = reactive<EmergencySuppliesVO>({
+  const formData = reactive<EmergencySuppliesVO & { tempImageUrls?: string }>({
     suppliesName: '',
     warehouseName: '',
     suppliesType: 1,
@@ -200,7 +201,8 @@
     storageLocation: '',
     longitude: undefined,
     latitude: undefined,
-    imageUrls: '',
+    imageUrls: '', // 用于提交的永久URL
+    tempImageUrls: '', // 用于显示的临时URL
     remark: '',
   });
 
@@ -227,6 +229,7 @@
         longitude: undefined,
         latitude: undefined,
         imageUrls: '',
+        tempImageUrls: '',
         remark: '',
       });
       return;
@@ -247,7 +250,8 @@
       formData.storageLocation = detail.storageLocation || '';
       formData.longitude = detail.longitude;
       formData.latitude = detail.latitude;
-      formData.imageUrls = detail.imageUrls || '';
+      formData.imageUrls = detail.imageUrls || ''; // 永久URL用于提交
+      formData.tempImageUrls = detail.tempImageUrls || ''; // 临时URL用于显示
       formData.remark = detail.remark || '';
     } catch (error: any) {
       Message.error(error?.message || '加载物资详情失败');
@@ -263,11 +267,25 @@
 
     submitLoading.value = true;
     try {
+      // 准备提交数据，排除tempImageUrls字段
+      const submitData: EmergencySuppliesVO = {
+        suppliesName: formData.suppliesName,
+        warehouseName: formData.warehouseName,
+        suppliesType: formData.suppliesType,
+        quantity: formData.quantity,
+        areaCodes: formData.areaCodes,
+        storageLocation: formData.storageLocation,
+        longitude: formData.longitude,
+        latitude: formData.latitude,
+        imageUrls: formData.imageUrls, // 只提交imageUrls字段
+        remark: formData.remark,
+      };
+
       if (props.editData?.id) {
-        await updateEmergencySupplies({ ...formData, id: props.editData.id });
+        await updateEmergencySupplies({ ...submitData, id: props.editData.id });
         Message.success('更新成功');
       } else {
-        await createEmergencySupplies(formData);
+        await createEmergencySupplies(submitData);
         Message.success('保存成功');
       }
       emit('success');
@@ -304,6 +322,12 @@
     } else {
       Message.success(`已选择坐标：${data.position.lng}, ${data.position.lat}`);
     }
+  };
+
+  // 处理图片变化
+  const handleImageChange = (fileUrl: string, fileTemporaryUrl: string) => {
+    formData.imageUrls = fileUrl; // 永久URL用于提交
+    formData.tempImageUrls = fileTemporaryUrl; // 临时URL用于显示
   };
 
   onMounted(() => {

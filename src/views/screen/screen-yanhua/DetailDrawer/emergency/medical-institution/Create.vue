@@ -159,9 +159,10 @@
         <div class="upload-section">
           <div class="section-title">机构图片</div>
           <ImageUpload
-            v-model="formData.images"
+            v-model="formData.tempImages"
             upload-text="上传图片"
             :max-size="5"
+            @change="handleImageChange"
           />
           <div class="upload-tip">
             建议尺寸：800x600像素，支持 jpg、png 格式，大小不超过 5MB
@@ -199,7 +200,7 @@
   const submitLoading = ref(false);
   const mapPickerRef = ref();
 
-  const formData = reactive<MedicalInstitutionVO>({
+  const formData = reactive<MedicalInstitutionVO & { tempImages?: string }>({
     institutionName: '',
     institutionLevel: undefined,
     institutionType: undefined,
@@ -209,7 +210,8 @@
     longitude: undefined,
     latitude: undefined,
     detailedAddress: '',
-    images: '',
+    images: '', // 用于提交的永久URL
+    tempImages: '', // 用于显示的临时URL
     remark: '',
   });
 
@@ -219,7 +221,13 @@
     institutionLevel: [{ required: true, message: '请选择机构等级' }],
     institutionType: [{ required: true, message: '请选择机构类型' }],
     areaCodes: [{ required: true, message: '请选择所在区域' }],
-    emergencyPhone: [{ required: true, message: '请输入急诊电话' }],
+    emergencyPhone: [
+      { required: true, message: '请输入急诊电话' },
+      {
+        match: /^(1[3-9]\d{9}|0\d{2,3}-?\d{7,8}|\d{7,8})$/,
+        message: '请输入正确的手机号码或座机号码',
+      },
+    ],
   };
 
   // 加载详情数据
@@ -237,6 +245,7 @@
         latitude: undefined,
         detailedAddress: '',
         images: '',
+        tempImages: '',
         remark: '',
       });
       return;
@@ -258,7 +267,8 @@
       formData.longitude = detail.longitude;
       formData.latitude = detail.latitude;
       formData.detailedAddress = detail.detailedAddress || '';
-      formData.images = detail.images || '';
+      formData.images = detail.images || ''; // 永久URL用于提交
+      formData.tempImages = detail.tempImages || ''; // 临时URL用于显示
       formData.remark = detail.remark || '';
     } catch (error: any) {
       Message.error(error?.message || '加载医疗机构详情失败');
@@ -274,11 +284,29 @@
 
     submitLoading.value = true;
     try {
+      // 准备提交数据，排除tempImages字段
+      const submitData: MedicalInstitutionVO = {
+        institutionName: formData.institutionName,
+        institutionLevel: formData.institutionLevel,
+        institutionType: formData.institutionType,
+        areaCodes: formData.areaCodes,
+        emergencyBeds: formData.emergencyBeds,
+        emergencyPhone: formData.emergencyPhone,
+        longitude: formData.longitude,
+        latitude: formData.latitude,
+        detailedAddress: formData.detailedAddress,
+        images: formData.images, // 只提交images字段
+        remark: formData.remark,
+      };
+
       if (props.editData?.id) {
-        await updateMedicalInstitution({ ...formData, id: props.editData.id });
+        await updateMedicalInstitution({
+          ...submitData,
+          id: props.editData.id,
+        });
         Message.success('更新成功');
       } else {
-        await createMedicalInstitution(formData);
+        await createMedicalInstitution(submitData);
         Message.success('保存成功');
       }
       emit('success');
@@ -313,6 +341,12 @@
       formData.detailedAddress = data.formattedAddress;
     }
     Message.success(`已选择位置：${data.formattedAddress}`);
+  };
+
+  // 处理图片变化
+  const handleImageChange = (fileUrl: string, fileTemporaryUrl: string) => {
+    formData.images = fileUrl; // 永久URL用于提交
+    formData.tempImages = fileTemporaryUrl; // 临时URL用于显示
   };
 
   onMounted(() => {
