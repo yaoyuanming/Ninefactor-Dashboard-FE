@@ -600,17 +600,34 @@
           overflow-y: auto;
 
           :deep(.arco-tree) {
-            color: #fff;
+            color: #a21d1d;
             background: transparent;
 
             .arco-tree-node {
               &:hover {
                 background: rgb(255 255 255 / 8%);
+
+                // 悬停时文字改为蓝色
+                .arco-tree-node-title {
+                  color: #1796fa !important;
+                }
+
+                .tree-title {
+                  color: #1796fa !important;
+                }
+
+                .arco-tree-node-switcher {
+                  color: #1796fa !important;
+                }
               }
             }
 
             .arco-tree-node-selected {
               background: rgb(23 150 250 / 30%);
+
+              .arco-tree-node-title {
+                color: #fff !important;
+              }
             }
 
             .arco-tree-node-title {
