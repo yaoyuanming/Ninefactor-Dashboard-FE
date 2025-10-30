@@ -136,7 +136,12 @@
 <script lang="ts" setup>
   import { ref, computed, onMounted } from 'vue';
   import { Message } from '@arco-design/web-vue';
-  import { getCameraTree } from '@/api/camera';
+  import {
+    getCameraTree,
+    getCamerasByCompId,
+    type TreeNodeVO,
+    type CameraVO,
+  } from '@/api/camera';
   import RealtimeMonitor from './Monitor/RealtimeMonitor.vue';
   import HistoryPlayback from './Monitor/HistoryPlayback.vue';
 
@@ -144,12 +149,12 @@
     key: string;
     title: string;
     children?: TreeNode[];
-    dataNodeType?: string; // 改名避免与 DOM 的 nodeType 冲突
-    isParent?: boolean;
+    nodeType?: 'region' | 'company' | 'camera'; // 节点类型
     vendorType?: string;
     isLeaf?: boolean;
+    isOnline?: number; // 监控点是否在线
     id?: string;
-    pId?: string;
+    pid?: string;
   }
 
   // 当前模式：realtime-实时监控，history-历史回放
@@ -159,78 +164,47 @@
   const realtimeTreeData = ref<TreeNode[]>([]);
   const treeLoading = ref(false);
 
-  // 将扁平数据转换为树形结构（参考旧项目逻辑）
-  const buildTree = (flatData: any[]): TreeNode[] => {
-    if (!flatData || flatData.length === 0) {
-      return [];
-    }
-
-    const map = new Map();
-    const roots: TreeNode[] = [];
-
-    // 创建所有节点的映射
-    flatData.forEach((item) => {
-      const isCamera = item.nodeType === 'camera';
-      const node: TreeNode = {
-        key: item.id,
-        title: item.name,
-        id: item.id,
-        pId: item.pId,
-        dataNodeType: item.nodeType, // 使用 dataNodeType 避免冲突
-        isParent: item.isParent,
-        vendorType: item.vendorType,
-        isLeaf: isCamera,
-      };
-      // 只有非叶子节点且是父节点才添加空children以支持懒加载
-      // 摄像头节点（叶子节点）不添加children，这样就不会显示展开箭头
-      if (!isCamera && item.isParent) {
-        node.children = [];
-      }
-      map.set(item.id, node);
-    });
-
-    // 构建树形结构
-    flatData.forEach((item) => {
-      const node = map.get(item.id);
-      // 判断是否为根节点
-      if (
-        item.pId === '-1' ||
-        item.pId === '0' ||
-        item.pId === 0 ||
-        !item.pId ||
-        !map.has(item.pId)
-      ) {
-        roots.push(node);
-      } else {
-        const parent = map.get(item.pId);
-        if (parent) {
-          // 如果父节点没有children，创建一个
-          if (!parent.children) {
-            parent.children = [];
-          }
-          parent.children.push(node);
-        }
-      }
-    });
-
-    return roots;
+  // 将区域/企业节点转换为树节点
+  const convertToTreeNode = (node: TreeNodeVO): TreeNode => {
+    return {
+      key: node.id,
+      title: node.name,
+      id: node.id,
+      pid: node.pid,
+      nodeType: node.nodeType,
+      isLeaf: false, // 区域和企业节点都不是叶子节点
+      children: [], // 支持懒加载
+    };
   };
 
-  // 加载监控树根节点
+  // 将监控点转换为树节点
+  const convertCameraToTreeNode = (camera: CameraVO): TreeNode => {
+    return {
+      key: camera.id,
+      title: camera.name,
+      id: camera.id,
+      nodeType: 'camera',
+      vendorType: camera.vendorType,
+      isOnline: camera.isOnline,
+      isLeaf: true, // 监控点是叶子节点
+    };
+  };
+
+  // 加载监控树根节点（区域/企业树）
   const loadCameraTree = async () => {
     treeLoading.value = true;
     try {
-      const response: any = await getCameraTree({ menu: 0 });
+      const response: any = await getCameraTree();
 
-      let dataArray: any[] = [];
+      let dataArray: TreeNodeVO[] = [];
       if (Array.isArray(response)) {
         dataArray = response;
       } else if (response?.data && Array.isArray(response.data)) {
         dataArray = response.data;
       }
 
-      // 构建树形结构
-      realtimeTreeData.value = buildTree(dataArray);
+      // 转换为树节点
+      realtimeTreeData.value = dataArray.map(convertToTreeNode);
     } catch (error: any) {
       Message.error(error?.message || '加载监控树失败');
       realtimeTreeData.value = [];
@@ -239,31 +213,8 @@
     }
   };
 
-  // 历史回放树形数据
+  // 历史回放树形数据（与实时监控共用）
   const historyTreeData = ref<TreeNode[]>([]);
-
-  // 加载历史回放树（menu=1）
-  const loadHistoryTree = async () => {
-    treeLoading.value = true;
-    try {
-      const response: any = await getCameraTree({ menu: 1 });
-
-      let dataArray: any[] = [];
-      if (Array.isArray(response)) {
-        dataArray = response;
-      } else if (response?.data && Array.isArray(response.data)) {
-        dataArray = response.data;
-      }
-
-      // 构建树形结构
-      historyTreeData.value = buildTree(dataArray);
-    } catch (error: any) {
-      Message.error(error?.message || '加载历史回放树失败');
-      historyTreeData.value = [];
-    } finally {
-      treeLoading.value = false;
-    }
-  };
 
   // 当前显示的树形数据
   const currentTreeData = computed(() => {
@@ -287,10 +238,11 @@
   const switchMode = async (mode: 'realtime' | 'history') => {
     activeMode.value = mode;
 
-    // 切换到历史回放模式时，加载历史树并设置默认时间
+    // 切换到历史回放模式时，加载树并设置默认时间
     if (mode === 'history') {
       if (historyTreeData.value.length === 0) {
-        await loadHistoryTree();
+        // 历史回放也使用相同的树数据
+        historyTreeData.value = [...realtimeTreeData.value];
       }
 
       // 设置默认时间为当天 00:00:00 - 23:59:59
@@ -312,7 +264,7 @@
   // 懒加载子节点（Arco Tree 的 load-more 需要返回 Promise<void>）
   const loadTreeNode = async (node: TreeNode): Promise<void> => {
     // 判断是否为叶子节点
-    if (!node || node.isLeaf || node.dataNodeType === 'camera') {
+    if (!node || node.isLeaf || node.nodeType === 'camera') {
       return;
     }
 
@@ -322,44 +274,37 @@
     }
 
     try {
-      // 根据当前模式使用不同的 menu 参数
-      const menu = activeMode.value === 'history' ? 1 : 0;
+      // 如果是区域节点，调用 getCameraTree 获取下级区域或企业
+      if (node.nodeType === 'region') {
+        const resp: any = await getCameraTree({ id: node.id || node.key });
 
-      const resp: any = await getCameraTree({
-        id: node.id || node.key,
-        menu,
-        vendorType: node.vendorType,
-      });
-
-      // 处理响应数据
-      let list: any[] = [];
-      if (Array.isArray(resp)) {
-        list = resp;
-      } else if (Array.isArray(resp?.data)) {
-        list = resp.data;
-      }
-
-      // 转换子节点并直接赋值给 node.children
-      node.children = list.map((item: any) => {
-        const isCamera = item.nodeType === 'camera';
-        const childNode: TreeNode = {
-          key: item.id,
-          title: item.name,
-          id: item.id,
-          pId: item.pId,
-          dataNodeType: item.nodeType, // 使用 dataNodeType 避免冲突
-          isParent: item.isParent,
-          vendorType: item.vendorType,
-          isLeaf: isCamera,
-        };
-        // 只有非摄像头且是父节点才添加空children
-        // 摄像头节点不添加children，确保不显示展开箭头
-        if (!isCamera && item.isParent) {
-          childNode.children = [];
+        let list: TreeNodeVO[] = [];
+        if (Array.isArray(resp)) {
+          list = resp;
+        } else if (Array.isArray(resp?.data)) {
+          list = resp.data;
         }
-        return childNode;
-      });
-    } catch (error) {
+
+        // 转换子节点
+        node.children = list.map(convertToTreeNode);
+      }
+      // 如果是企业节点，调用 getCamerasByCompId 获取监控点列表
+      else if (node.nodeType === 'company') {
+        const resp: any = await getCamerasByCompId(node.id || node.key);
+
+        let list: CameraVO[] = [];
+        if (Array.isArray(resp)) {
+          list = resp;
+        } else if (Array.isArray(resp?.data)) {
+          list = resp.data;
+        }
+
+        // 转换监控点为树节点
+        node.children = list.map(convertCameraToTreeNode);
+      }
+    } catch (error: any) {
+      // console.error('加载子节点失败:', error);
+      Message.error(error?.message || '加载子节点失败');
       // 加载失败时设置为空数组
       node.children = [];
     }
@@ -370,35 +315,28 @@
     if (activeMode.value !== 'realtime') return;
 
     const { node } = data;
-    console.log('树节点点击:', node);
 
     if (!node) return;
 
     // 如果不是摄像头节点，不做处理（只是展开/收起）
-    if (node.dataNodeType !== 'camera' || !node.isLeaf) {
-      console.log('非摄像头节点，不播放');
+    if (node.nodeType !== 'camera' || !node.isLeaf) {
       return;
     }
 
-    console.log('摄像头节点，准备播放:', node.title);
-
-    // 保存选中的摄像头节点信息
+    // 保存选中的摄像头节点信息（传递给 RealtimeMonitor 组件）
     selectedNode.value = {
       id: node.id || node.key,
       title: node.title,
-      dataNodeType: node.dataNodeType,
+      nodeType: node.nodeType,
       vendorType: node.vendorType,
       isLeaf: node.isLeaf,
+      isOnline: node.isOnline,
     };
-
-    console.log('已设置 selectedNode:', selectedNode.value);
   };
 
   // 树节点复选（仅历史回放模式）
   const handleCheck = (checkedKeys: any, data: any) => {
     if (activeMode.value !== 'history') return;
-
-    console.log('复选框变化:', checkedKeys, data);
 
     // 级联选择模式下，only-check-leaf=true 时，checkedKeys 只包含叶子节点的 key
     const keys = Array.isArray(checkedKeys) ? checkedKeys : [];
@@ -407,7 +345,7 @@
     // 从 checkedNodes 中提取摄像头节点信息（只收集叶子节点）
     const checkedNodes = data.checkedNodes || [];
     const cameraNodes = checkedNodes.filter(
-      (node: TreeNode) => node.isLeaf && node.dataNodeType === 'camera'
+      (node: TreeNode) => node.isLeaf && node.nodeType === 'camera'
     );
 
     // 保存节点信息用于查询
@@ -417,11 +355,10 @@
         id: node.id || node.key,
         title: node.title,
         vendorType: node.vendorType,
+        isOnline: node.isOnline,
       };
     });
     selectedCameraMap.value = map;
-
-    console.log('已选摄像头:', cameraNodes.length, '个');
   };
 
   // 回放触发器 - 用于强制重新播放
@@ -438,19 +375,8 @@
       return;
     }
 
-    console.log('查询回放:', {
-      cameras: selectedCameraIds.value,
-      cameraMap: selectedCameraMap.value,
-      startTime: historyStartTime.value,
-      endTime: historyEndTime.value,
-    });
-
     // 触发回放（通过改变 trigger 值强制 HistoryPlayback 重新播放）
     playbackTrigger.value += 1;
-
-    Message.success(
-      `开始播放 ${selectedCameraIds.value.length} 个摄像头的历史录像`
-    );
   };
 
   // 组件挂载时加载树数据

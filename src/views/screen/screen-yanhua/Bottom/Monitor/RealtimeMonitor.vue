@@ -296,7 +296,7 @@
 
   // 播放视频
   const playVideo = async (node: any) => {
-    if (!node || node.dataNodeType !== 'camera') {
+    if (!node || node.nodeType !== 'camera') {
       return;
     }
 
@@ -307,10 +307,12 @@
       activeVendor.value = 'HIKVISION';
       try {
         await ensureInitHK();
-        const vi: any = await getCameraStreamPreview({
+        const response: any = await getCameraStreamPreview({
           id: deviceCode,
           vendorType: 'HIKVISION',
         });
+        // 处理响应数据，提取 data 字段
+        const vi = response?.data || response;
         const url = vi.url || '';
         const playConfig: any = {
           playURL: url,
@@ -333,10 +335,12 @@
     // DAHUA 播放
     activeVendor.value = 'DAHUA';
     try {
-      const vi: any = await getCameraStreamPreview({
+      const response: any = await getCameraStreamPreview({
         id: deviceCode,
         vendorType: 'DAHUA',
       });
+      // 处理响应数据，提取 data 字段
+      const vi = response?.data || response;
       let rtspURL = vi.url || '';
       if (vi.token) {
         rtspURL = `${vi.url}?token=${vi.token}`;
@@ -385,7 +389,6 @@
   watch(
     () => props.selectedNode,
     (newNode) => {
-      console.log('RealtimeMonitor watch selectedNode 变化:', newNode);
       if (newNode) {
         playVideo(newNode);
       }

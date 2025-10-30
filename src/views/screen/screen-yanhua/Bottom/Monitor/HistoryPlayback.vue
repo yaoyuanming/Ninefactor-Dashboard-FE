@@ -378,19 +378,11 @@
       !props.selectedCameras ||
       Object.keys(props.selectedCameras).length === 0
     ) {
-      console.log('没有选中的摄像头');
       return;
     }
     if (!props.startTime || !props.endTime) {
-      console.log('缺少时间参数');
       return;
     }
-
-    console.log('开始播放历史回放:', {
-      cameras: props.selectedCameras,
-      startTime: props.startTime,
-      endTime: props.endTime,
-    });
 
     const startTimestamp = Math.floor(
       new Date(props.startTime).getTime() / 1000
@@ -399,33 +391,17 @@
       new Date(props.endTime).getTime() / 1000
     ).toString();
 
-    console.log('时间戳转换:', {
-      startTimestamp,
-      endTimestamp,
-    });
-
     const cameraEntries = Object.entries(props.selectedCameras);
-    console.log('准备播放摄像头数量:', cameraEntries.length);
 
     // 使用 Promise.all 替代 for...of 循环
     await Promise.all(
       cameraEntries.map(async ([id, camera]) => {
         const vendorType = camera.vendorType || 'DAHUA';
-        console.log(
-          `播放摄像头 [${camera.title}] (${id}), 厂商: ${vendorType}`
-        );
 
         if (vendorType === 'HIKVISION') {
           activeVendor.value = 'HIKVISION';
           try {
             await ensureInitHK();
-            console.log('调用海康回放接口:', {
-              id,
-              vendorType: 'HIKVISION',
-              startTime: startTimestamp,
-              endTime: endTimestamp,
-            });
-
             const response: any = await getCameraStreamPlayback({
               id,
               vendorType: 'HIKVISION',
@@ -433,10 +409,11 @@
               endTime: endTimestamp,
             });
 
-            console.log('海康回放接口返回:', response);
+            // 提取 data 字段
+            const data = response?.data || response;
 
-            if (response) {
-              const rawUrl = response.url || '';
+            if (data) {
+              const rawUrl = data.url || '';
               const originalUrl =
                 typeof rawUrl === 'string' ? rawUrl : String(rawUrl ?? '');
 
@@ -510,13 +487,6 @@
         }
 
         // DAHUA 回放
-        console.log('调用大华回放接口:', {
-          id,
-          vendorType,
-          startTime: startTimestamp,
-          endTime: endTimestamp,
-        });
-
         const response: any = await getCameraStreamPlayback({
           id,
           vendorType,
@@ -524,10 +494,11 @@
           endTime: endTimestamp,
         });
 
-        console.log('大华回放接口返回:', response);
+        // 提取 data 字段
+        const data = response?.data || response;
 
-        if (response) {
-          const { url, token, records } = response;
+        if (data) {
+          const { url, token, records } = data;
           let rtspURL = url || '';
           if (token) {
             rtspURL = `${url}?token=${token}`;
@@ -549,13 +520,6 @@
 
           if (dhPlayer && records && records.length > 0) {
             const channelId = records[0]?.channelId || id;
-            console.log('调用大华播放器 recordByUrl:', {
-              wsURL,
-              rtspURL,
-              channelId,
-              recordsCount: records.length,
-              selectIndex: currentWindowIndex.value,
-            });
 
             dhPlayer.recordByUrl({
               wsURL,
@@ -576,16 +540,6 @@
             });
             currentWindowIndex.value =
               (currentWindowIndex.value + 1) % maxWindows.value;
-
-            console.log(
-              '大华播放器调用成功，窗口索引:',
-              currentWindowIndex.value
-            );
-          } else {
-            console.warn('播放器未初始化或无录像记录:', {
-              dhPlayer: !!dhPlayer,
-              recordsLength: records?.length || 0,
-            });
           }
         }
       })
@@ -603,7 +557,6 @@
     () => {
       // 只有当 trigger 有值时才播放（避免初始化时自动播放）
       if (props.trigger && props.trigger > 0) {
-        console.log('触发历史回放:', props.trigger);
         playPlaybackVideos();
       }
     },
