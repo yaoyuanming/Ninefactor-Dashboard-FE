@@ -125,69 +125,8 @@
     },
   ];
 
-  // 表格数据（占位）
-  const tableData = ref([
-    {
-      id: 1,
-      name: '福州市XXXXX公司',
-      code: '102937',
-      industry: '烟花爆竹',
-      riskLevel: '超高风险',
-      status: '已解决',
-      createTime: '2025-09-25 13:00:12',
-      updateTime: '2025-09-25 13:00:12',
-    },
-    {
-      id: 2,
-      name: '福州市XXXXX公司',
-      code: '102937',
-      industry: '烟花爆竹',
-      riskLevel: '高风险',
-      status: '处理中',
-      createTime: '2025-09-25 13:00:12',
-      updateTime: '2025-09-25 13:00:12',
-    },
-    {
-      id: 3,
-      name: '福州市XXXXX公司',
-      code: '102937',
-      industry: '涉水大区',
-      riskLevel: '中风险',
-      status: '已解决',
-      createTime: '2025-09-25 13:00:12',
-      updateTime: '2025-09-25 13:00:12',
-    },
-    {
-      id: 4,
-      name: '福州市XXXXX公司',
-      code: '102937',
-      industry: '超高风险',
-      riskLevel: '超高风险',
-      status: '处理中',
-      createTime: '2025-09-25 13:00:12',
-      updateTime: '2025-09-25 13:00:12',
-    },
-    {
-      id: 5,
-      name: '福州市XXXXX公司',
-      code: '102937',
-      industry: '超高风险',
-      riskLevel: '超高风险',
-      status: '已解决',
-      createTime: '2025-09-25 13:00:12',
-      updateTime: '2025-09-25 13:00:12',
-    },
-    {
-      id: 6,
-      name: '福州市XXXXX公司',
-      code: '102937',
-      industry: '超高风险',
-      riskLevel: '超高风险',
-      status: '处理中',
-      createTime: '2025-09-25 13:00:12',
-      updateTime: '2025-09-25 13:00:12',
-    },
-  ]);
+  // 表格数据
+  const tableData = ref([]);
 
   const loading = ref(false);
 
