@@ -65,7 +65,7 @@
         :data="tableData"
         :loading="loading"
         :pagination="pagination"
-        :scroll="{ y: 'calc(100vh - 400px)' }"
+        :scroll="{ y: '100%' }"
         row-key="id"
         :stripe="false"
         :bordered="false"
