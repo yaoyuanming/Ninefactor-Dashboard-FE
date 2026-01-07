@@ -1,0 +1,52 @@
+.cesium-lighter .cesium-button {
+  color: #111;
+  background: #e2f0ff;
+  border: 1px solid #759dc0;
+  fill: #111;
+}
+
+.cesium-lighter .cesium-button:focus {
+  color: #000;
+  border-color: #ea4;
+  fill: #000;
+}
+
+.cesium-lighter .cesium-button:hover {
+  color: #000;
+  background: #a6d2ff;
+  border-color: #aef;
+  box-shadow: 0 0 8px #777;
+  fill: #000;
+}
+
+.cesium-lighter .cesium-button:active {
+  color: #fff;
+  background: #48b;
+  border-color: #ea0;
+  fill: #fff;
+}
+
+.cesium-lighter .cesium-button-disabled,
+.cesium-lighter .cesium-button-disabled:active,
+.cesium-lighter .cesium-button-disabled:focus,
+.cesium-lighter .cesium-button-disabled:hover,
+.cesium-lighter .cesium-button:disabled {
+  color: #999;
+  background: #ccc;
+  border-color: #999;
+  box-shadow: none;
+  fill: #999;
+}
+
+.cesium-lighter .cesium-performanceDisplay {
+  background-color: #e2f0ff;
+  border-color: #759dc0;
+}
+
+.cesium-lighter .cesium-performanceDisplay-fps {
+  color: #e52;
+}
+
+.cesium-lighter .cesium-performanceDisplay-ms {
+  color: #ea4;
+}

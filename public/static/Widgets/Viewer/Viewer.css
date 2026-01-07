@@ -1,0 +1,108 @@
+.cesium-viewer {
+  position: relative;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-size: 16px;
+  font-family: sans-serif;
+}
+
+.cesium-viewer-cesiumWidgetContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.cesium-viewer-bottom {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: block;
+  padding-right: 5px;
+}
+
+.cesium-viewer .cesium-widget-credits {
+  position: static;
+  bottom: auto;
+  left: auto;
+  display: inline;
+  padding-right: 0;
+  color: #fff;
+  font-size: 10px;
+  text-shadow: 0 0 2px #000;
+}
+
+.cesium-viewer-timelineContainer {
+  position: absolute;
+  right: 29px;
+  bottom: 0;
+  left: 169px;
+  height: 27px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+.cesium-viewer-animationContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 169px;
+  height: 112px;
+  padding: 0;
+}
+
+.cesium-viewer-fullscreenContainer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 29px;
+  height: 29px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.cesium-viewer-vrContainer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 29px;
+  height: 29px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.cesium-viewer-toolbar {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: block;
+}
+
+.cesium-viewer-cesiumInspectorContainer {
+  position: absolute;
+  top: 50px;
+  right: 10px;
+  display: block;
+}
+
+.cesium-viewer-geocoderContainer {
+  position: relative;
+  display: inline-block;
+  margin: 0 3px;
+}
+
+.cesium-viewer-cesium3DTilesInspectorContainer {
+  position: absolute;
+  top: 50px;
+  right: 10px;
+  display: block;
+  box-sizing: border-box;
+  max-height: calc(100% - 120px);
+  overflow-x: hidden;
+  overflow-y: auto;
+}

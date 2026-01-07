@@ -1,0 +1,109 @@
+.cesium-timeline-main {
+  position: relative;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  border: solid 1px #888;
+}
+
+.cesium-timeline-trackContainer {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  overflow: auto;
+  border-top: solid 1px #888;
+}
+
+.cesium-timeline-tracks {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.cesium-timeline-needle {
+  position: absolute;
+  top: 1.7em;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  background: red;
+}
+
+.cesium-timeline-bar {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1.7em;
+  overflow: hidden;
+  background: linear-gradient(
+    to bottom,
+    rgb(116 117 119 / 80%) 0,
+    rgb(58 68 82 / 80%) 11%,
+    rgb(46 50 56 / 80%) 46%,
+    rgb(53 53 53 / 80%) 81%,
+    rgb(53 53 53 / 80%) 100%
+  );
+  cursor: pointer;
+}
+
+.cesium-timeline-ruler {
+  z-index: -200;
+  font-size: 80%;
+  white-space: nowrap;
+  visibility: hidden;
+}
+
+.cesium-timeline-highlight {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background: #08f;
+}
+
+.cesium-timeline-ticLabel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #eee;
+  font-size: 80%;
+  white-space: nowrap;
+}
+
+.cesium-timeline-ticMain {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  height: 50%;
+  background: #eee;
+}
+
+.cesium-timeline-ticSub {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  height: 33%;
+  background: #aaa;
+}
+
+.cesium-timeline-ticTiny {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  height: 25%;
+  background: #888;
+}
+
+.cesium-timeline-icon16 {
+  position: absolute;
+  display: block;
+  width: 16px;
+  height: 16px;
+  background-image: url(../Images/TimelineIcons.png);
+  background-repeat: no-repeat;
+}

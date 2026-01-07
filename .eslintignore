@@ -1,3 +1,6 @@
 /*.json
 /*.js
 dist
+/public/Cesium.js
+/public/static/**
+/public/map-geojson/**

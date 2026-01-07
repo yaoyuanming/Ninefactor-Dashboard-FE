@@ -22,13 +22,44 @@
     <el-button class="work-home" @click="openModal('home')">
       <img class="img" src="@/assets/screen/top/work-home.png" />
     </el-button>
+
+    <div class="nav-bar">
+      <button
+        v-for="item in menuItems"
+        :key="item.path"
+        class="nav-item"
+        :class="{ active: item.active }"
+        type="button"
+        @click="handleNavigate(item.path)"
+      >
+        {{ item.label }}
+      </button>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-  import { onBeforeUnmount, onMounted, ref } from 'vue';
+  import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
   import dayjs from 'dayjs';
   import { baseConfig } from '../config';
+
+  const router = useRouter();
+  const route = useRoute();
+  const navMenus = [
+    { label: '监测一张图', path: '/screen/3d/monitor' },
+    { label: '报警监测', path: '/screen/3d/report' },
+    { label: '预警监测', path: '/screen/3d/warning' },
+    { label: '视频监测', path: '/screen/3d/video' },
+    { label: '信息管理', path: '/screen/3d/info' },
+  ];
+
+  const menuItems = computed(() =>
+    navMenus.map((item) => ({
+      ...item,
+      active: route.path === item.path,
+    }))
+  );
 
   const timeRef = ref();
   const utcDate = ref(dayjs().format('YYYY-MM-DD'));
@@ -43,6 +74,12 @@
   onBeforeUnmount(() => {
     clearInterval(timeRef.value);
   });
+
+  function handleNavigate(path: string) {
+    if (path !== route.path) {
+      router.push(path);
+    }
+  }
 </script>
 
 <style lang="less" scoped>
@@ -119,6 +156,39 @@
 
       .img {
         width: 160px;
+      }
+    }
+
+    .nav-bar {
+      position: absolute;
+      top: 86px;
+      left: 50%;
+      display: flex;
+      gap: 18px;
+      padding: 8px 24px;
+      background: rgb(6 27 60 / 60%);
+      border-radius: 999px;
+      box-shadow: 0 12px 40px rgb(0 0 0 / 35%);
+      transform: translateX(-50%);
+      pointer-events: fill;
+    }
+
+    .nav-item {
+      min-width: 140px;
+      padding: 8px 28px;
+      color: #f4f8ff;
+      font-size: 16px;
+      letter-spacing: 0.1em;
+      background: rgb(14 40 82 / 65%);
+      border: 1px solid rgb(255 255 255 / 25%);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &.active {
+        background: linear-gradient(135deg, #27d1ff, #0079ff);
+        border-color: rgb(39 209 255 / 60%);
+        box-shadow: 0 10px 25px rgb(39 209 255 / 45%);
       }
     }
   }

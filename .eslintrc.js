@@ -4,6 +4,11 @@ const path = require('path');
 module.exports = {
   root: true,
   parser: 'vue-eslint-parser',
+  ignorePatterns: [
+    'public/Cesium.js',
+    'public/static/**',
+    'public/map-geojson/**',
+  ],
   parserOptions: {
     // Parser that checks the content of the <script> tag
     parser: '@typescript-eslint/parser',

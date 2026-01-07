@@ -1,29 +1,44 @@
 <template>
   <div class="screen-container">
-    <div class="screen-base">
+    <div id="screen-base" class="screen-base">
       <div class="screen-base-canvas">
-        <Map />
+        <component :is="backgroundComponent" />
       </div>
     </div>
-    <div id="max-screen-content" class="screen-content">
+    <div
+      id="max-screen-content"
+      class="screen-content"
+      :class="{ 'is-panel-mode': !isMapMode }"
+    >
       <Top v-if="baseConfig.topConfig.show" />
-      <Left v-if="baseConfig.leftConfig.show" />
-      <Right v-if="baseConfig.rightConfig.show" />
+      <router-view v-slot="{ Component }">
+        <component
+          :is="Component"
+          class="screen-panel"
+          :class="isMapMode ? 'screen-panel--map' : 'screen-panel--panel'"
+        />
+      </router-view>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-  import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+  import { computed, onBeforeUnmount, onMounted } from 'vue';
+  import { useRoute } from 'vue-router';
   import Top from './Top/index.vue';
   import Map from './Map/index.vue';
-  import Left from './Left/index.vue';
-  import Right from './Right/index.vue';
+  import PanelBackground from './Background/PanelBackground.vue';
   import { baseConfig } from './config';
-  // import Info2 from './Info2.vue';
-  // import Info3 from './Info3.vue';
-  // import Info4 from './Info4.vue';
-  // import Map from './Map.vue';
+
+  const route = useRoute();
+  const backgroundComponent = computed(() => {
+    const activeRecord = route.matched[route.matched.length - 1];
+    return activeRecord?.meta?.background === 'map' ? Map : PanelBackground;
+  });
+  const isMapMode = computed(() => {
+    const activeRecord = route.matched[route.matched.length - 1];
+    return activeRecord?.meta?.background !== 'panel';
+  });
 
   function adjustScale() {
     const designWidth = 1920;
@@ -31,33 +46,40 @@
     const currentWidth = window.innerWidth;
     const currentHeight = window.innerHeight;
 
-    // 计算宽高缩放比例，取最小值保证内容完整显示
     const scaleX = currentWidth / designWidth;
     const scaleY = currentHeight / designHeight;
-    const scale = Math.min(scaleX, scaleY);
+    const scaleContain = Math.min(scaleX, scaleY);
+    const baseScale = scaleContain;
 
-    // 设置最小缩放比例，避免内容过小
     const minScale = 0.6;
-    const finalScale = Math.max(scale, minScale);
+    const finalScale = Math.max(baseScale, minScale);
 
-    const screenContent = document.getElementById('max-screen-content');
-    if (screenContent) {
-      screenContent.style.transform = `scale(${finalScale})`;
-      screenContent.style.transformOrigin = '0 0';
+    const offsetX = Math.max((currentWidth - designWidth * finalScale) / 2, 0);
+    const offsetY = Math.max(
+      (currentHeight - designHeight * finalScale) / 2,
+      0
+    );
+    const stageElements = ['screen-base', 'max-screen-content'];
 
-      // 计算偏移量使内容居中
-      const offsetX = (currentWidth - designWidth * finalScale) / 2;
-      // const offsetY = (currentHeight - designHeight * finalScale) / 2;
-      screenContent.style.left = `${offsetX}px`;
-      screenContent.style.top = `0px`;
-    }
+    stageElements.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.width = `${designWidth}px`;
+      el.style.height = `${designHeight}px`;
+      el.style.transform = `scale(${finalScale})`;
+      el.style.transformOrigin = '0 0';
+      el.style.left = `${offsetX}px`;
+      el.style.top = `${offsetY}px`;
+    });
   }
 
   onMounted(async () => {
     adjustScale();
     window.addEventListener('resize', adjustScale);
   });
-  onBeforeUnmount(() => {});
+  onBeforeUnmount(() => {
+    window.removeEventListener('resize', adjustScale);
+  });
 </script>
 
 <style scoped lang="less">
@@ -66,25 +88,23 @@
     width: 100%;
     height: 100vh;
     overflow: hidden;
-    overflow-y: auto;
     background: linear-gradient(180deg, #265d96 0%, #0f2038 100%);
     user-select: none;
   }
 
   .screen-base {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
     display: flex;
-    align-items: center; /* 垂直居中 */
-    justify-content: center; /* 水平居中 */
-    width: 100%;
-    min-width: 1920px;
-    height: 100vh;
-    min-height: 920px;
+    align-items: center;
+    justify-content: center;
+    width: 1920px;
+    height: 1080px;
+    transform-origin: 0 0;
 
     .screen-base-canvas {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: relative;
       width: 100%;
       height: 100%;
     }
@@ -98,5 +118,23 @@
     height: 1080px;
     transform-origin: 0 0;
     pointer-events: none;
+
+    &.is-panel-mode {
+      pointer-events: auto;
+    }
+  }
+
+  .screen-panel {
+    width: 100%;
+    height: 100%;
+  }
+
+  .screen-panel--map {
+    pointer-events: none;
+  }
+
+  .screen-panel--panel {
+    padding: 0 48px 48px;
+    pointer-events: auto;
   }
 </style>
