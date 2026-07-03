@@ -1,0 +1,143 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: srmi-web-govt
+  namespace: service-srmi-govt-mws
+  labels:
+    k8s.kuboard.cn/name: srmi-web-govt
+  annotations:
+    k8s.kuboard.cn/displayName: 监管端
+    k8s.kuboard.cn/workload: srmi-web-govt
+spec:
+  replicas: 1  # 副本数量
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+  selector:
+    matchLabels:
+      k8s.kuboard.cn/name: srmi-web-govt
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        k8s.kuboard.cn/name: srmi-web-govt
+    spec:
+      containers:
+      - name: srmi-web-govt
+        image: 'srmi-web-govt:v1.0'  # 替换为你的镜像地址
+        imagePullPolicy: IfNotPresent
+        # ========== 核心：启动命令使用环境变量替换脚本 ==========
+        command:
+        - /usr/local/bin/replace-env.sh
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        # ========== 环境变量配置（运行时注入） ==========
+        env:
+        - name: VITE_API_BASE_URL
+          value: '/api'  # API 请求前缀
+        - name: VITE_UPLOAD_TYPE
+          value: server
+        - name: VITE_DROP_DEBUGGER
+          value: 'true'
+        - name: VITE_DROP_CONSOLE
+          value: 'true'
+        - name: VITE_SOURCEMAP
+          value: 'false'
+        - name: VITE_APP_CAPTCHA_ENABLE
+          value: 'true'
+        - name: VITE_APP_DEFAULT_LOGIN_USERNAME
+          value: ''
+        - name: VITE_APP_DEFAULT_LOGIN_PASSWORD
+          value: ''
+        # ========== 资源限制（可根据需要调整） ==========
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+        # ========== 健康检查 ==========
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      # 如果使用私有镜像仓库，需要配置 imagePullSecrets
+      # imagePullSecrets:
+      # - name: registry-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: srmi-web-govt
+  namespace: service-srmi-govt-mws
+  labels:
+    k8s.kuboard.cn/name: srmi-web-govt
+  annotations:
+    k8s.kuboard.cn/workload: srmi-web-govt
+spec:
+  type: ClusterIP
+  selector:
+    k8s.kuboard.cn/name: srmi-web-govt
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  sessionAffinity: None
+  internalTrafficPolicy: Cluster
+  ipFamilyPolicy: SingleStack
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: srmi-web-govt
+  namespace: service-srmi-govt-mws
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: 'false'
+    nginx.ingress.kubernetes.io/use-regex: 'true'
+    nginx.ingress.kubernetes.io/proxy-body-size: '50m'  # 上传文件大小限制
+spec:
+  ingressClassName: ingress-nginx
+  rules:
+  - host: govt.di-digo.com  # 替换为监管端的域名
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: srmi-web-govt
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - govt.di-digo.com  # 替换为监管端的域名
+    secretName: di-digo.com-ssl  # 使用相同的 SSL 证书
