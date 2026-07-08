@@ -6,9 +6,7 @@
       <div class="login-header">
         <div class="logo-section">
           <div class="logo-icon">🛡️</div>
-          <h1 class="system-title"
-            >福州市烟花爆竹企业安全风险监测预警监管平台</h1
-          >
+          <h1 class="system-title">烟花爆竹企业安全风险监测预警监管平台</h1>
           <p class="system-subtitle">
             Taizhou Bay Area Safety Production Supervision Platform
           </p>

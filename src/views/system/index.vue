@@ -6,7 +6,7 @@
         <div class="logo-section">
           <img src="@/assets/screen/logo.png" alt="Logo" class="logo" />
           <span class="system-title"
-            >福州市烟花爆竹经营(批发)企业安全风险监测预警系统</span
+            >烟花爆竹经营(批发)企业安全风险监测预警系统</span
           >
         </div>
         <div class="nav-section">
